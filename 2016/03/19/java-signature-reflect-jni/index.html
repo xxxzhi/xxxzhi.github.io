@@ -83,8 +83,8 @@
 <meta name="keywords" content="Java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java方法签名与JNI,反射">
-<meta property="og:url" content="http://yoursite.com/2016/03/19/java-signature-reflect-jni/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="http://houzhi.me/2016/03/19/java-signature-reflect-jni/index.html">
+<meta property="og:site_name" content="侯志">
 <meta property="og:description" content="在这段时间写东西，必须要先吐槽一下找实习的杯具。找个实习不容易，没经验，各种跪。 一直都觉得在Java反射中，那些反射的方法调用都很有规律，每一个调用都需要相同的特性：函数对象（Method），函数参数，类对象。今天坐在电脑前又回忆了JNI的调用方式（C++调用Java），也需要相同的内容：函数ID（jmethodID），参数，类对象（jobject），JNIEnv。仔细一比较，其实两者就是一样的">
 <meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
 <meta name="twitter:card" content="summary">
@@ -119,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/03/19/java-signature-reflect-jni/"/>
+  <link rel="canonical" href="http://houzhi.me/2016/03/19/java-signature-reflect-jni/"/>
 
 
 
 
 
-  <title>Java方法签名与JNI,反射 | Hexo</title>
+  <title>Java方法签名与JNI,反射 | 侯志</title>
   
 
 
@@ -155,7 +155,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -185,7 +185,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -195,7 +195,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -232,16 +232,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/03/19/java-signature-reflect-jni/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2016/03/19/java-signature-reflect-jni/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -259,7 +259,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-19T00:00:00+08:00">
                 2016-03-19
@@ -418,7 +418,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -430,7 +430,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -441,7 +441,7 @@
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -452,7 +452,7 @@
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -494,13 +494,13 @@
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

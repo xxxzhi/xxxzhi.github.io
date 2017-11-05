@@ -83,8 +83,8 @@
 <meta name="keywords" content="java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="FutureTask源码分析">
-<meta property="og:url" content="http://yoursite.com/2016/05/19/feature-source-code/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="http://houzhi.me/2016/05/19/feature-source-code/index.html">
+<meta property="og:site_name" content="侯志">
 <meta property="og:description" content="FutureTask是JDK1.6新增的内容，间接实现了Future, Runnable接口。前面已经介绍过了Future的get方法会阻塞在那，等待执行完成，获取结果，那么FutureTask是怎么实现这一功能的呢？ 相关类简介LockSupportLockSupport是用来创建锁及其他同步类的基本线程阻塞元素，它的park和 unpark能够分别阻塞线程和解除线程阻塞。它提供了可以指定阻塞时">
 <meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
 <meta name="twitter:card" content="summary">
@@ -119,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/05/19/feature-source-code/"/>
+  <link rel="canonical" href="http://houzhi.me/2016/05/19/feature-source-code/"/>
 
 
 
 
 
-  <title>FutureTask源码分析 | Hexo</title>
+  <title>FutureTask源码分析 | 侯志</title>
   
 
 
@@ -155,7 +155,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -185,7 +185,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -195,7 +195,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -232,16 +232,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/19/feature-source-code/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2016/05/19/feature-source-code/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -259,7 +259,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-19T00:00:00+08:00">
                 2016-05-19
@@ -414,10 +414,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -426,7 +426,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -438,7 +438,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -449,7 +449,7 @@
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -460,7 +460,7 @@
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -518,13 +518,13 @@
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

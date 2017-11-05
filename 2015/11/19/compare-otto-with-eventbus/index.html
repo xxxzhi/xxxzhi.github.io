@@ -83,8 +83,8 @@
 <meta name="keywords" content="Android,源码,框架">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Otto与EventBus框架比较">
-<meta property="og:url" content="http://yoursite.com/2015/11/19/compare-otto-with-eventbus/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="http://houzhi.me/2015/11/19/compare-otto-with-eventbus/index.html">
+<meta property="og:site_name" content="侯志">
 <meta property="og:description" content="最近这几天经常在空闲时间看到了AOP编程，其实也就是对面向事件过程编程，一开始一直很难理解这个名次。不过看到Android正好有面向事件编程，程序解藕的开源库（Otto，EventBus）。所以闲暇时间就去看了一下这两个库的源码，写篇博客记录一下。其实很多时候，沉下心去做一件事就好了，收获会伴随着的。 用法首先从用法上面来说，两个框架的用法本质上其实是差不多的：注册（register），发布事件（">
 <meta property="og:image" content="http://xxxzhi.github.io/images/otto-struct.png">
 <meta property="og:image" content="http://xxxzhi.github.io/images/EventBus-struct.png">
@@ -122,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2015/11/19/compare-otto-with-eventbus/"/>
+  <link rel="canonical" href="http://houzhi.me/2015/11/19/compare-otto-with-eventbus/"/>
 
 
 
 
 
-  <title>Otto与EventBus框架比较 | Hexo</title>
+  <title>Otto与EventBus框架比较 | 侯志</title>
   
 
 
@@ -158,7 +158,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -188,7 +188,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -198,7 +198,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -235,16 +235,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/11/19/compare-otto-with-eventbus/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/11/19/compare-otto-with-eventbus/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -262,7 +262,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-19T00:00:00+08:00">
                 2015-11-19
@@ -467,10 +467,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -479,7 +479,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -491,7 +491,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -502,7 +502,7 @@
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -513,7 +513,7 @@
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -571,13 +571,13 @@
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

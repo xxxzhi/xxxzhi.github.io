@@ -83,8 +83,8 @@
 <meta name="keywords" content="网络">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Http keep-alive 与Tcp keep-alive">
-<meta property="og:url" content="http://yoursite.com/2016/03/31/http-tcp-keep-alive/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="http://houzhi.me/2016/03/31/http-tcp-keep-alive/index.html">
+<meta property="og:site_name" content="侯志">
 <meta property="og:description" content="前两天面试遇到一个问题：如果让你对一个项目通信协议进行选择的话，你会选择Http还是Tcp(当时问的是套接字，其实套接字还有UDP啦，我好像也没去讲)协议？感觉当时脑子转的不太灵活。而且以为Http keep-alive与Tcp keep-alive是差不多的，所以根本没去讲两者之间的keep-alive。每次面试回答问题都有点着急，所以思考不够。实际上两者是不同的，下面分别介绍一下。 首先Htt">
 <meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
 <meta name="twitter:card" content="summary">
@@ -119,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/03/31/http-tcp-keep-alive/"/>
+  <link rel="canonical" href="http://houzhi.me/2016/03/31/http-tcp-keep-alive/"/>
 
 
 
 
 
-  <title>Http keep-alive 与Tcp keep-alive | Hexo</title>
+  <title>Http keep-alive 与Tcp keep-alive | 侯志</title>
   
 
 
@@ -155,7 +155,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -185,7 +185,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -195,7 +195,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -232,16 +232,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/03/31/http-tcp-keep-alive/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2016/03/31/http-tcp-keep-alive/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -259,7 +259,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-31T00:00:00+08:00">
                 2016-03-31
@@ -405,10 +405,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -417,7 +417,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -429,7 +429,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -440,7 +440,7 @@
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -451,7 +451,7 @@
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -509,13 +509,13 @@
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

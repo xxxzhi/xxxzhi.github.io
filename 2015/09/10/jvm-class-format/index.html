@@ -83,8 +83,8 @@
 <meta name="keywords" content="JVM,Java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="java虚拟机Class格式与指令">
-<meta property="og:url" content="http://yoursite.com/2015/09/10/jvm-class-format/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="http://houzhi.me/2015/09/10/jvm-class-format/index.html">
+<meta property="og:site_name" content="侯志">
 <meta property="og:description" content="前几天看《深入理解java虚拟机》中关于.class文件的详细解析，实际上Class文件里面就是包含着运行时候的指令，以及数据等内容。如果想要能够读懂Class文件，那一定需要对Class的文件结构以及Java虚拟机指令集有一定的了解 JVM指令集java虚拟机也有自己的指令集（字节码指令集），指令占一个字节长度，也就是说JVM中的指令最多也就256个。一常用的指令如:iload,iadd,is">
 <meta property="og:image" content="http://xxxzhi.github.io/images/beautiful5.jpg">
 <meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
@@ -121,13 +121,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2015/09/10/jvm-class-format/"/>
+  <link rel="canonical" href="http://houzhi.me/2015/09/10/jvm-class-format/"/>
 
 
 
 
 
-  <title>java虚拟机Class格式与指令 | Hexo</title>
+  <title>java虚拟机Class格式与指令 | 侯志</title>
   
 
 
@@ -157,7 +157,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -187,7 +187,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -197,7 +197,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -234,16 +234,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/09/10/jvm-class-format/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/09/10/jvm-class-format/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -261,7 +261,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-09-10T00:00:00+08:00">
                 2015-09-10
@@ -406,8 +406,8 @@ Constant pool:
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/09/10/http-protocol/" rel="next" title="Http协议">
-                <i class="fa fa-chevron-left"></i> Http协议
+              <a href="/2015/06/21/android-childautomovi-layout/" rel="next" title="子View按规则自动移动Layout">
+                <i class="fa fa-chevron-left"></i> 子View按规则自动移动Layout
               </a>
             
           </div>
@@ -416,8 +416,8 @@ Constant pool:
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/09/10/jvm-memory-manager/" rel="prev" title="JVM内存管理">
-                JVM内存管理 <i class="fa fa-chevron-right"></i>
+              <a href="/2015/09/10/http-protocol/" rel="prev" title="Http协议">
+                Http协议 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -472,10 +472,10 @@ Constant pool:
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -484,7 +484,7 @@ Constant pool:
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -496,7 +496,7 @@ Constant pool:
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -507,7 +507,7 @@ Constant pool:
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -518,7 +518,7 @@ Constant pool:
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -576,13 +576,13 @@ Constant pool:
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

@@ -83,8 +83,8 @@
 <meta name="keywords" content="java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java泛型Type体系">
-<meta property="og:url" content="http://yoursite.com/2015/10/30/java-type-reflect/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="http://houzhi.me/2015/10/30/java-type-reflect/index.html">
+<meta property="og:site_name" content="侯志">
 <meta property="og:description" content="最近看开源代码，看到里面很多Java泛型，并且通过反射去获取泛型信息。所以这两三天就不在不断地看Java泛型相关的东西。如果说想要明白通过反射去获取泛型信息，那么Type体系是必须要了解的。Java从1.5开始引入泛型，并且也引入了Type体系。首先给出Type的类型树UML图，以便有个整体的认识。  这些都在java的reflect包下面，图中带有s的接口返回的是数组，由于画图工具的原因，标记">
 <meta property="og:image" content="http://xxxzhi.github.io/images/type-interface.png">
 <meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
@@ -121,13 +121,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2015/10/30/java-type-reflect/"/>
+  <link rel="canonical" href="http://houzhi.me/2015/10/30/java-type-reflect/"/>
 
 
 
 
 
-  <title>Java泛型Type体系 | Hexo</title>
+  <title>Java泛型Type体系 | 侯志</title>
   
 
 
@@ -157,7 +157,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -187,7 +187,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -197,7 +197,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -234,16 +234,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/10/30/java-type-reflect/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/10/30/java-type-reflect/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -261,7 +261,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-30T00:00:00+08:00">
                 2015-10-30
@@ -427,10 +427,10 @@ public &lt;R&gt; void testMethod(R params){
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -439,7 +439,7 @@ public &lt;R&gt; void testMethod(R params){
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -451,7 +451,7 @@ public &lt;R&gt; void testMethod(R params){
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -462,7 +462,7 @@ public &lt;R&gt; void testMethod(R params){
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -473,7 +473,7 @@ public &lt;R&gt; void testMethod(R params){
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -531,13 +531,13 @@ public &lt;R&gt; void testMethod(R params){
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

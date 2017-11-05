@@ -80,11 +80,11 @@
 
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/page/4/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:title" content="侯志">
+<meta property="og:url" content="http://houzhi.me/page/4/index.html">
+<meta property="og:site_name" content="侯志">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="侯志">
 
 
 
@@ -114,13 +114,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/page/4/"/>
+  <link rel="canonical" href="http://houzhi.me/page/4/"/>
 
 
 
 
 
-  <title>Hexo</title>
+  <title>侯志</title>
   
 
 
@@ -151,7 +151,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -228,16 +228,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/10/21/java-f-bounded/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/10/21/java-f-bounded/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -257,7 +257,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-21T00:00:00+08:00">
                 2015-10-21
@@ -363,16 +363,175 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/10/16/java-annotation-simple/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/10/16/java-dynamic-proxy/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/10/16/java-dynamic-proxy/" itemprop="url">Java动态代理</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-16T00:00:00+08:00">
+                2015-10-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><img src="http://xxxzhi.github.io/images/beautiful3.jpg" alt="enter image description here"></p>
+<p>最近发现很多项目都用到了动态代理，就又认真学习了下Java动态代理。代理模式应用在很多地方，但是如果在编码的时候就添加代理类，那整个代码就会变的非常冗余，繁琐。这样动态代理就应运而生了，动态代理的代理是在程序运行的时候动态生成的。动态代理只需要提供一组接口，以及被代理的对象，程序就会自动生成代理类，而且你还可以在运行方法的前后做一些自己需要的操作，甚至于不执行方法。</p>
+<p>下面介绍一个动态代理的例子。</p>
+<p>首先是一个被代理的类,以及类实现的接口</p>
+<pre><code>public interface ProxyInterface{
+    void doProxy();
+}
+
+
+
+public class ProxyObject implements ProxyInterface{
+
+    public void doProxy(){
+        System.out.println(&quot;hello proxy object&quot;);
+    }
+}
+</code></pre><p>然后有一个对代理运行的时候调用处理的Handle类</p>
+<pre><code>public class TestProxyHandler implements InvotationHandler{
+    Object proxyObject = null;
+    public TestProxyHandler(Object proxyObject){
+        this.proxyObject = proxyObject;
+    }
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable{
+        Object result = method.invoke(proxyObject,args);
+    }
+}
+</code></pre><p>使用这些代理的代码</p>
+<pre><code>ProxyObject object = new ProxyObject();
+TestProxyHandler proxyHandler = new TestProxyHandler(object);
+ProxyInterface proxyInterface = (ProxyInterface)Proxy.newProxyInstance(ProxyObject.class.getClassLoader(),
+                object.getClass().getInterfaces(),
+                proxyHandler);
+proxyInterface.doProxy();
+</code></pre><p>通过Proxy的newProxyInstance方法产生了一个新的代理对象，这个代理对象实现了指定的接口（方法newProxyInstance第二个参数传入的内容）。程序在运行的时候会执行proxyHandler的invoke方法，我们可以在invoke方法里面做自己需要做的一些操作。</p>
+<p>上面就是动态代理的一个非常简单的例子。一个最明显的特征就是代理对象不是单独作为一个类，而是有java代理代码自动生成，其中生成的代理对象内部又引用了InvotationHandler，由InvotationHandler连接与被代理对象。</p>
+<h3 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h3><ol>
+<li>Proxy的代码量是固定的了，不会变成一堆庞大的代码</li>
+<li>可以实现AOP编程</li>
+</ol>
+<p>看着动态代理似乎简单，但是应用起来非常广泛，而且有很多意想不到的巧妙。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/10/16/java-annotation-simple/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="houzhi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -392,7 +551,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-16T00:00:00+08:00">
                 2015-10-16
@@ -527,175 +686,16 @@ Hello h = (Hello)method.getAnnotation(Hello.class);
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/10/16/java-dynamic-proxy/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/10/07/retorfit-analyse/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/16/java-dynamic-proxy/" itemprop="url">Java动态代理</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-16T00:00:00+08:00">
-                2015-10-16
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p><img src="http://xxxzhi.github.io/images/beautiful3.jpg" alt="enter image description here"></p>
-<p>最近发现很多项目都用到了动态代理，就又认真学习了下Java动态代理。代理模式应用在很多地方，但是如果在编码的时候就添加代理类，那整个代码就会变的非常冗余，繁琐。这样动态代理就应运而生了，动态代理的代理是在程序运行的时候动态生成的。动态代理只需要提供一组接口，以及被代理的对象，程序就会自动生成代理类，而且你还可以在运行方法的前后做一些自己需要的操作，甚至于不执行方法。</p>
-<p>下面介绍一个动态代理的例子。</p>
-<p>首先是一个被代理的类,以及类实现的接口</p>
-<pre><code>public interface ProxyInterface{
-    void doProxy();
-}
-
-
-
-public class ProxyObject implements ProxyInterface{
-
-    public void doProxy(){
-        System.out.println(&quot;hello proxy object&quot;);
-    }
-}
-</code></pre><p>然后有一个对代理运行的时候调用处理的Handle类</p>
-<pre><code>public class TestProxyHandler implements InvotationHandler{
-    Object proxyObject = null;
-    public TestProxyHandler(Object proxyObject){
-        this.proxyObject = proxyObject;
-    }
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable{
-        Object result = method.invoke(proxyObject,args);
-    }
-}
-</code></pre><p>使用这些代理的代码</p>
-<pre><code>ProxyObject object = new ProxyObject();
-TestProxyHandler proxyHandler = new TestProxyHandler(object);
-ProxyInterface proxyInterface = (ProxyInterface)Proxy.newProxyInstance(ProxyObject.class.getClassLoader(),
-                object.getClass().getInterfaces(),
-                proxyHandler);
-proxyInterface.doProxy();
-</code></pre><p>通过Proxy的newProxyInstance方法产生了一个新的代理对象，这个代理对象实现了指定的接口（方法newProxyInstance第二个参数传入的内容）。程序在运行的时候会执行proxyHandler的invoke方法，我们可以在invoke方法里面做自己需要做的一些操作。</p>
-<p>上面就是动态代理的一个非常简单的例子。一个最明显的特征就是代理对象不是单独作为一个类，而是有java代理代码自动生成，其中生成的代理对象内部又引用了InvotationHandler，由InvotationHandler连接与被代理对象。</p>
-<h3 id="优势"><a href="#优势" class="headerlink" title="优势"></a>优势</h3><ol>
-<li>Proxy的代码量是固定的了，不会变成一堆庞大的代码</li>
-<li>可以实现AOP编程</li>
-</ol>
-<p>看着动态代理似乎简单，但是应用起来非常广泛，而且有很多意想不到的巧妙。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/10/07/retorfit-analyse/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -715,7 +715,7 @@ proxyInterface.doProxy();
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-07T00:00:00+08:00">
                 2015-10-07
@@ -982,16 +982,16 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/09/10/jvm-memory-manager/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/09/10/jvm-memory-manager/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -1011,7 +1011,7 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-09-10T00:00:00+08:00">
                 2015-09-10
@@ -1130,16 +1130,166 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/09/10/jvm-class-format/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/09/10/http-protocol/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/09/10/http-protocol/" itemprop="url">Http协议</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-09-10T00:00:00+08:00">
+                2015-09-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><img src="http://xxxzhi.github.io/images/beautiful1.jpg" alt="enter image description here"></p>
+<p>老早就学了Http协议，但是最开始学HTTP协议的时候，没有从内心意识到他的地位之高，它的使用范围之广。那时候学习的时候，基本时联系到平时使用的Apache Http包或者Java HttpUrlConnection来考虑了。更多地是在应用，或者说是比较，但是最近接触到的各种知识，像REST规范。以及使用的API各种接口。越来越觉得HTTP协议是简单但重要的东西。以前对HTTP协议，是从应用来考虑的，而现在我觉得应该从协议上面来重新学习一下。</p>
+<h2 id="请求消息"><a href="#请求消息" class="headerlink" title="请求消息"></a>请求消息</h2><p>平时使用最多的，接触最多的，都是POST方式，GET方式请求，其实这只是HTTP协议中请求的Method而已。HTTP协议的第一行（<strong>请求行</strong>）就是包括下面这些内容：</p>
+<pre><code>METHOD URI  VERSION CRLF
+</code></pre><p>example：</p>
+<pre><code>GET /index.html http/1.0 CRLF
+</code></pre><p>对应中文的解释分别是：Http请求方法，uri路径，http协议版本（有1.0和1.1），回车换行。而HTTP协议中，METHOD有GET，POST，HEAD，PUT，DELETE，TRACE。</p>
+<p>在请求行之后，整个请求头还有一系列的请求报头，像Host(HTTP1.1中，Host是必须的)，Accept，If-Modified-Since等等。在请求消息报头后面，还有一个请求体，POST请求内容就放请求体中，而GET请求则放在url后面（?param1=1&amp;param2=2）。</p>
+<p>这是一个非常简单的请求的例子：</p>
+<pre><code>GET /index.html http/1.1 CRLF
+Host:localhost:8080
+Accept:*/*
+</code></pre><h2 id="响应消息"><a href="#响应消息" class="headerlink" title="响应消息"></a>响应消息</h2><p>响应消息是指HTTP协议返回的消息，包括状态行，响应头，响应体。状态行格式如下所示：</p>
+<pre><code>HTTP-VERSION STATUS-Code RESULT-Phrase
+</code></pre><p>比如：</p>
+<pre><code>http/1.1 200 ok
+</code></pre><p>在状态行之后就是响应头，响应头类似于请求头，包含了响应的一些信息，以key：value的形式，其中包括诸如Allow，Date，Content-Length等。这个里面每个响应头都有重要用处，在平时的使用中，如果能够理解这些，对于一些请求错误，会有非常大的帮助，就比如说Encoding，Language。乱码就是来源于请求头，和响应头的这些信息不对。</p>
+<p>在响应头之后，就是响应体，HTTP返回的附加内容就是放在响应体当中。比如请求文件，那么文件内容就在这个里面。</p>
+<h2 id="GET与POST的区别"><a href="#GET与POST的区别" class="headerlink" title="GET与POST的区别"></a>GET与POST的区别</h2><p>在平常对HTTP的使用当中，用的最多的就是这两个了，这两个大部分的区别平常基本是明了的：</p>
+<ol>
+<li><p>GET的参数放在url后面，而POST的参数放在body里面。这样GET的参数长度有限制（1024），而POST长度没有限制。另外这样，POST请求也更加安全。参数放在url中，会有纪录。而被人查看到。</p>
+</li>
+<li><p>GET没有body，而POST有body</p>
+</li>
+<li><p>服务器解析GET参数是从Request.QueryString中解析，而POST是从Request.Form中解析。这一点需要特别注意，特别是在使用一些没有对请求参数进行封装的HTTP包的时候。</p>
+</li>
+</ol>
+<h2 id="HTTP与具体代码"><a href="#HTTP与具体代码" class="headerlink" title="HTTP与具体代码"></a>HTTP与具体代码</h2><p>很多人可能一开始接触的不是协议，而是代码。而现在很多应用包都非常好地封装了HTTP协议。如果不去了解HTTP协议，对于这些封装的API函数，显然是无法彻底熟悉的。</p>
+<p>其实从HTTP协议上面来看，那些对HTTP请求控制的API，可以分成三个部分，请求方法，请求头内容设置，请求体写入。同样响应也是一样的。从这个思路上去看HTTP请求与响应，对于HTTP的处理就会非常清晰明了。</p>
+<p>我们使用最多的可能时响应行中的状态码，我们经常会遇到4开头，5开头的错误。遇到这种，从状态码就可以发现是什么错误原因了。比如说503，那可能是服务器出现错误了，去查看服务器的日志。如果404，就可以考虑是不是自己的url写错了某个字母。</p>
+<p>除了状态码外，响应头跟请求头的对应也是非常重要。还有有时候，得到的响应内容是乱码的，这个时候就要看客户端解码是否使用了正确的编码，服务器端写入是否采用了正确的编码，根HTTP响应头协议中的编码格式是否一致。很快就可以查找出来，而不是拿着乱码的错误，到处google，百度，搜索引擎很多时候都不如自己明白详里后，查找原因并且解决问题来的快。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/09/10/jvm-class-format/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="houzhi">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -1159,7 +1309,7 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-09-10T00:00:00+08:00">
                 2015-09-10
@@ -1322,166 +1472,16 @@ Constant pool:
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/09/10/http-protocol/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/06/21/android-childautomovi-layout/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/09/10/http-protocol/" itemprop="url">Http协议</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-09-10T00:00:00+08:00">
-                2015-09-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p><img src="http://xxxzhi.github.io/images/beautiful1.jpg" alt="enter image description here"></p>
-<p>老早就学了Http协议，但是最开始学HTTP协议的时候，没有从内心意识到他的地位之高，它的使用范围之广。那时候学习的时候，基本时联系到平时使用的Apache Http包或者Java HttpUrlConnection来考虑了。更多地是在应用，或者说是比较，但是最近接触到的各种知识，像REST规范。以及使用的API各种接口。越来越觉得HTTP协议是简单但重要的东西。以前对HTTP协议，是从应用来考虑的，而现在我觉得应该从协议上面来重新学习一下。</p>
-<h2 id="请求消息"><a href="#请求消息" class="headerlink" title="请求消息"></a>请求消息</h2><p>平时使用最多的，接触最多的，都是POST方式，GET方式请求，其实这只是HTTP协议中请求的Method而已。HTTP协议的第一行（<strong>请求行</strong>）就是包括下面这些内容：</p>
-<pre><code>METHOD URI  VERSION CRLF
-</code></pre><p>example：</p>
-<pre><code>GET /index.html http/1.0 CRLF
-</code></pre><p>对应中文的解释分别是：Http请求方法，uri路径，http协议版本（有1.0和1.1），回车换行。而HTTP协议中，METHOD有GET，POST，HEAD，PUT，DELETE，TRACE。</p>
-<p>在请求行之后，整个请求头还有一系列的请求报头，像Host(HTTP1.1中，Host是必须的)，Accept，If-Modified-Since等等。在请求消息报头后面，还有一个请求体，POST请求内容就放请求体中，而GET请求则放在url后面（?param1=1&amp;param2=2）。</p>
-<p>这是一个非常简单的请求的例子：</p>
-<pre><code>GET /index.html http/1.1 CRLF
-Host:localhost:8080
-Accept:*/*
-</code></pre><h2 id="响应消息"><a href="#响应消息" class="headerlink" title="响应消息"></a>响应消息</h2><p>响应消息是指HTTP协议返回的消息，包括状态行，响应头，响应体。状态行格式如下所示：</p>
-<pre><code>HTTP-VERSION STATUS-Code RESULT-Phrase
-</code></pre><p>比如：</p>
-<pre><code>http/1.1 200 ok
-</code></pre><p>在状态行之后就是响应头，响应头类似于请求头，包含了响应的一些信息，以key：value的形式，其中包括诸如Allow，Date，Content-Length等。这个里面每个响应头都有重要用处，在平时的使用中，如果能够理解这些，对于一些请求错误，会有非常大的帮助，就比如说Encoding，Language。乱码就是来源于请求头，和响应头的这些信息不对。</p>
-<p>在响应头之后，就是响应体，HTTP返回的附加内容就是放在响应体当中。比如请求文件，那么文件内容就在这个里面。</p>
-<h2 id="GET与POST的区别"><a href="#GET与POST的区别" class="headerlink" title="GET与POST的区别"></a>GET与POST的区别</h2><p>在平常对HTTP的使用当中，用的最多的就是这两个了，这两个大部分的区别平常基本是明了的：</p>
-<ol>
-<li><p>GET的参数放在url后面，而POST的参数放在body里面。这样GET的参数长度有限制（1024），而POST长度没有限制。另外这样，POST请求也更加安全。参数放在url中，会有纪录。而被人查看到。</p>
-</li>
-<li><p>GET没有body，而POST有body</p>
-</li>
-<li><p>服务器解析GET参数是从Request.QueryString中解析，而POST是从Request.Form中解析。这一点需要特别注意，特别是在使用一些没有对请求参数进行封装的HTTP包的时候。</p>
-</li>
-</ol>
-<h2 id="HTTP与具体代码"><a href="#HTTP与具体代码" class="headerlink" title="HTTP与具体代码"></a>HTTP与具体代码</h2><p>很多人可能一开始接触的不是协议，而是代码。而现在很多应用包都非常好地封装了HTTP协议。如果不去了解HTTP协议，对于这些封装的API函数，显然是无法彻底熟悉的。</p>
-<p>其实从HTTP协议上面来看，那些对HTTP请求控制的API，可以分成三个部分，请求方法，请求头内容设置，请求体写入。同样响应也是一样的。从这个思路上去看HTTP请求与响应，对于HTTP的处理就会非常清晰明了。</p>
-<p>我们使用最多的可能时响应行中的状态码，我们经常会遇到4开头，5开头的错误。遇到这种，从状态码就可以发现是什么错误原因了。比如说503，那可能是服务器出现错误了，去查看服务器的日志。如果404，就可以考虑是不是自己的url写错了某个字母。</p>
-<p>除了状态码外，响应头跟请求头的对应也是非常重要。还有有时候，得到的响应内容是乱码的，这个时候就要看客户端解码是否使用了正确的编码，服务器端写入是否采用了正确的编码，根HTTP响应头协议中的编码格式是否一致。很快就可以查找出来，而不是拿着乱码的错误，到处google，百度，搜索引擎很多时候都不如自己明白详里后，查找原因并且解决问题来的快。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/06/21/android-childautomovi-layout/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -1501,7 +1501,7 @@ Accept:*/*
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-06-21T00:00:00+08:00">
                 2015-06-21
@@ -1648,16 +1648,16 @@ tagRandomView.setAdapter(adapter, new BubbleLineUpMoving());
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/06/02/java-Runtime-exec-delay/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/06/02/java-Runtime-exec-delay/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -1677,7 +1677,7 @@ tagRandomView.setAdapter(adapter, new BubbleLineUpMoving());
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-06-02T00:00:00+08:00">
                 2015-06-02
@@ -1811,16 +1811,16 @@ tagRandomView.setAdapter(adapter, new BubbleLineUpMoving());
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/04/28/android-pageradapter-notifydatasetchanged/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/04/28/android-pageradapter-notifydatasetchanged/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -1840,7 +1840,7 @@ tagRandomView.setAdapter(adapter, new BubbleLineUpMoving());
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-04-28T00:00:00+08:00">
                 2015-04-28
@@ -1991,7 +1991,7 @@ tagRandomView.setAdapter(adapter, new BubbleLineUpMoving());
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -2003,7 +2003,7 @@ tagRandomView.setAdapter(adapter, new BubbleLineUpMoving());
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -2014,7 +2014,7 @@ tagRandomView.setAdapter(adapter, new BubbleLineUpMoving());
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -2025,7 +2025,7 @@ tagRandomView.setAdapter(adapter, new BubbleLineUpMoving());
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -2067,13 +2067,13 @@ tagRandomView.setAdapter(adapter, new BubbleLineUpMoving());
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

@@ -83,8 +83,8 @@
 <meta name="keywords" content="杂技,apache">
 <meta property="og:type" content="article">
 <meta property="og:title" content="利用apache负载均衡热备份给内网穿透接口备份">
-<meta property="og:url" content="http://yoursite.com/2015/01/27/apache-proxy-intranet-through/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="http://houzhi.me/2015/01/27/apache-proxy-intranet-through/index.html">
+<meta property="og:site_name" content="侯志">
 <meta property="og:description" content="因为在学校，内网无法被外网访问。实验室租了一个阿里云服务器，但是阿里云服务器没有GPU,我那些GPU程序不能够在阿里云上面使用。之能够在自己带有GPU的本机上面使用。但是自己的本机外网又不能够访问，之能够想办法了。 内网穿透方法使用大端口号来访问教育网服务器最开始的时候我发现从外网能够ping同我内网电脑的ip，然后我就开始在网上找原因，发现教育网作服务器只是被封了一些端口，有的大一点的端口还">
 <meta property="og:image" content="http://xxxzhi.github.io/images/apache-hot-spare.jpg">
 <meta property="og:image" content="http://xxxzhi.github.io/images/network-1.png">
@@ -122,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2015/01/27/apache-proxy-intranet-through/"/>
+  <link rel="canonical" href="http://houzhi.me/2015/01/27/apache-proxy-intranet-through/"/>
 
 
 
 
 
-  <title>利用apache负载均衡热备份给内网穿透接口备份 | Hexo</title>
+  <title>利用apache负载均衡热备份给内网穿透接口备份 | 侯志</title>
   
 
 
@@ -158,7 +158,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -188,7 +188,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -198,7 +198,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -235,16 +235,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/01/27/apache-proxy-intranet-through/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/01/27/apache-proxy-intranet-through/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -262,7 +262,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-01-27T00:00:00+08:00">
                 2015-01-27
@@ -426,10 +426,10 @@ ProxyPass /test balancer://proxy/
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -438,7 +438,7 @@ ProxyPass /test balancer://proxy/
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -450,7 +450,7 @@ ProxyPass /test balancer://proxy/
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -461,7 +461,7 @@ ProxyPass /test balancer://proxy/
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -472,7 +472,7 @@ ProxyPass /test balancer://proxy/
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -530,13 +530,13 @@ ProxyPass /test balancer://proxy/
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

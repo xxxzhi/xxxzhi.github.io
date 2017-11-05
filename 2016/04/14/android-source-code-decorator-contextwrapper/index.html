@@ -83,8 +83,8 @@
 <meta name="keywords" content="Android,设计模式,源码分析">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android源码装饰模式---ContextWrapper">
-<meta property="og:url" content="http://yoursite.com/2016/04/14/android-source-code-decorator-contextwrapper/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="http://houzhi.me/2016/04/14/android-source-code-decorator-contextwrapper/index.html">
+<meta property="og:site_name" content="侯志">
 <meta property="og:description" content="如果说Android源码中哪个地方装饰模式应用的最明显的话，那肯定是非ContextWrapper莫属了，ContextWrapper是一个透明的经典的装饰模式。本文将通过装饰器模式分析Context源码结构。本文基于的Android源码是(android 5.0.0)。首先先介绍一下装饰模式。 装饰模式意图装饰模式动态地给对象添加额外的职责，就添加功能来说，它比子类的方式更加灵活。 UML图 简">
 <meta property="og:image" content="http://xxxzhi.github.io/images/decorator.png">
 <meta property="og:image" content="http://xxxzhi.github.io/images/context-decorator.png">
@@ -122,13 +122,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/04/14/android-source-code-decorator-contextwrapper/"/>
+  <link rel="canonical" href="http://houzhi.me/2016/04/14/android-source-code-decorator-contextwrapper/"/>
 
 
 
 
 
-  <title>Android源码装饰模式---ContextWrapper | Hexo</title>
+  <title>Android源码装饰模式---ContextWrapper | 侯志</title>
   
 
 
@@ -158,7 +158,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -188,7 +188,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -198,7 +198,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -235,16 +235,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/14/android-source-code-decorator-contextwrapper/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2016/04/14/android-source-code-decorator-contextwrapper/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -262,7 +262,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-14T00:00:00+08:00">
                 2016-04-14
@@ -466,10 +466,10 @@ r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfig
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -478,7 +478,7 @@ r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfig
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -490,7 +490,7 @@ r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfig
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -501,7 +501,7 @@ r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfig
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -512,7 +512,7 @@ r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfig
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -570,13 +570,13 @@ r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfig
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

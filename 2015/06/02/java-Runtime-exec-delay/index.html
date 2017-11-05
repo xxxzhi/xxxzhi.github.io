@@ -83,8 +83,8 @@
 <meta name="keywords" content="思考,Bug">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Runtime.exec使用错误导致延迟">
-<meta property="og:url" content="http://yoursite.com/2015/06/02/java-Runtime-exec-delay/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="http://houzhi.me/2015/06/02/java-Runtime-exec-delay/index.html">
+<meta property="og:site_name" content="侯志">
 <meta property="og:description" content="这篇文章是纪录了一个bug解决的过程，但是我还是没有能够真正地找出bug的缘由。希望大牛能够详细解释。 问题的发现当接触的系统越来越大的时候，对于系统的性能越来越高的时候，找到表面问题的真正原因就慢慢地成为了一个比较麻烦的问题。说实话，一开始我一直不知道是因为Runtime.getRuntime().exec()导致服务处理时间缓慢。发现这个原因倒是花了不少时间。 为了方便，我直接就用jav">
 <meta property="og:image" content="http://i1383.photobucket.com/albums/ah295/houzhi/12934238772tru_zpsrzqqhdxf.jpg">
 <meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
@@ -121,13 +121,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2015/06/02/java-Runtime-exec-delay/"/>
+  <link rel="canonical" href="http://houzhi.me/2015/06/02/java-Runtime-exec-delay/"/>
 
 
 
 
 
-  <title>Runtime.exec使用错误导致延迟 | Hexo</title>
+  <title>Runtime.exec使用错误导致延迟 | 侯志</title>
   
 
 
@@ -157,7 +157,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -187,7 +187,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -197,7 +197,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -234,16 +234,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/06/02/java-Runtime-exec-delay/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/06/02/java-Runtime-exec-delay/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -261,7 +261,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-06-02T00:00:00+08:00">
                 2015-06-02
@@ -443,10 +443,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -455,7 +455,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -467,7 +467,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -478,7 +478,7 @@
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -489,7 +489,7 @@
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -547,13 +547,13 @@
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

@@ -83,15 +83,15 @@
 <meta name="keywords" content="android,FPS,Pipe">
 <meta property="og:type" content="article">
 <meta property="og:title" content="利用Fps meter 的pipe来获取android 的 Fps值">
-<meta property="og:url" content="http://yoursite.com/2014/04/17/using-fps-meter-to-obtain-fps/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="http://houzhi.me/2014/04/17/using-fps-meter-to-obtain-fps/index.html">
+<meta property="og:site_name" content="侯志">
 <meta property="og:description" content="========================前几天实习中，需要根据利用FPS Meter 来获取android 当前的FPS值。这个idea是他们给的，我需要去实现。网上有篇博客[1]对FPS meter 进行了比较深入的讲述。根据那篇博客所讲的，FPS meter 是利用native 将fps 值不断地写入到pipe当中，然后java层的服务不断地从pipe中获取。首先回顾一下pipe Pi">
-<meta property="og:image" content="http://yoursite.com/image/2012110216160766.jpg">
+<meta property="og:image" content="http://houzhi.me/image/2012110216160766.jpg">
 <meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="利用Fps meter 的pipe来获取android 的 Fps值">
 <meta name="twitter:description" content="========================前几天实习中，需要根据利用FPS Meter 来获取android 当前的FPS值。这个idea是他们给的，我需要去实现。网上有篇博客[1]对FPS meter 进行了比较深入的讲述。根据那篇博客所讲的，FPS meter 是利用native 将fps 值不断地写入到pipe当中，然后java层的服务不断地从pipe中获取。首先回顾一下pipe Pi">
-<meta name="twitter:image" content="http://yoursite.com/image/2012110216160766.jpg">
+<meta name="twitter:image" content="http://houzhi.me/image/2012110216160766.jpg">
 
 
 
@@ -121,13 +121,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2014/04/17/using-fps-meter-to-obtain-fps/"/>
+  <link rel="canonical" href="http://houzhi.me/2014/04/17/using-fps-meter-to-obtain-fps/"/>
 
 
 
 
 
-  <title>利用Fps meter 的pipe来获取android 的 Fps值 | Hexo</title>
+  <title>利用Fps meter 的pipe来获取android 的 Fps值 | 侯志</title>
   
 
 
@@ -157,7 +157,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -187,7 +187,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -197,7 +197,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -234,16 +234,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/04/17/using-fps-meter-to-obtain-fps/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2014/04/17/using-fps-meter-to-obtain-fps/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -261,7 +261,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-04-17T00:00:00+08:00">
                 2014-04-17
@@ -282,7 +282,7 @@
                 <i class="fa fa-folder-o"></i>
               </span>
               
-                <span class="post-meta-item-text">in</span>
+                <span class="post-meta-item-text">In</span>
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
@@ -462,10 +462,10 @@ try {
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -474,7 +474,7 @@ try {
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -486,7 +486,7 @@ try {
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -497,7 +497,7 @@ try {
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -508,7 +508,7 @@ try {
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -566,13 +566,13 @@ try {
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

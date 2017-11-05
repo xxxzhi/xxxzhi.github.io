@@ -83,8 +83,8 @@
 <meta name="keywords" content="Android,源码解析">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Retrofit源码解析">
-<meta property="og:url" content="http://yoursite.com/2015/10/07/retorfit-analyse/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:url" content="http://houzhi.me/2015/10/07/retorfit-analyse/index.html">
+<meta property="og:site_name" content="侯志">
 <meta property="og:description" content="1. 功能介绍1.1 RetrofitRetrofit是Github上面squre组织开发的一个类型安全的Http客户端，它可以在Java和Android上面使用。Retrofit将描述请求的接口转换为对象，然后再由该对象去请求后台。Retrofit将请求对象化了。目前已经发布了2.0beta版本。 1.2 特点Retrofit主要有以下功能特点  将Http请求对象化，函数化。让接口的函数代表具">
 <meta property="og:image" content="http://xxxzhi.github.io/images/retorfit-model.png">
 <meta property="og:image" content="http://xxxzhi.github.io/images/flow-draw.png">
@@ -124,13 +124,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2015/10/07/retorfit-analyse/"/>
+  <link rel="canonical" href="http://houzhi.me/2015/10/07/retorfit-analyse/"/>
 
 
 
 
 
-  <title>Retrofit源码解析 | Hexo</title>
+  <title>Retrofit源码解析 | 侯志</title>
   
 
 
@@ -160,7 +160,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">侯志</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -190,7 +190,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -200,7 +200,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -237,16 +237,16 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/10/07/retorfit-analyse/">
+    <link itemprop="mainEntityOfPage" href="http://houzhi.me/2015/10/07/retorfit-analyse/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="houzhi">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="侯志">
     </span>
 
     
@@ -264,7 +264,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-07T00:00:00+08:00">
                 2015-10-07
@@ -523,8 +523,8 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2015/10/16/java-dynamic-proxy/" rel="prev" title="Java动态代理">
-                Java动态代理 <i class="fa fa-chevron-right"></i>
+              <a href="/2015/10/16/java-annotation-simple/" rel="prev" title="Java注解简述">
+                Java注解简述 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -579,10 +579,10 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -591,7 +591,7 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">houzhi</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -603,7 +603,7 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -614,7 +614,7 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">Kategorien</span>
+                  <span class="site-state-item-name">categories</span>
                 
               </div>
             
@@ -625,7 +625,7 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">Tags</span>
+                  <span class="site-state-item-name">tags</span>
                 
               </div>
             
@@ -683,13 +683,13 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">houzhi</span>
 
   
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
