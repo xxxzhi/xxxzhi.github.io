@@ -228,154 +228,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/05/2013-12-1-repair-ubuntu/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/11/05/2013-12-1-repair-ubuntu/" itemprop="url">修复ubuntu系统的思考</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-05T23:09:54+08:00">
-                2017-11-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">in</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/思考/" itemprop="url" rel="index">
-                    <span itemprop="name">思考</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h3><p>因为要使用一下android 的jni 来实践一下机器学习上面的一些算法。所以想要用回ubuntu 因为之前整黑苹果，把ubuntu的引导整没了。不过这件事，让我学到很多东西。实践了一些课堂上的东东。以及另外一点，打破砂锅问到底。</p>
-<p>记得那个时候装黑苹果的时候，整的我是可谓欲生欲死了。天天整那个东东，MBR改了几次，变色龙装了几次，黑苹果装了又删掉，尼玛驱动就是不成功。明明一模一样的机器，网上那人就搞定了，我就是不行，一装显卡驱动，电脑重新启动就会黑掉。。。后面还改了dsdt最后都是不行…总之最后就是没成功。不过体会到了打破沙锅问到底的好处，学了很多电脑的东西，也更深地体会到了mbr了。其实每次装个系统，可能就是改了引导，然后就是装系统那个盘了，其他的没啥关系的，所以现在即使ubuntu整没了，同样可以修复回去。改一下MBR引导。系统启动就是这样的，显示MBR，然后再找到各个系统的引导。打破砂锅问到底是好的，特别是在打破砂锅的过程中，学到了东西，然后又从汲取新的知识上获得动力。然后继续，良性循环。即使最后没能问到什么。过程中学到的东西是远远超出了那种价值了。</p>
-<p>特别是遇到让你crazy的事情，想想都特别美妙</p>
-<h3 id="操作"><a href="#操作" class="headerlink" title="操作"></a>操作</h3><p>其实做起来就是网上那一大堆的方式了，so easy。 用光盘进入ubuntu系统。然后在ubuntu下面将系统主引导修改。让ubuntu的那个引导成为主引导。相关操作如下（我也是参考了在网上找的那个）：</p>
-<p><a href="http://blog.csdn.net/kevin6216/article/details/7764292" target="_blank" rel="external">http://blog.csdn.net/kevin6216/article/details/7764292</a></p>
-<p>so,其实多思考下，maybe 不在ubuntu下面整也是能够弄好的，不过估计就比较麻烦了。那些代码估计不会是一般的多。其实MBR也就是一堆代码而已。</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>多思考，多思考，多思考。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/17/android-messagequeue-sourcecode-analysis/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -642,26 +494,26 @@
             <p><a href="https://github.com/JakeWharton/hugo" target="_blank" rel="external">Hugo</a>是JakeWharton大神开发的一个通过注解触发的Debug日志库。它是一个非常好的AOP框架，在Debug模式下，Hugo利用aspectj库来进行切面编程，插入日志代码。通过分析Hugo的代码能够对gradle以及aspectj有一个非常好的了解。</p>
 <h3 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h3><p>通过使用来看Hugo具体的功能，这样也能够更好的明白Hugo的实现方式。</p>
 <p>首先把下面的编译配置文件添加到项目当中:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">buildscript &#123;</div><div class="line">  repositories &#123;</div><div class="line">    mavenCentral()</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  dependencies &#123;</div><div class="line">    classpath &apos;com.jakewharton.hugo:hugo-plugin:1.2.1&apos;</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">apply plugin: &apos;com.android.application&apos;</div><div class="line">apply plugin: &apos;com.jakewharton.hugo&apos;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">buildscript &#123;</div><div class="line">  repositories &#123;</div><div class="line">    mavenCentral()</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  dependencies &#123;</div><div class="line">    classpath &apos;com.jakewharton.hugo:hugo-plugin:1.2.1&apos;</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">apply plugin: &apos;com.android.application&apos;</div><div class="line">apply plugin: &apos;com.jakewharton.hugo&apos;</div></pre></td></tr></table></figure>
 <p>使用的时候直接使用@DebugLog注解给想要调试的方法就好了，它会打印函数的参数，执行时间，以及返回值:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">@DebugLog</div><div class="line">public String getName(String first, String last) &#123;</div><div class="line">  SystemClock.sleep(15); // Don&apos;t ever really do this!</div><div class="line">  return first + &quot; &quot; + last;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">@DebugLog</div><div class="line">public String getName(String first, String last) &#123;</div><div class="line">  SystemClock.sleep(15); // Don&apos;t ever really do this!</div><div class="line">  return first + &quot; &quot; + last;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>输出:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">V/Example: ⇢ getName(first=&quot;Jake&quot;, last=&quot;Wharton&quot;)</div><div class="line">V/Example: ⇠ getName [16ms] = &quot;Jake Wharton&quot;</div></pre></td></tr></table></figure>
 <p>需要指出的，Hugo只会在Debug模式下打印log。DebugLog的源码如下:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">package hugo.weaving;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import java.lang.annotation.Retention;</div><div class="line"></div><div class="line">import java.lang.annotation.Target;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import static java.lang.annotation.ElementType.CONSTRUCTOR;</div><div class="line"></div><div class="line">import static java.lang.annotation.ElementType.METHOD;</div><div class="line"></div><div class="line">import static java.lang.annotation.ElementType.TYPE;</div><div class="line"></div><div class="line">import static java.lang.annotation.RetentionPolicy.CLASS;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">@Target(&#123;TYPE, METHOD, CONSTRUCTOR&#125;) @Retention(CLASS)</div><div class="line"></div><div class="line">public @interface DebugLog &#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">package hugo.weaving;</div><div class="line"></div><div class="line">import java.lang.annotation.Retention;</div><div class="line">import java.lang.annotation.Target;</div><div class="line">import static java.lang.annotation.ElementType.CONSTRUCTOR;</div><div class="line">import static java.lang.annotation.ElementType.METHOD;</div><div class="line">import static java.lang.annotation.ElementType.TYPE;</div><div class="line">import static java.lang.annotation.RetentionPolicy.CLASS;</div><div class="line"></div><div class="line">@Target(&#123;TYPE, METHOD, CONSTRUCTOR&#125;) @Retention(CLASS)</div><div class="line"></div><div class="line">public @interface DebugLog &#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>就是注解，Target也包含了TYPE，DebugLog也可以添加到类上面:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">@DebugLog</div><div class="line"></div><div class="line">static class Greeter &#123;</div><div class="line"></div><div class="line">  private final String name;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  Greeter(String name) &#123;</div><div class="line"></div><div class="line">    this.name = name;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  private String sayHello() &#123;</div><div class="line"></div><div class="line">    return &quot;Hello, &quot; + name;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">@DebugLog</div><div class="line"></div><div class="line">static class Greeter &#123;</div><div class="line"></div><div class="line">  private final String name;</div><div class="line"></div><div class="line">  Greeter(String name) &#123;</div><div class="line"></div><div class="line">    this.name = name;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  private String sayHello() &#123;</div><div class="line"></div><div class="line">    return &quot;Hello, &quot; + name;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <h3 id="AspectJ"><a href="#AspectJ" class="headerlink" title="AspectJ"></a>AspectJ</h3><p>AspectJ是一个面向切面的框架，它有一个专门的编译器用来生成遵守Java字节编码规范的class文件。在<a href="http://www.eclipse.org/aspectj/downloads.php" target="_blank" rel="external">这里</a>下载安装，实际上它有自己的语法。看个简单的例子:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">// 我们有一个TestService类，TestService.java</div><div class="line"></div><div class="line">public class TestService&#123;</div><div class="line"></div><div class="line">    public void test()&#123;</div><div class="line"></div><div class="line">        System.out.println(&quot;test&quot;);</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String[]args)&#123;</div><div class="line"></div><div class="line">            new TestService().test();</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>现在我们想要给test()方法增加一些东西，比如打印test方法进入的时间。如果用aspectj则可以增加一个文件:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public aspect LogAspect &#123;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">        pointcut logPointcut():execution(void TestService.test());</div><div class="line"></div><div class="line">        void around():logPointcut()&#123;</div><div class="line"></div><div class="line">                System.out.println(&quot;start time: &quot; + System.currentTimeMillis());</div><div class="line"></div><div class="line">                proceed();</div><div class="line"></div><div class="line">                System.out.println(&quot;end time: &quot; + System.currentTimeMillis());</div><div class="line"></div><div class="line">        &#125;</div></pre></td></tr></table></figure>
 <p>通过执行命令 ajc -d . TestService.java LogAspect.java生成TestService.class，然后执行命令java TestService，输出为:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">start time: 1478071231659</div><div class="line"></div><div class="line">test</div><div class="line"></div><div class="line">end time: 1478071231659</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">start time: 1478071231659</div><div class="line"></div><div class="line">test</div><div class="line"></div><div class="line">end time: 1478071231659</div></pre></td></tr></table></figure>
 <p>实际上将ajc理解为类似于javac的编译工具就好了，它编译的目标跟javac一样的都是java class文件，只是源文件的语法是符合aspect语法的。可以看看TestService.class反编译后的源码:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">org.aspectj.runtime.internal.AroundClosureTestService &#123;</div><div class="line">    TestService() &#123;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    test() &#123;</div><div class="line">        test_aroundBody1$advice(LogAspect.aspectOf()(AroundClosure))&#125;</div><div class="line"></div><div class="line">    main(String[] args) &#123;</div><div class="line">        (TestService()).test()&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>将aspect理解编译时期对源文件按照指定的描述（aspect语法文件）进行编译，得到进行切入后的字节码文件。详细的介绍可以参看这篇文章<a href="https://www.ibm.com/developerworks/cn/java/j-lo-springaopcglib/" target="_blank" rel="external">spring aop</a>。</p>
 <p>我们看看Hugo项目中是如何使用aspect，实际的aspect部分代码是在hugo-runtime子模块当中。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">package hugo.weaving.internal;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import android.os.Build;</div><div class="line"></div><div class="line">import android.os.Looper;</div><div class="line"></div><div class="line">import android.os.Trace;</div><div class="line"></div><div class="line">import android.util.Log;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import org.aspectj.lang.JoinPoint;</div><div class="line"></div><div class="line">import org.aspectj.lang.ProceedingJoinPoint;</div><div class="line"></div><div class="line">import org.aspectj.lang.Signature;</div><div class="line"></div><div class="line">import org.aspectj.lang.annotation.Around;</div><div class="line"></div><div class="line">import org.aspectj.lang.annotation.Aspect;</div><div class="line"></div><div class="line">import org.aspectj.lang.annotation.Pointcut;</div><div class="line"></div><div class="line">import org.aspectj.lang.reflect.CodeSignature;</div><div class="line"></div><div class="line">import org.aspectj.lang.reflect.MethodSignature;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import java.util.concurrent.TimeUnit;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">@Aspect</div><div class="line"></div><div class="line">public class Hugo &#123;</div><div class="line"></div><div class="line">  private static volatile boolean enabled = true;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;within(@hugo.weaving.DebugLog *)&quot;)</div><div class="line"></div><div class="line">  public void withinAnnotatedClass() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(!synthetic * *(..)) &amp;&amp; withinAnnotatedClass()&quot;)</div><div class="line"></div><div class="line">  public void methodInsideAnnotatedType() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(!synthetic *.new(..)) &amp;&amp; withinAnnotatedClass()&quot;)</div><div class="line"></div><div class="line">  public void constructorInsideAnnotatedType() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(@hugo.weaving.DebugLog * *(..)) || methodInsideAnnotatedType()&quot;)</div><div class="line"></div><div class="line">  public void method() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(@hugo.weaving.DebugLog *.new(..)) || constructorInsideAnnotatedType()&quot;)</div><div class="line"></div><div class="line">  public void constructor() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  public static void setEnabled(boolean enabled) &#123;</div><div class="line"></div><div class="line">    Hugo.enabled = enabled;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Around(&quot;method() || constructor()&quot;)</div><div class="line"></div><div class="line">  public Object logAndExecute(ProceedingJoinPoint joinPoint) throws Throwable &#123;</div><div class="line"></div><div class="line">    enterMethod(joinPoint);</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    long startNanos = System.nanoTime();</div><div class="line"></div><div class="line">    Object result = joinPoint.proceed();</div><div class="line"></div><div class="line">    long stopNanos = System.nanoTime();</div><div class="line"></div><div class="line">    long lengthMillis = TimeUnit.NANOSECONDS.toMillis(stopNanos - startNanos);</div><div class="line"></div><div class="line">    exitMethod(joinPoint, result, lengthMillis);</div><div class="line"></div><div class="line">    return result;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  private static void enterMethod(JoinPoint joinPoint) &#123;</div><div class="line"></div><div class="line">    if (!enabled) return;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">     // ...</div><div class="line"></div><div class="line">    //组织相关信息到builder当中</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    if (Looper.myLooper() != Looper.getMainLooper()) &#123;</div><div class="line"></div><div class="line">      builder.append(&quot; [Thread:\&quot;&quot;).append(Thread.currentThread().getName()).append(&quot;\&quot;]&quot;);</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    Log.v(asTag(cls), builder.toString());</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.JELLY_BEAN_MR2) &#123;</div><div class="line"></div><div class="line">      final String section = builder.toString().substring(2);</div><div class="line"></div><div class="line">      Trace.beginSection(section);</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  private static void exitMethod(JoinPoint joinPoint, Object result, long lengthMillis) &#123;</div><div class="line"></div><div class="line">    if (!enabled) return;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.JELLY_BEAN_MR2) &#123;</div><div class="line"></div><div class="line">      Trace.endSection();</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    // ...</div><div class="line"></div><div class="line">    //组织相关信息为builder</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    Log.v(asTag(cls), builder.toString());</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">  private static String asTag(Class&lt;?&gt; cls) &#123;</div><div class="line"></div><div class="line">    if (cls.isAnonymousClass()) &#123;</div><div class="line"></div><div class="line">      return asTag(cls.getEnclosingClass());</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    return cls.getSimpleName();</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">package hugo.weaving.internal;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import android.os.Build;</div><div class="line"></div><div class="line">import android.os.Looper;</div><div class="line"></div><div class="line">import android.os.Trace;</div><div class="line"></div><div class="line">import android.util.Log;</div><div class="line"></div><div class="line">import org.aspectj.lang.JoinPoint;</div><div class="line">import org.aspectj.lang.ProceedingJoinPoint;</div><div class="line">import org.aspectj.lang.Signature;</div><div class="line">import org.aspectj.lang.annotation.Around;</div><div class="line"></div><div class="line">import org.aspectj.lang.annotation.Aspect;</div><div class="line"></div><div class="line">import org.aspectj.lang.annotation.Pointcut;</div><div class="line"></div><div class="line">import org.aspectj.lang.reflect.CodeSignature;</div><div class="line"></div><div class="line">import org.aspectj.lang.reflect.MethodSignature;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import java.util.concurrent.TimeUnit;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">@Aspect</div><div class="line"></div><div class="line">public class Hugo &#123;</div><div class="line"></div><div class="line">  private static volatile boolean enabled = true;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;within(@hugo.weaving.DebugLog *)&quot;)</div><div class="line">  public void withinAnnotatedClass() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(!synthetic * *(..)) &amp;&amp; withinAnnotatedClass()&quot;)</div><div class="line">  public void methodInsideAnnotatedType() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(!synthetic *.new(..)) &amp;&amp; withinAnnotatedClass()&quot;)</div><div class="line">  public void constructorInsideAnnotatedType() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(@hugo.weaving.DebugLog * *(..)) || methodInsideAnnotatedType()&quot;)</div><div class="line">  public void method() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(@hugo.weaving.DebugLog *.new(..)) || constructorInsideAnnotatedType()&quot;)</div><div class="line">  public void constructor() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  public static void setEnabled(boolean enabled) &#123;</div><div class="line"></div><div class="line">    Hugo.enabled = enabled;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Around(&quot;method() || constructor()&quot;)</div><div class="line"></div><div class="line">  public Object logAndExecute(ProceedingJoinPoint joinPoint) throws Throwable &#123;</div><div class="line"></div><div class="line">    enterMethod(joinPoint);</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    long startNanos = System.nanoTime();</div><div class="line"></div><div class="line">    Object result = joinPoint.proceed();</div><div class="line"></div><div class="line">    long stopNanos = System.nanoTime();</div><div class="line"></div><div class="line">    long lengthMillis = TimeUnit.NANOSECONDS.toMillis(stopNanos - startNanos);</div><div class="line"></div><div class="line">    exitMethod(joinPoint, result, lengthMillis);</div><div class="line"></div><div class="line">    return result;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  private static void enterMethod(JoinPoint joinPoint) &#123;</div><div class="line"></div><div class="line">    if (!enabled) return;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">     // ...</div><div class="line"></div><div class="line">    //组织相关信息到builder当中</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    if (Looper.myLooper() != Looper.getMainLooper()) &#123;</div><div class="line"></div><div class="line">      builder.append(&quot; [Thread:\&quot;&quot;).append(Thread.currentThread().getName()).append(&quot;\&quot;]&quot;);</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    Log.v(asTag(cls), builder.toString());</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.JELLY_BEAN_MR2) &#123;</div><div class="line"></div><div class="line">      final String section = builder.toString().substring(2);</div><div class="line"></div><div class="line">      Trace.beginSection(section);</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  private static void exitMethod(JoinPoint joinPoint, Object result, long lengthMillis) &#123;</div><div class="line"></div><div class="line">    if (!enabled) return;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.JELLY_BEAN_MR2) &#123;</div><div class="line"></div><div class="line">      Trace.endSection();</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    // ...</div><div class="line"></div><div class="line">    //组织相关信息为builder</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    Log.v(asTag(cls), builder.toString());</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">  private static String asTag(Class&lt;?&gt; cls) &#123;</div><div class="line"></div><div class="line">    if (cls.isAnonymousClass()) &#123;</div><div class="line"></div><div class="line">      return asTag(cls.getEnclosingClass());</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    return cls.getSimpleName();</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>上面只是给出的代码去除了相关详细内容，具体代码可以直接看源码<a href="https://github.com/JakeWharton/hugo/blob/master/hugo-runtime/src/main/java/hugo/weaving/internal/Hugo.java" target="_blank" rel="external">Hugo.java</a>。</p>
 <p>上面是使用了<strong><em>aspect注解</em></strong>来描述相关插入代码的:</p>
 <p>@Aspect 表示这个类由AspectJ处理</p>
@@ -1817,6 +1669,153 @@
 <li><a href="https://developer.android.com/training/displaying-bitmaps/index.html" target="_blank" rel="external">https://developer.android.com/training/displaying-bitmaps/index.html</a></li>
 <li><a href="https://mp.weixin.qq.com/s?__biz=MzA3NTYzODYzMg==&amp;mid=403263974&amp;idx=1&amp;sn=b0315addbc47f3c38e65d9c633a12cd6&amp;scene=0&amp;key=41ecb04b051110037b72d05bba1495f596e848534fc51afe877d63329a16dc24dc1d3606aaaba3745a05bfdb8c624a74&amp;ascene=0&amp;uin=Mjc3OTU3Nzk1&amp;devicetype=iMac+MacBookPro10%2C1+OSX+OSX+10.10.5+build%2814F27%29&amp;version=11020201&amp;pass_ticket=kK4%2F6316QveG8O0vFtthPfBeKkNjyaL4HapsUAokHL5mUKCgI5hKTIKMc3D8uyqk" target="_blank" rel="external">https://mp.weixin.qq.com/s?__biz=MzA3NTYzODYzMg==&amp;mid=403263974&amp;idx=1&amp;sn=b0315addbc47f3c38e65d9c633a12cd6&amp;scene=0&amp;key=41ecb04b051110037b72d05bba1495f596e848534fc51afe877d63329a16dc24dc1d3606aaaba3745a05bfdb8c624a74&amp;ascene=0&amp;uin=Mjc3OTU3Nzk1&amp;devicetype=iMac+MacBookPro10%2C1+OSX+OSX+10.10.5+build%2814F27%29&amp;version=11020201&amp;pass_ticket=kK4%2F6316QveG8O0vFtthPfBeKkNjyaL4HapsUAokHL5mUKCgI5hKTIKMc3D8uyqk</a></li>
 </ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/06/07/android-bitmap-introduce-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/06/07/android-bitmap-introduce-1/" itemprop="url">Android Bitmap深入介绍（一）---基础</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-07T00:00:00+08:00">
+                2016-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在Android应用开发中，我们经常需要跟图片打交道，而图片一个很麻烦的问题是占用内存非常大，经常导致OOM，了解Bitmap相关信息，不同sdk版本中Android图片处理的变化，以及一些优化处理的方式对我们平时开发中对图片的会非常有帮助。</p>
+<p>我觉得需要了解好图片最基础的是需要知道图片基础信息，Bitmap内容，存储信息，以及加载。</p>
+<h3 id="像素"><a href="#像素" class="headerlink" title="像素"></a>像素</h3><p>Bitmap的存储可以说包括两个部分，像素以及长,宽，颜色等描述信息。像素是Bitmap最占用内存的地方，长宽和像素位数是用来描述图片的，可以通过这些信息计算出图片的像素占用的内存大小。具体到Bitmap的API是下面这几个接口:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public final int getWidth()</div><div class="line">public final int getHeight()</div><div class="line">public final Config getConfig()</div></pre></td></tr></table></figure>
+<p>Config是一个枚举类型，表示图片像素类型，总共有下面几种类型：<code>ALPHA_8     (1),RGB_565     (3),ARGB_4444   (4),ARGB_8888   (5);</code>。表示每一个像素图片组成。实际上下面两种方式获取的数值是相等的：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">int b = 1;</div><div class="line">switch (bitmap.getConfig()) &#123;</div><div class="line">    case ALPHA_8:</div><div class="line">        b = 1;</div><div class="line">        break;</div><div class="line">    case ARGB_4444:</div><div class="line">        b = 2;</div><div class="line">        break;</div><div class="line">    case ARGB_8888:</div><div class="line">        b = 4;</div><div class="line">        break;</div><div class="line">&#125;</div><div class="line">int bytes1 = bitmap.getWidth() * bitmap.getHeight() * b;</div><div class="line"></div><div class="line">int bytes2 = bitmap.getByteCount();　//从api12才有的接口</div></pre></td></tr></table></figure>
+<p>这是由Bitmap相关参数可以计算出Bitmap所占用的像素数，实际上我们放入drawable里面的图片都是已经知道了图片的长宽以及像素组成的，但是直接在Android外面算出的图片像素数量与通过上面的代码计算会有出入的。因为Android对图片做了缩放，这个跟你将图片放入的drawable位置相关。</p>
+<p>我们都知道android资源目录中会有drawable-hdpi, drawable-xhdpi，drawable-xxhdpi等目录。这里每个目录都会对应一个density。下面看BitmapFactory.decodeResource方法加载Bitmap的例子:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line">Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test4, options);</div><div class="line">Log.i(LOGTAG, &quot;options: &quot; + options.inDensity + &quot;,&quot; + options.inTargetDensity);</div></pre></td></tr></table></figure>
+<p>decodeResource就是Android内部对Resource的加载方式，这里就不从源码上面一步一步介绍了，它最终会调用decodeResourceStream方法，直接看decodeResourceStream：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">public static Bitmap decodeResourceStream(Resources res, TypedValue value,</div><div class="line">        InputStream is, Rect pad, Options opts) &#123;</div><div class="line">    if (opts == null) &#123;</div><div class="line">        opts = new Options();</div><div class="line">    &#125;</div><div class="line">    if (opts.inDensity == 0 &amp;&amp; value != null) &#123;</div><div class="line">        final int density = value.density;</div><div class="line">        if (density == TypedValue.DENSITY_DEFAULT) &#123;</div><div class="line">            opts.inDensity = DisplayMetrics.DENSITY_DEFAULT;</div><div class="line">        &#125; else if (density != TypedValue.DENSITY_NONE) &#123;</div><div class="line">            opts.inDensity = density;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if (opts.inTargetDensity == 0 &amp;&amp; res != null) &#123;</div><div class="line">        opts.inTargetDensity = res.getDisplayMetrics().densityDpi;</div><div class="line">    &#125;</div><div class="line">    return decodeStream(is, pad, opts);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>options.inDensity表示图片自身默认的像素密度，TypedValue会有一个density，对应着图片来自于哪个drawable目录，因为每一个drawable目录(drawable-hdpi,drawable-xhdpi,drawable-xxhdpi)都对应着一种屏幕，而屏幕就有density，TypedValue的density对应着DisplayMetrics的densityDpi,densityDpi表示每英尺的像素数。options.inTargetDensity是当前手机屏幕对应的densityDpi，最终的像素数是:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bytes = 原始图片宽*(options.inDensity/options.inTargetDensity)*原始图片长*(options.inDensity/options.inTargetDensity)*每个像素点位数</div></pre></td></tr></table></figure>
+<h3 id="存储与传输"><a href="#存储与传输" class="headerlink" title="存储与传输"></a>存储与传输</h3><p>Android图片在不同的sdk版本中存储的地方是不一样的。在2.3及2.3以前，图片像素是存储在native内存中。Android内存分为Java堆和native内存。Android会限制每个应用能使用的最大内存。但是Android对内存的限制是Java堆和native内存的和，把像素数据存放在native区，虚拟机无法自动进行垃圾回收，必须手动使用bitmap.recycle()导致很容易内存泄漏。因为Android的设备monitor也只能够看到Java堆的内存变化，这样其实也不方便调试Bitmap内存。比如在应用中新创建一个图片，根本无法在monitor中看到内存变化。</p>
+<p>从3.0开始Android将图片保存在Java堆中，新加载一张图片的时候，也能够立刻从monitor反映出来。另外Java的垃圾回收机制也能够自动回收。然后在4.0后，图片又有了一些变化，那就是在parcel传输的时候，当图片很大时，它会使用ashmem来进行图片的传输，具体可以看我这篇文章<a href="http://blog.houzhi.me/2016/05/29/android-parcel-bitmap-2" target="_blank" rel="external">Android4.0之后Parcel传输Bitmap源码分析</a>。在6.0的时候，图片的存储又有了很大的变化，底层已经明显增加了将图片保存ashmem的接口了，具体可以可以看我这篇文章<a href="http://blog.houzhi.me/2016/05/24/android-bitmap-sourcecode-analysis" target="_blank" rel="external">Android6.0 Bitmap存储以及Parcel传输源码分析</a></p>
+<h3 id="BitmapFactory"><a href="#BitmapFactory" class="headerlink" title="BitmapFactory"></a>BitmapFactory</h3><p>BitmapFactory是用来加载图片的，这个类主要分为三种图片的加载，先把它的API拿出来看一下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public static Bitmap decodeResourceStream(Resources res, TypedValue value,</div><div class="line">        InputStream is, Rect pad, Options opts) </div><div class="line">public static Bitmap decodeResource(Resources res, int id, Options opts) </div><div class="line">public static Bitmap decodeResource(Resources res, int id) </div><div class="line"></div><div class="line">public static Bitmap decodeByteArray(byte[] data, int offset, int length, Options opts) &#123;</div><div class="line">public static Bitmap decodeByteArray(byte[] data, int offset, int length) &#123;</div><div class="line">   </div><div class="line">public static Bitmap decodeFile(String pathName, Options opts) </div><div class="line">public static Bitmap decodeFile(String pathName)</div><div class="line">public static Bitmap decodeStream(InputStream is, Rect outPadding, Options opts) </div><div class="line">public static Bitmap decodeStream(InputStream is) </div><div class="line"></div><div class="line">public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts)</div><div class="line">public static Bitmap decodeFileDescriptor(FileDescriptor fd)</div></pre></td></tr></table></figure>
+<p>我们直接看BitmapFactory提供的nativeDecode接口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">private static native Bitmap nativeDecodeStream(InputStream is, byte[] storage,</div><div class="line">        Rect padding, Options opts);</div><div class="line">private static native Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,</div><div class="line">        Rect padding, Options opts);</div><div class="line">private static native Bitmap nativeDecodeAsset(long nativeAsset, Rect padding, Options opts);</div><div class="line">private static native Bitmap nativeDecodeByteArray(byte[] data, int offset,</div><div class="line">        int length, Options opts);</div></pre></td></tr></table></figure>
+<p>BitmapFactory对File的decode都会转换为InputStream采用nativeDecodeStream来decode，对Resource的decode会采用decodeAsset，而如果FileDesciptor可以转换为native的fd,会通过nativeDecodeFileDescriptor来decode，另外ByteArray会直接采用nativeDecodeByteArray来decode。<strong><em>需要注意的是，对Resource的decode，BitmapFactory会设置Option的相关参数，最终进行相应的缩放，图片的大小会跟原图有所区别。</em></strong> 具体的内容建议去看看BitmapFactory，了解每种方式的区别，才能够更好地使用接口，选择的时候采用更有效率的方法。</p>
+<h3 id="BitmapFactory-Options"><a href="#BitmapFactory-Options" class="headerlink" title="BitmapFactory.Options"></a>BitmapFactory.Options</h3><p>下面看一下Options类，我们在加载的时候，可以通过这个参数对图片进行一些处理，前面已经说了inDensity和inTargetDensity。下面看看其他的参数。</p>
+<h4 id="inPurgeable"><a href="#inPurgeable" class="headerlink" title="inPurgeable"></a>inPurgeable</h4><p>这个参数的用途是当需要使用Bitmap的时候再加载Bitmap，不需要的时候回收Bitmap。在4.1中，使用inPurgeable，加载图片后内存基本不会增高，而不使用inPurgeable加载图片后内存会有明显的增加。</p>
+<h4 id="inSampleSize"><a href="#inSampleSize" class="headerlink" title="inSampleSize"></a>inSampleSize</h4><p>这是表示采样大小，长和宽会对应乘以1/inSampleSize。用于将图片缩小加载出来的，以免站占用太大内存，适合缩略图。</p>
+<h4 id="inJustDecodeBounds"><a href="#inJustDecodeBounds" class="headerlink" title="inJustDecodeBounds"></a>inJustDecodeBounds</h4><p>这个设置了true后，用于获取图片的宽度长度信息。下面是个例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line">options.inJustDecodeBounds = true;</div><div class="line">Bitmap bmp = BitmapFactory.decodeFile(path, options);</div><div class="line">// options.outWidth 和 options.outHeight就能够获取结果</div></pre></td></tr></table></figure>
+<h4 id="inBitmap"><a href="#inBitmap" class="headerlink" title="inBitmap"></a>inBitmap</h4><p>在Android 3.0开始引入了inBitmap设置，通过设置这个参数，在图片加载的时候可以使用之前已经创建了的Bitmap，以便节省内存，避免再次创建一个Bitmap。在Android4.4，新增了允许inBitmap设置的图片与需要加载的图片的大小不同的情况，只要inBitmap的图片比当前需要加载的图片大就好了。</p>
+<h4 id="inPreferredConfig"><a href="#inPreferredConfig" class="headerlink" title="inPreferredConfig"></a>inPreferredConfig</h4><p>用于配置图片解码方式，对应的类型Bitmap.Config。如果非null，则会使用它来解码图片</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这篇先主要介绍了Bitmap相关基本的信息，Bitmap，BitmapFactory和Options类，以及bitmap的存储。</p>
 
           
         

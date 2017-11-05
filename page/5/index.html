@@ -228,160 +228,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/04/28/android-pageradapter-notifydatasetchanged/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/04/28/android-pageradapter-notifydatasetchanged/" itemprop="url">Android notifyDatasetChanged</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-04-28T00:00:00+08:00">
-                2015-04-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <div align="center"><img src="http://i1383.photobucket.com/albums/ah295/houzhi/20130519041943_18280_zpspnyvmavc.jpg" width="640"></div>
-
-
-<h2 id="forget-to-call-notifyDatasetChanged-错误"><a href="#forget-to-call-notifyDatasetChanged-错误" class="headerlink" title="forget to call notifyDatasetChanged 错误"></a>forget to call notifyDatasetChanged 错误</h2><p>这几天一直在完善之前自己的写的Android应用。想用ViewPager让之前界面能够滑动阅读。但是滑动过程中，经常会莫名其妙地遇到一个问题。莫名其妙地提示ViewPager expected 10 counts，but found 20.  forget to call notifyDatasetChanged. 意思很明显，就是ViewPager的数据集改变了，但是我却忘了去通过notifyDatasetChanged去通知PagerAdapter数据已经更新了。但是我其实在那个页面压根没有去更新数据。不过根据提示显然是因为哪个地方改变了数据的数量。还好我动态更新数据的地方不多。检查一下代码，根据自己的思路，立刻发现了问题。我会在已经载入当前列表的时候，去服务器取下一个列表。这样在我取完下一个列表的时候，数据就变了。然后就出现那个问题了。</p>
-<p>虽然没怎么浪费时间就解决了问题，但是在面对多个线程数据共享的时候确实得增加一些额外的考虑。PagerAdapter的数据如果改变，是需要调用notifyDatasetChanged方法的。多线程的共享需要考虑同步的问题，这个同步不仅仅是一个synchronize就能够避免的，每个线程都需要去预防共享的数据被另外一个线程更改了。</p>
-<h2 id="ViewPager与Fragment"><a href="#ViewPager与Fragment" class="headerlink" title="ViewPager与Fragment"></a>ViewPager与Fragment</h2><p>我在使用ViewPager的时候，使用了FragmentStatePagerAdapter作为它的Adapter，因为会有很多Fragment，如何从ViewPager控制它的Fragment就成了一个问题。</p>
-<p>当然，直接保存ViewPager的所有Fragment似乎就能够控制了，但是这实在是不科学，保存起来太耗空间。而实际上ViewPager每次只有几个View保存着。当前显示的View以及前后几个View，在这之外的View都会被destory掉。这样能够很好地控制占用的内存。</p>
-<p>但是幸运地是FragmentActivity的FragmentManager提供了一个getFragments的方法，该方法能够获取当前所有的Fragment。这样问题就解决了。获取Activity中所有的Fragment，然后判断是不是FragmentStatePagerAdapter的Fragment。这样ViewPager就能够直接控制它的Fragment Item了。</p>
-<p>对于FragmentPagerAdapter与FragmentStatePagerAdapter的区别，FragmentPagerAdapter会对每一个Fragment进行缓存，而FragmentStatePagerAdapter不会。两个的使用方法是一样的。</p>
-<h2 id="notifyDatasetChanged做了什么工作？"><a href="#notifyDatasetChanged做了什么工作？" class="headerlink" title="notifyDatasetChanged做了什么工作？"></a>notifyDatasetChanged做了什么工作？</h2><p>每个Adapter都会有<code>private DataSetObservable mObservable = new DataSetObservable();</code> 一个DataSetObservable观察者。这个观察者可以注册<code>registerDataSetObserver</code>。而notifyDatasetChanged函数做的就是通知注册这，我的数据已经改变了。</p>
-<p>这样就给了ViewPager监听Adapter数据集变化的机会。在ViewPager的setAdapter中，有下面这段代码:</p>
-<pre><code>431        if (mAdapter != null) {
-432            if (mObserver == null) {
-433                mObserver = new PagerObserver();
-434            }
-435            mAdapter.registerDataSetObserver(mObserver);
-436            mPopulatePending = false;
-437            final boolean wasFirstLayout = mFirstLayout;
-438            mFirstLayout = true;
-439            mExpectedAdapterCount = mAdapter.getCount();
-440            if (mRestoredCurItem &gt;= 0) {
-441                mAdapter.restoreState(mRestoredAdapterState, mRestoredClassLoader);
-442                setCurrentItemInternal(mRestoredCurItem, false, true);
-443                mRestoredCurItem = -1;
-444                mRestoredAdapterState = null;
-445                mRestoredClassLoader = null;
-446            } else if (!wasFirstLayout) {
-447                populate();
-448            } else {
-449                requestLayout();
-450            }
-451        }
-</code></pre><p>在上面的代码中，注册了数据集变化的观察者。而notifyDatasetChanged就是通知观察者。</p>
-<hr>
-<p>探究</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/04/20/android-listview-item-focus/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1821,6 +1667,183 @@ assertEquals(1, 1);
 <p>你在写代码的时候，你在开始写那段代码的时候，你最能发现那段代码可能潜在什么问题，而你暂时又不确定，而且这样的情形发生的时候，可能不会一下子导致程序崩溃，但是这是一个隐患。这个时候用断言，或者单元测试。这非常实用。我就经常在浑浑噩噩中违背了一些断言设置的基本原则。</p>
 <hr>
 <p>晨写</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/10/13/make-linux-kernel/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2014/10/13/make-linux-kernel/" itemprop="url">centos 4.4 中编译linux 2.6.18 </a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-10-13T00:00:00+08:00">
+                2014-10-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="centos-4-4-中编译linux-2-6-18"><a href="#centos-4-4-中编译linux-2-6-18" class="headerlink" title="centos 4.4 中编译linux 2.6.18"></a>centos 4.4 中编译linux 2.6.18</h1><hr>
+<p>###1. 系统环境：<br>ubuntu14.04 LTS 中安装virtual box ，在virtualbox 中安装centos4.4 （其内核版本为2.6.9），<br>编译的内核版本为：linux 2.6.18.</p>
+<p><img src="http://xxxzhi.github.io/images/make_linux_uname.png" alt="此处输入图片的描述"></p>
+<h3 id="2-编译步骤："><a href="#2-编译步骤：" class="headerlink" title="2. 编译步骤："></a>2. 编译步骤：</h3><h5 id="1-下载内核源码"><a href="#1-下载内核源码" class="headerlink" title="1. 下载内核源码"></a>1. 下载内核源码</h5><pre><code>wget https://www.kernel.org/pub/linux/kernel/v2.6/linux-2.6.18.tar.gz --no-check-certificate
+</code></pre><h5 id="2-检查并安装gcc"><a href="#2-检查并安装gcc" class="headerlink" title="2. 检查并安装gcc"></a>2. 检查并安装gcc</h5><p>在我下载的centos4.4 中，并没有gcc，所以必须要重新安装，使用下列命令安装gcc<br>    yum -y install gcc<br>    yum -y install gcc-c++<br>    yum install make<br>如果使用的是centos4.4的话，在我实验过程中就遇到了一个问题：</p>
+<blockquote>
+<p>Setting up Update Process<br>Setting up repositories<br>not using ftp, http[s], or file for repos, skipping - 4 is not a valid release or hasnt been released yet<br>Cannot find a valid baseurl for repo: update<br>Error: Cannot find a valid baseurl for repo: update</p>
+</blockquote>
+<p>在网上查找了一些资料后，发现是4.4已经被depresed掉了，连yum安装都不行了，但是网上有个人介绍了一个CentOS-Base.repo是可以使用的。上面错误的具体原因，参见：<a href="http://blog.sina.com.cn/s/blog_4a5eb9980102v2e1.html" target="_blank" rel="external">yum Cannot find a valid baseurl for repo: update</a>。我对他的解决方案进行了简化，直接表述：</p>
+<pre><code>wget http://vault.centos.org/4.9/CentOS-Base.repo
+mv CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+</code></pre><p>上面需要root用户的，直接用su然后输入root 密码，上面是使用4.9 的yum。</p>
+<h5 id="3-解压，并把它放到-usr-src-目录下"><a href="#3-解压，并把它放到-usr-src-目录下" class="headerlink" title="3. 解压，并把它放到/usr/src/目录下"></a>3. 解压，并把它放到/usr/src/目录下</h5><pre><code>gzip -d linux-2.6.18.tar.gz
+tar -xvf linux-2.6.18.tar
+//获取root 权限
+su
+mv -rf linux-2.6.18 /usr/src
+</code></pre><h5 id="4-在-usr-src-建立一个软链接到linux-2-6-18目录"><a href="#4-在-usr-src-建立一个软链接到linux-2-6-18目录" class="headerlink" title="4. 在/usr/src/建立一个软链接到linux-2.6.18目录"></a>4. 在/usr/src/建立一个软链接到linux-2.6.18目录</h5><pre><code>cd /usr/src
+ln -s linux-2.6.18 linux
+cd linux
+</code></pre><h5 id="5-清理源代码（如果是之前已生成一些中间文件可运行此命令，否则不必了）"><a href="#5-清理源代码（如果是之前已生成一些中间文件可运行此命令，否则不必了）" class="headerlink" title="5. 清理源代码（如果是之前已生成一些中间文件可运行此命令，否则不必了）"></a>5. 清理源代码（如果是之前已生成一些中间文件可运行此命令，否则不必了）</h5><pre><code>make mrproper
+</code></pre><h5 id="6-生成config文件"><a href="#6-生成config文件" class="headerlink" title="6. 生成config文件"></a>6. 生成config文件</h5><pre><code>cp /boot/config-2.6.9-42.EL ./.config
+make menuconfig
+</code></pre><p>在make menuconfig 的过程中出现ncurses.h 缺失的错误，用命令解决</p>
+<pre><code>yum install ncurses ncurses-devel
+</code></pre><p>在make menuconfig的配置界面中，先选择Load config file，把该才拷贝的文件加载进来再进行修改，修改完成后，直接选Exit，然后在提示中选择保当前配置文件。如下所示：</p>
+<p><img src="http://xxxzhi.github.io/images/make_linux_menuconfig1.png" alt="load config file"></p>
+<p>save:</p>
+<p><img src="http://xxxzhi.github.io/images/make_linux_menuconfig2.png" alt="save"></p>
+<h5 id="7-编译"><a href="#7-编译" class="headerlink" title="7. 编译"></a>7. 编译</h5><pre><code>make
+</code></pre><h5 id="8-安装模块"><a href="#8-安装模块" class="headerlink" title="8. 安装模块"></a>8. 安装模块</h5><pre><code>make modules_install
+</code></pre><p>该命令会把模块及相关文件放到目录/lib/modules/2.6.18/下，并不会与当前内核产生冲突，除非内核版本是一样的。之后wait…</p>
+<h5 id="9-安装内核"><a href="#9-安装内核" class="headerlink" title="9. 安装内核"></a>9. 安装内核</h5><pre><code>make install
+</code></pre><p>该命令会把内核相关文件(bzImage, initrd.img，System.map config）放到/boot/目录下，文件名均带有内核版本名，与其它版本相关区别。</p>
+<p>重启进行新内核。</p>
+<h5 id="10-重启无法进入"><a href="#10-重启无法进入" class="headerlink" title="10. 重启无法进入"></a>10. 重启无法进入</h5><blockquote>
+<p>Enforcing mode requested but no policy loaded. Halting now.<br>kernel panic - not syncing:  Attempted to kill init!<br>出现以上错误</p>
+</blockquote>
+<p>解决方法：</p>
+<blockquote>
+<p>1、在grub.conf里把 kernel /vmlinuz-2.6.19 ro root=LABEL=/ rhgb quiet 变为： kernel /vmlinuz-2.6.19 ro root=LABEL=/ enforcing=0 rhgb quiet<br>2、修改/etc/selinux/config配置文件,只要把SELINUX的值改成disabled就好了</p>
+</blockquote>
+<p>原因：</p>
+<blockquote>
+<p>selinux的问题。<br>enforcing参数是在启动内核时传递给selinux的内核参数，它用来决定你系统的内核运行于强制（enforcing ）模式还是自由（permissive） 模式。</p>
+<p>在自由模式下SELinux只是记录他该做什么，而事实上并不做任何动作。在强制模式下SElinux会来真格的。如果你的策略有错误，在强制模式下系统可能会阻止你登陆！所以正常情况下你应改在启动时传enforcing=1 给内核，当你的SELinux策略有问题时，你可以临时传enforcing=0给内核来查错。在/etc/selinux/config这个init的 配置文件中相应的有一个选项，通过设置它，也可以使系统进入自由模式。</p>
+</blockquote>
+<p><img src="http://xxxzhi.github.io/images/make_linux_uname2.png" alt="after make uname"></p>
+<h3 id="3-总结与思考"><a href="#3-总结与思考" class="headerlink" title="3. 总结与思考"></a>3. 总结与思考</h3><p>感觉编译内核就是照着葫芦画瓢，参照别网上的人的经历，然后一步一步地去做，遇到问题，去思考应该怎么做，可能遇到什么问题，比如说上面我遇到过的gcc没有，那这样的话，直接就去安装gcc继续来就好了。遇到yum使用不了，也是通过找资料解决的。耐心淡定地去找资料，思考问题就能够解决问题。</p>
+<p>感觉我对linux 的各种命令已经很熟悉了，而且越来越偏好使用命令行了。网络实在是不行，在安装gcc的过程中，下载系统的过程中花费了不少时间。另外低版本的linux不少已经depressed了，可能存在一些东西，官方已经不支持了。</p>
+<hr>
+<hr>
+<p>参考</p>
+<ol>
+<li><a href="http://blog.csdn.net/linyt/article/details/3995435" target="_blank" rel="external">http://blog.csdn.net/linyt/article/details/3995435</a></li>
+<li><a href="http://blog.csdn.net/do2jiang/article/details/5146911" target="_blank" rel="external">http://blog.csdn.net/do2jiang/article/details/5146911</a></li>
+<li><a href="http://blog.sina.com.cn/s/blog_4a5eb9980102v2e1.html" target="_blank" rel="external">http://blog.sina.com.cn/s/blog_4a5eb9980102v2e1.html</a></li>
+</ol>
 
           
         

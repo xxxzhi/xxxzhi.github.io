@@ -228,153 +228,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/06/07/android-bitmap-introduce-1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/06/07/android-bitmap-introduce-1/" itemprop="url">Android Bitmap深入介绍（一）---基础</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-07T00:00:00+08:00">
-                2016-06-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>在Android应用开发中，我们经常需要跟图片打交道，而图片一个很麻烦的问题是占用内存非常大，经常导致OOM，了解Bitmap相关信息，不同sdk版本中Android图片处理的变化，以及一些优化处理的方式对我们平时开发中对图片的会非常有帮助。</p>
-<p>我觉得需要了解好图片最基础的是需要知道图片基础信息，Bitmap内容，存储信息，以及加载。</p>
-<h3 id="像素"><a href="#像素" class="headerlink" title="像素"></a>像素</h3><p>Bitmap的存储可以说包括两个部分，像素以及长,宽，颜色等描述信息。像素是Bitmap最占用内存的地方，长宽和像素位数是用来描述图片的，可以通过这些信息计算出图片的像素占用的内存大小。具体到Bitmap的API是下面这几个接口:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public final int getWidth()</div><div class="line">public final int getHeight()</div><div class="line">public final Config getConfig()</div></pre></td></tr></table></figure>
-<p>Config是一个枚举类型，表示图片像素类型，总共有下面几种类型：<code>ALPHA_8     (1),RGB_565     (3),ARGB_4444   (4),ARGB_8888   (5);</code>。表示每一个像素图片组成。实际上下面两种方式获取的数值是相等的：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">int b = 1;</div><div class="line">switch (bitmap.getConfig()) &#123;</div><div class="line">    case ALPHA_8:</div><div class="line">        b = 1;</div><div class="line">        break;</div><div class="line">    case ARGB_4444:</div><div class="line">        b = 2;</div><div class="line">        break;</div><div class="line">    case ARGB_8888:</div><div class="line">        b = 4;</div><div class="line">        break;</div><div class="line">&#125;</div><div class="line">int bytes1 = bitmap.getWidth() * bitmap.getHeight() * b;</div><div class="line"></div><div class="line">int bytes2 = bitmap.getByteCount();　//从api12才有的接口</div></pre></td></tr></table></figure>
-<p>这是由Bitmap相关参数可以计算出Bitmap所占用的像素数，实际上我们放入drawable里面的图片都是已经知道了图片的长宽以及像素组成的，但是直接在Android外面算出的图片像素数量与通过上面的代码计算会有出入的。因为Android对图片做了缩放，这个跟你将图片放入的drawable位置相关。</p>
-<p>我们都知道android资源目录中会有drawable-hdpi, drawable-xhdpi，drawable-xxhdpi等目录。这里每个目录都会对应一个density。下面看BitmapFactory.decodeResource方法加载Bitmap的例子:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line">Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test4, options);</div><div class="line">Log.i(LOGTAG, &quot;options: &quot; + options.inDensity + &quot;,&quot; + options.inTargetDensity);</div></pre></td></tr></table></figure>
-<p>decodeResource就是Android内部对Resource的加载方式，这里就不从源码上面一步一步介绍了，它最终会调用decodeResourceStream方法，直接看decodeResourceStream：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">public static Bitmap decodeResourceStream(Resources res, TypedValue value,</div><div class="line">        InputStream is, Rect pad, Options opts) &#123;</div><div class="line">    if (opts == null) &#123;</div><div class="line">        opts = new Options();</div><div class="line">    &#125;</div><div class="line">    if (opts.inDensity == 0 &amp;&amp; value != null) &#123;</div><div class="line">        final int density = value.density;</div><div class="line">        if (density == TypedValue.DENSITY_DEFAULT) &#123;</div><div class="line">            opts.inDensity = DisplayMetrics.DENSITY_DEFAULT;</div><div class="line">        &#125; else if (density != TypedValue.DENSITY_NONE) &#123;</div><div class="line">            opts.inDensity = density;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if (opts.inTargetDensity == 0 &amp;&amp; res != null) &#123;</div><div class="line">        opts.inTargetDensity = res.getDisplayMetrics().densityDpi;</div><div class="line">    &#125;</div><div class="line">    return decodeStream(is, pad, opts);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>options.inDensity表示图片自身默认的像素密度，TypedValue会有一个density，对应着图片来自于哪个drawable目录，因为每一个drawable目录(drawable-hdpi,drawable-xhdpi,drawable-xxhdpi)都对应着一种屏幕，而屏幕就有density，TypedValue的density对应着DisplayMetrics的densityDpi,densityDpi表示每英尺的像素数。options.inTargetDensity是当前手机屏幕对应的densityDpi，最终的像素数是:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bytes = 原始图片宽*(options.inDensity/options.inTargetDensity)*原始图片长*(options.inDensity/options.inTargetDensity)*每个像素点位数</div></pre></td></tr></table></figure>
-<h3 id="存储与传输"><a href="#存储与传输" class="headerlink" title="存储与传输"></a>存储与传输</h3><p>Android图片在不同的sdk版本中存储的地方是不一样的。在2.3及2.3以前，图片像素是存储在native内存中。Android内存分为Java堆和native内存。Android会限制每个应用能使用的最大内存。但是Android对内存的限制是Java堆和native内存的和，把像素数据存放在native区，虚拟机无法自动进行垃圾回收，必须手动使用bitmap.recycle()导致很容易内存泄漏。因为Android的设备monitor也只能够看到Java堆的内存变化，这样其实也不方便调试Bitmap内存。比如在应用中新创建一个图片，根本无法在monitor中看到内存变化。</p>
-<p>从3.0开始Android将图片保存在Java堆中，新加载一张图片的时候，也能够立刻从monitor反映出来。另外Java的垃圾回收机制也能够自动回收。然后在4.0后，图片又有了一些变化，那就是在parcel传输的时候，当图片很大时，它会使用ashmem来进行图片的传输，具体可以看我这篇文章<a href="http://blog.houzhi.me/2016/05/29/android-parcel-bitmap-2" target="_blank" rel="external">Android4.0之后Parcel传输Bitmap源码分析</a>。在6.0的时候，图片的存储又有了很大的变化，底层已经明显增加了将图片保存ashmem的接口了，具体可以可以看我这篇文章<a href="http://blog.houzhi.me/2016/05/24/android-bitmap-sourcecode-analysis" target="_blank" rel="external">Android6.0 Bitmap存储以及Parcel传输源码分析</a></p>
-<h3 id="BitmapFactory"><a href="#BitmapFactory" class="headerlink" title="BitmapFactory"></a>BitmapFactory</h3><p>BitmapFactory是用来加载图片的，这个类主要分为三种图片的加载，先把它的API拿出来看一下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public static Bitmap decodeResourceStream(Resources res, TypedValue value,</div><div class="line">        InputStream is, Rect pad, Options opts) </div><div class="line">public static Bitmap decodeResource(Resources res, int id, Options opts) </div><div class="line">public static Bitmap decodeResource(Resources res, int id) </div><div class="line"></div><div class="line">public static Bitmap decodeByteArray(byte[] data, int offset, int length, Options opts) &#123;</div><div class="line">public static Bitmap decodeByteArray(byte[] data, int offset, int length) &#123;</div><div class="line">   </div><div class="line">public static Bitmap decodeFile(String pathName, Options opts) </div><div class="line">public static Bitmap decodeFile(String pathName)</div><div class="line">public static Bitmap decodeStream(InputStream is, Rect outPadding, Options opts) </div><div class="line">public static Bitmap decodeStream(InputStream is) </div><div class="line"></div><div class="line">public static Bitmap decodeFileDescriptor(FileDescriptor fd, Rect outPadding, Options opts)</div><div class="line">public static Bitmap decodeFileDescriptor(FileDescriptor fd)</div></pre></td></tr></table></figure>
-<p>我们直接看BitmapFactory提供的nativeDecode接口：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">private static native Bitmap nativeDecodeStream(InputStream is, byte[] storage,</div><div class="line">        Rect padding, Options opts);</div><div class="line">private static native Bitmap nativeDecodeFileDescriptor(FileDescriptor fd,</div><div class="line">        Rect padding, Options opts);</div><div class="line">private static native Bitmap nativeDecodeAsset(long nativeAsset, Rect padding, Options opts);</div><div class="line">private static native Bitmap nativeDecodeByteArray(byte[] data, int offset,</div><div class="line">        int length, Options opts);</div></pre></td></tr></table></figure>
-<p>BitmapFactory对File的decode都会转换为InputStream采用nativeDecodeStream来decode，对Resource的decode会采用decodeAsset，而如果FileDesciptor可以转换为native的fd,会通过nativeDecodeFileDescriptor来decode，另外ByteArray会直接采用nativeDecodeByteArray来decode。<strong><em>需要注意的是，对Resource的decode，BitmapFactory会设置Option的相关参数，最终进行相应的缩放，图片的大小会跟原图有所区别。</em></strong> 具体的内容建议去看看BitmapFactory，了解每种方式的区别，才能够更好地使用接口，选择的时候采用更有效率的方法。</p>
-<h3 id="BitmapFactory-Options"><a href="#BitmapFactory-Options" class="headerlink" title="BitmapFactory.Options"></a>BitmapFactory.Options</h3><p>下面看一下Options类，我们在加载的时候，可以通过这个参数对图片进行一些处理，前面已经说了inDensity和inTargetDensity。下面看看其他的参数。</p>
-<h4 id="inPurgeable"><a href="#inPurgeable" class="headerlink" title="inPurgeable"></a>inPurgeable</h4><p>这个参数的用途是当需要使用Bitmap的时候再加载Bitmap，不需要的时候回收Bitmap。在4.1中，使用inPurgeable，加载图片后内存基本不会增高，而不使用inPurgeable加载图片后内存会有明显的增加。</p>
-<h4 id="inSampleSize"><a href="#inSampleSize" class="headerlink" title="inSampleSize"></a>inSampleSize</h4><p>这是表示采样大小，长和宽会对应乘以1/inSampleSize。用于将图片缩小加载出来的，以免站占用太大内存，适合缩略图。</p>
-<h4 id="inJustDecodeBounds"><a href="#inJustDecodeBounds" class="headerlink" title="inJustDecodeBounds"></a>inJustDecodeBounds</h4><p>这个设置了true后，用于获取图片的宽度长度信息。下面是个例子：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line">options.inJustDecodeBounds = true;</div><div class="line">Bitmap bmp = BitmapFactory.decodeFile(path, options);</div><div class="line">// options.outWidth 和 options.outHeight就能够获取结果</div></pre></td></tr></table></figure>
-<h4 id="inBitmap"><a href="#inBitmap" class="headerlink" title="inBitmap"></a>inBitmap</h4><p>在Android 3.0开始引入了inBitmap设置，通过设置这个参数，在图片加载的时候可以使用之前已经创建了的Bitmap，以便节省内存，避免再次创建一个Bitmap。在Android4.4，新增了允许inBitmap设置的图片与需要加载的图片的大小不同的情况，只要inBitmap的图片比当前需要加载的图片大就好了。</p>
-<h4 id="inPreferredConfig"><a href="#inPreferredConfig" class="headerlink" title="inPreferredConfig"></a>inPreferredConfig</h4><p>用于配置图片解码方式，对应的类型Bitmap.Config。如果非null，则会使用它来解码图片</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这篇先主要介绍了Bitmap相关基本的信息，Bitmap，BitmapFactory和Options类，以及bitmap的存储。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/06/02/android-sourcecode-adapter-activity/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1761,6 +1614,148 @@ public boolean dispatchTouchEvent(MotionEvent ev) {
 <hr>
 <blockquote>
 <p>积跬步，至千里；积小流，成江海</p>
+</blockquote>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/26/android-sourcecode-bridge-fragmentcompat/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2016/04/26/android-sourcecode-bridge-fragmentcompat/" itemprop="url">Android源码桥梁模式---FragmentCompat</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-26T00:00:00+08:00">
+                2016-04-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>发现想要在Android源码中找到一个明显使用桥梁模式的模块还真的挺不容易的，但由于Android代码命名上面的规律，还是让我搜索到了。FragmentCompat是一个用于访问Fragment特征的帮助类，它在support v13开始以一种向后兼容的风格提出。它是如何向后兼容的呢？就是使用桥梁模式来向后兼容。它是一种简化了的桥梁模式，下面将简单介绍FragmentCompat与桥梁模式。</p>
+<h2 id="桥梁模式"><a href="#桥梁模式" class="headerlink" title="桥梁模式"></a>桥梁模式</h2><h3 id="意图"><a href="#意图" class="headerlink" title="意图"></a>意图</h3><p>将对象的抽象与实现分隔开来，以使对象的抽象与实现相互独立地变化。</p>
+<h3 id="UML"><a href="#UML" class="headerlink" title="UML"></a>UML</h3><p><img src="http://xxxzhi.github.io/images/bridge.png" alt="此处输入图片的描述"></p>
+<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="comment">//抽象</span></div><div class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbsComponent</span></span>&#123;</div><div class="line">    <span class="keyword">private</span> AbsComponentImpl impl;</div><div class="line">    <span class="function"><span class="keyword">public</span> AbsComponentImpl <span class="title">getComponentImpl</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="keyword">return</span> impl;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">AbsComponent</span><span class="params">(AbsComponentImpl impl)</span></span>&#123;</div><div class="line">        <span class="keyword">this</span>.impl = impl;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">operate</span><span class="params">()</span></span>;</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">//实现</span></div><div class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbsComponentImpl</span></span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">operateImpl</span><span class="params">()</span></span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ComponentImpl1</span> <span class="keyword">extends</span> <span class="title">AbsComponentImpl</span></span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operateImpl</span><span class="params">()</span></span>&#123;</div><div class="line">        System.out.println(<span class="string">"operate implements"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Component1</span> <span class="keyword">extends</span> <span class="title">AbsComponent</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Component1</span><span class="params">(AbsComponentImpl impl)</span></span>&#123;</div><div class="line">        <span class="keyword">super</span>(impl);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operate</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="comment">//通过具体的实现部分（impl）来进行操作。</span></div><div class="line">        getComponentImpl().operateImpl();</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> AbsComponentImpl <span class="title">createImpl</span><span class="params">(<span class="keyword">int</span> id)</span></span>&#123;</div><div class="line">    <span class="comment">// 根据id来创建不同的对象</span></div><div class="line">    <span class="keyword">switch</span>(id)&#123;</div><div class="line">    <span class="keyword">case</span> <span class="number">1</span>:</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ComponentImpl1();</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</div><div class="line">    Component1 com = <span class="keyword">new</span> Component1(createImpl(<span class="number">1</span>)); <span class="comment">//此处就是将实现与抽象部分结合起来，大多采用工厂方法的方式创建实现部分</span></div><div class="line">    com.operate();    <span class="comment">//里面是桥接到实现部分去操作的</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上述代码中，有一个抽象组件以及组件实现，组件实现也是有一个抽象父类，想要实现组件实现，就去新创建一个子类。大部分时候，都是采用工厂方法模式去创建一个具体的组件实现对象。根据传入的参数来创建不同的实现。假如实现修改了，抽象部分并不需要改变，只需要创建一个对应的实现对象就可以了。同样抽象部分的变化，也完全不会影响到实现。这就是桥接模式的好处，几乎所有的窗口实现都是采用桥接模式的，窗口与窗口的具体实现（Linux Gnome窗口，Ubuntu窗口）通过桥接模式分隔开来，应用程序开发的时候只需要考虑窗口就可以了。</p>
+<h2 id="FragmentCompat"><a href="#FragmentCompat" class="headerlink" title="FragmentCompat"></a>FragmentCompat</h2><p>FragmentCompat的源码在android.support.v13.app中。它只有四个静态方法，首先介绍一下FragmentCompat相关接口功能:</p>
+<ul>
+<li>setMenuVisibility(Fragment f,boolean visible)<br>设置Fragment创建的菜单是否显示。会在合适的Android版本中调用f.setMenuVisibility(visible)。</li>
+<li>setUserVisibleHint(Fragment f, boolean deferStart)<br>设置Fragment是否显示给用户，这个可以用作Fragment延迟加载，也可以用作在ScrollView中未显示给用户的fragment隐藏起来。</li>
+<li>requestPermissions(Fragment fragment, String[] permissions, int requestCode)<br>请求对应的权限，关于在应用中请求权限是在Mashmallow出现的，从Mashmallow开始，Android重新设计了应用权限，在apk安装的时候不再显示所需要的权限，而是在应用中需要权限的时候再向用户请求。关于应用权限，这篇文章我觉得讲的很不错<a href="http://zhixinliu.com/2015/11/23/2015-11_23_android_permission/" target="_blank" rel="external">Android permissions最佳实践</a></li>
+<li>shouldShowRequestPermissionRationale(Fragment fragment, String permission)<br>判断是否应该显示请求权限的原因，让用户更好地了解该权限的使用。这个要在API23才能使用，之前的版本都是返回false。</li>
+</ul>
+<h3 id="FragmentCompat-UML图"><a href="#FragmentCompat-UML图" class="headerlink" title="FragmentCompat UML图"></a>FragmentCompat UML图</h3><p><img src="http://xxxzhi.github.io/images/fragment-compat.png" alt="此处输入图片的描述"></p>
+<h3 id="FragmentCompat的实现"><a href="#FragmentCompat的实现" class="headerlink" title="FragmentCompat的实现"></a>FragmentCompat的实现</h3><p>FragmentCompat中的四个方法都是静态方法，它包含一个FragmentCompatImpl静态成员对象IMPL。其初始化如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">final</span> FragmentCompatImpl IMPL;</div><div class="line"><span class="keyword">static</span> &#123;</div><div class="line">    <span class="keyword">if</span> (Build.VERSION.SDK_INT &gt;= <span class="number">23</span>) &#123;</div><div class="line">        IMPL = <span class="keyword">new</span> MncFragmentCompatImpl();</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (android.os.Build.VERSION.SDK_INT &gt;= <span class="number">15</span>) &#123;</div><div class="line">        IMPL = <span class="keyword">new</span> ICSMR1FragmentCompatImpl();</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (android.os.Build.VERSION.SDK_INT &gt;= <span class="number">14</span>) &#123;</div><div class="line">        IMPL = <span class="keyword">new</span> ICSFragmentCompatImpl();</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        IMPL = <span class="keyword">new</span> BaseFragmentCompatImpl();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>实际上就是根据不同的sdk版本采用不同的实现。从上面的UML图也可以看出来，目前的实现方式都是新的SDK版本的实现继承旧的SDK版本的实现。</p>
+<p>其实ICSFragmentCompatImpl,ICSMR1FragmentCompatImpl,MncFragmentCompatImpl内部的实现又是通过引用FragmentCompatICS,FragmentCompatICSMR1，FragmentCompat23来实现对应的功能的。如UML图所示，setMenuVisibility由FragmentCompatICS实现，setUserVisibleHint由FragmentCompatICSMR1实现，requestPermissions和shouldShowRequestPermissionRationale由FragmentCompat23实现。</p>
+<h2 id="桥梁模式在FragmentCompat的使用分析"><a href="#桥梁模式在FragmentCompat的使用分析" class="headerlink" title="桥梁模式在FragmentCompat的使用分析"></a>桥梁模式在FragmentCompat的使用分析</h2><p>FragmentCompat可以看作是桥梁模式的抽象部分，FragmentCompatImpl是它的实现部分。在FragmentCompat中，它的抽象只有一个，其实也没什么变化，它变化的部分主要还是在实现。Android在不同的SDK版本中都有不同的FragmentCompatImpl实现，在这里有点特殊的是它最新的实现都是通过继承之前的实现来完成的。FragmentCompat可以根据不同的SDK版本采用不同的实现。桥梁模式非常适合这种情况。</p>
+<p>在另外一方面，在新的sdk出现的时候，有些功能有变化了（比如到了API23, Fragment有shouldShowRequestPermissionRationale方法了，shouldShowRequestPermissionRationale可以实现了），那只需要采用新的Impl就好了，并不会影响前面的实现部分。这样就达到了向后兼容的效果。</p>
+<hr>
+<blockquote>
+<p>读书无嗜好，就能尽其多。不先泛览群书，则会无所适从或失之偏好，广然后深，博然后专。—鲁迅</p>
 </blockquote>
 
           

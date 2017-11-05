@@ -228,155 +228,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/10/30/java-type-reflect/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/10/30/java-type-reflect/" itemprop="url">Java泛型Type体系</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-30T00:00:00+08:00">
-                2015-10-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <hr>
-<p>最近看开源代码，看到里面很多Java泛型，并且通过反射去获取泛型信息。所以这两三天就不在不断地看Java泛型相关的东西。如果说想要明白通过反射去获取泛型信息，那么Type体系是必须要了解的。Java从1.5开始引入泛型，并且也引入了Type体系。首先给出Type的类型树UML图，以便有个整体的认识。</p>
-<p><img src="http://xxxzhi.github.io/images/type-interface.png" alt="Type接口"></p>
-<p>这些都在java的<a href="https://docs.oracle.com/javase/7/docs/api/java/lang/reflect/package-tree.html" target="_blank" rel="external">reflect</a>包下面，图中带有s的接口返回的是数组，由于画图工具的原因，标记的只有一个类型，没有带[]。可以说是Java泛型反射的基础。这个UML图我只选取了这些类与接口与Type相关的部分。</p>
-<h2 id="Method-Field-Constructor-Class与Type"><a href="#Method-Field-Constructor-Class与Type" class="headerlink" title="Method,Field,Constructor,Class与Type"></a>Method,Field,Constructor,Class与Type</h2><p>Method，Field，Constructor都是与Type关联的，而Class是Type的子类。从实际泛型中看也是这样的，因为方法，域，构造方法都可以是泛型。</p>
-<p>如果从来没有接触过这些，那么一开始接触这些泛型的反射会非常突兀。如果从一些疑问，或者说需求开始思考可能会能够更好地了解这些东西的作用，比如说:我们已经知道能够通过反射（从1.1就开始支持了）获得一个Class里面的方法以及域，但是我们怎么获得一个带有模版参数的Class里面的模版参数呢？比如说下面这个类</p>
-<pre><code>class Test&lt;T&gt; {
-public &lt;R&gt; void testMethod(R params){
-}
-}
-</code></pre><p>我们怎么根据Test.class获得T呢？获得T的具体类型？Class实现了接口GenericDeclaration。GenericDeclaration的getTypeParameters()方法就可以获得模版参数。</p>
-<p>同样Method能够包含模版参数的地方有四个，模版参数，返回值，函数参数，异常。Method的四个方法分别对应这四个地方（有一个是继承自GenericDeclaration）。Field，Constructor也都是类似。</p>
-<p>Method，Field，Constructor，Class都有获得声明的模版参数的方法，这样我们就可以通过反射来获取模版参数类型。</p>
-<h2 id="Type的子接口"><a href="#Type的子接口" class="headerlink" title="Type的子接口"></a>Type的子接口</h2><p>Type有四个子接口：ParameterizedType，TypeVariable，WildcardType，GenericArrayType。下面分别介绍这四个类型的具体表示的意思。假设我们申明有下面这个类</p>
-<pre><code>public class GenericTest&lt;T1,T2 extends Number&gt; {
-    private Map&lt;T1 , Integer&gt; map = null;
-}
-</code></pre><p>下面我们开始举例说明。</p>
-<h3 id="ParameterizedType"><a href="#ParameterizedType" class="headerlink" title="ParameterizedType"></a>ParameterizedType</h3><p>ParameterizedType是表示泛型类型，比如说Map<string,integer>,这就是一个ParameterizedType类型。</string,integer></p>
-<p>ParameterizedType可以获得具体附带的泛型参数(也就是&lt;&gt;中的内容）。getActualTypeArguments就是获得具体的泛型参数。而getRawType是返回原始类型—申明了泛型参数的那个类，方法（也就是&lt;&gt;左边的那个部分，比如ParameterizedType类型Map<string ,="" integer="">, 那么getRawType返回的就是Map.class）。 而getOwnerType则是返回申明了这个类型的类（在内部类中就会返回父类）。下面是一段简单的测试代码。</string></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">   	public static void testParameterizedType() throws NoSuchFieldException, SecurityException&#123;</div><div class="line"></div><div class="line">	Type mapGenericType = GenericTest.class.getDeclaredField(&quot;map&quot;).getGenericType();  //ParameterizedType</div><div class="line">	if(mapGenericType instanceof ParameterizedType)&#123;</div><div class="line">		Type basicType = ((ParameterizedType) mapGenericType).getRawType();</div><div class="line"></div><div class="line"></div><div class="line">		System.out.println(&quot;basicType equals Map.class is &quot; + (basicType ==Map.class)); //返回True</div><div class="line"></div><div class="line">		System.out.println(&quot;基本类型为：&quot;+basicType);  //Map</div><div class="line">		// 获取泛型类型的泛型参数, 分别为</div><div class="line">		Type[] types = ((ParameterizedType) mapGenericType).getActualTypeArguments();</div><div class="line">		for (int i = 0; i &lt; types.length; i++) &#123;</div><div class="line">			System.out.println(&quot;第&quot;+(i+1)+&quot;个泛型类型是：&quot;+types[i]);</div><div class="line">		&#125;</div><div class="line">		//返回为 T1, class java.lang.Integer</div><div class="line"></div><div class="line">		System.out.println(((ParameterizedType) mapGenericType).getOwnerType());  //null</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="TypeVariable"><a href="#TypeVariable" class="headerlink" title="TypeVariable"></a>TypeVariable</h3><p>这个是泛型参数类型，比如Map<t1,integer>, 那么T1就是一个泛型参数，而Integer已经是放入了具体的参数了，所以不是TypeVariable。TypeVariable就是申明的泛型参数。像GenericTest的两个泛型参数T1，T2。可以理解为泛型变量，不是我们具体运行时的类型。</t1,integer></p>
-<p>TypeVariable可以获得申明了此泛型参数的类型。通过getGenericDeclaration方法。比如GenericTest<t1,t2>， 两个TypeVariable的getGenericDeclaration都会返回GenericTest.class。<br>同时也可以获得申明的上界，getBounds就可以获得泛型参数的上界列表。下面是一个TypeVariable的例子。</t1,t2></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">testTypeVariable</span><span class="params">()</span> <span class="keyword">throws</span> NoSuchFieldException, SecurityException</span>&#123;</div><div class="line"></div><div class="line">	Type mapGenericType = GenericTest.class.getDeclaredField(<span class="string">"map"</span>).getGenericType();  <span class="comment">//ParameterizedType</span></div><div class="line">	<span class="keyword">if</span>(mapGenericType <span class="keyword">instanceof</span> ParameterizedType)&#123;</div><div class="line">		<span class="comment">// 获取泛型类型的泛型参数, 分别为 T1, class java.lang.Integer</span></div><div class="line">		Type[] types = ((ParameterizedType) mapGenericType).getActualTypeArguments();</div><div class="line">		<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; types.length; i++) &#123;</div><div class="line">			<span class="keyword">if</span>( types[i] <span class="keyword">instanceof</span> TypeVariable)&#123;</div><div class="line">				<span class="comment">// T1 is TypeVariable, and Integer is not.</span></div><div class="line">				System.out.println(<span class="string">"the "</span>+(i+<span class="number">1</span>)+<span class="string">"th is TypeVariable"</span>);</div><div class="line">			&#125;<span class="keyword">else</span>&#123;</div><div class="line">				System.out.println(<span class="string">"the "</span>+(i+<span class="number">1</span>)+<span class="string">"th is not TypeVariable"</span>);</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line"></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	System.out.println(<span class="string">"GenericTest TypeVariable"</span>);</div><div class="line"></div><div class="line">	TypeVariable&lt;Class&lt;GenericTest&gt;&gt;[] typeVariables = GenericTest.class.getTypeParameters();</div><div class="line"></div><div class="line">	<span class="comment">// console print  T1, T2</span></div><div class="line">	<span class="keyword">for</span>(TypeVariable tmp : typeVariables)&#123;</div><div class="line">		System.out.println(<span class="string">""</span>+tmp);</div><div class="line">		Type[] bounds = tmp.getBounds(); <span class="comment">//return upper bounds</span></div><div class="line">		<span class="keyword">if</span>(bounds.length &gt; <span class="number">0</span>)&#123;</div><div class="line">			<span class="comment">//T2 has upper bounds which is class java.lang.Number,</span></div><div class="line">			<span class="comment">//T1's upper bounds is Object which is default.</span></div><div class="line">			System.out.println(<span class="string">"bounds[0] is: "</span>+bounds[<span class="number">0</span>]);</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		System.out.println(<span class="string">"name is: "</span>+tmp.getName());  <span class="comment">//  T1, T2</span></div><div class="line">		System.out.println(<span class="string">"GenericDeclaration is equals GenericTest.class: "</span>+ (tmp.getGenericDeclaration()==GenericTest.class)); <span class="comment">//GenericTest</span></div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="WildcardType"><a href="#WildcardType" class="headerlink" title="WildcardType"></a>WildcardType</h3><p>WildcardType是通配符类型，也就是<code>? extends Number</code>这种。可以获得上下界。具体使用如下</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">private Map&lt;? extends Number, ? super Integer&gt; map1 = new HashMap&lt;Integer,Integer&gt;();</div><div class="line">public static void testWildcardType() throws NoSuchFieldException, SecurityException&#123;</div><div class="line">	Type mapGenericType = GenericTest.class.getDeclaredField(&quot;map1&quot;).getGenericType();</div><div class="line">	TypeVariable&lt;Class&lt;GenericTest&gt;&gt;[] typeVariables = GenericTest.class.getTypeParameters();</div><div class="line">	Type[] types = ((ParameterizedType) mapGenericType).getActualTypeArguments();</div><div class="line">	for(Type t : types)&#123;</div><div class="line">		if(t instanceof WildcardType)&#123;</div><div class="line">			System.out.println(&quot;wildcardType&quot;);</div><div class="line"></div><div class="line">			if( ((WildcardType) t).getLowerBounds().length &gt; 0 )</div><div class="line">			System.out.println((((WildcardType) t).getLowerBounds())[0]); //print java.lang.Integer</div><div class="line"></div><div class="line">			if( ((WildcardType) t).getUpperBounds().length &gt; 0 )</div><div class="line">				System.out.println((((WildcardType) t).getUpperBounds())[0]); //print java.lang.Number, Object</div><div class="line"></div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="GenericArrayType"><a href="#GenericArrayType" class="headerlink" title="GenericArrayType"></a>GenericArrayType</h3><p>这个是数组泛型。比如<code>T1[] tArray</code>。这是变量的声明。比如下面这段代码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">private T1[] tArray = null;</div><div class="line">public static void testGenericArrayType() throws NoSuchFieldException, SecurityException&#123;</div><div class="line">	Type tArrayGenericType = GenericTest.class.getDeclaredField(&quot;tArray&quot;).getGenericType();</div><div class="line">	if(tArrayGenericType instanceof GenericArrayType)&#123;</div><div class="line">		System.out.println(&quot;is GenericArrayType&quot;);  //</div><div class="line">		Type t1 = ((GenericArrayType) tArrayGenericType).getGenericComponentType();</div><div class="line">		System.out.println(t1);   // print T1</div><div class="line">		if( t1 instanceof TypeVariable)&#123;</div><div class="line">			System.out.println(&quot;t1 is TypeVariable&quot;);</div><div class="line">			System.out.println(((TypeVariable) t1).getGenericDeclaration());</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="Class"><a href="#Class" class="headerlink" title="Class"></a>Class</h3><p>Class也是实现了Type接口。像前面的代码中得到了java.lang.Integer等，就是返回Class。Class也可以通过getGenericInterfaces()获取实现的接口，通过getGenericSuperclass()获取父类的类型。</p>
-<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>整个Type体系主要就是前面介绍的内容了，从Method，Field，Class反射获取Type，然后Type本身又有很多子类型，标明具体的泛型类型。这个是我测试的<a href="https://gist.github.com/xxxzhi/18ed5fc3833dceb678ef" target="_blank" rel="external">代码源码</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/10/21/java-f-bounded/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1131,6 +982,154 @@ HttpbinService httpbinService = retrofit.create(HttpbinService.class);
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/09/10/jvm-memory-manager/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/09/10/jvm-memory-manager/" itemprop="url">JVM内存管理</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-09-10T00:00:00+08:00">
+                2015-09-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><img src="http://xxxzhi.github.io/images/beautiful4.jpg" alt="图片"></p>
+<h2 id="内存区域"><a href="#内存区域" class="headerlink" title="内存区域"></a>内存区域</h2><p>Java的内存区域主要包括虚拟机栈，本地方法栈，程序计数器，堆，方法区。</p>
+<p><strong><em>虚拟机栈</em></strong>是对应于每个线程运行时候的东西，JVM会给每个线程分配一个栈，线程运行就是执行栈里面的东西。这个栈又包含了帧，帧对应着线程函数。栈里面只能够出帧和入帧，对应着每个函数的运行和运行完成。</p>
+<p><strong><em>本地方法栈</em></strong>是每个线程native代码对应的部分。与虚拟机栈很相似，但是本地方法栈执行的是Java Native方法。</p>
+<p><strong><em>程序计数器</em></strong>可以看作是当前线程执行字节码的行号指示器。字节码解释器可以通过改变程序计数器的值来选取下一条需要执行的指令。分支，循环，跳转都需要这个计数器来实现。</p>
+<p><strong><em>JAVA堆</em></strong>是所有线程共享的，每次new的时候，JVM就会在Java堆里面划一块区域。平时的内存溢出也基本都是这块区域超出了。</p>
+<p><strong><em>JAVA方法区</em></strong>是存储着已经加载的类，常量，静态变量等数据。方法区，也常被称作永久代，方法区很少进行垃圾回收，回收也非常严苛。如果这个区域出现异常，则一般会提示PermGen space。</p>
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><p>Java中有四种引用，强引用，软引用，弱引用，虚引用。JVM对每种类型的回收是不一致的。</p>
+<p><strong>强引用</strong>是Java中最常见的，一般我们使用的<code>Object object = new Object</code>就是强引用。一个对象只要存在强引用，对象就不会被回收，如果内存不够，就抛出OutOfMemory异常。</p>
+<p><strong>软引用</strong>是如果一个对象只有软引用，那么在内存足够的时候对象不会回收该对象，如果内存不够的时候对象就会被回收。软引用适合作高速缓存。</p>
+<p>软引用可以和引用队列一起使用，当引用对象被回收的时候，会被虚拟机加入到引用队列里面去。</p>
+<pre><code>SoftReference&lt;Object&gt; softObject = new SoftReference(new Object(),new ReferenceQueue&lt;Object&gt;())
+</code></pre><p><strong>弱引用</strong>是一个对象如果只有弱引用，那么对象在下次垃圾回收的时候，不管内存足不足够都会被回收。它比软引用的周期更短，不过垃圾回收是一个优先级非常低的线程，对象实际上被回收也不会那么快。它也可以跟一个引用队列一起使用。</p>
+<p><strong>虚引用</strong>是一个更加弱小的引用，只有虚引用的对象不知道对象什么时候会被回收。它主要用来跟踪对象被垃圾回收的活动。它一定要跟一个引用队列一起使用。</p>
+<h2 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h2><p>Java会有一个单独垃圾回收进程，对虚拟机在程序新建的但已经没有用的对象进行回收。对于如何判断对象是否还在使用，这里面有两种常见的方式是引用计数法跟可达性分析法。<strong>引用计数法</strong>通过给每个对象的引用进行计数，这种方式很简单，并且效率高。但是在解决循环引用的时候效果并不好。而主流的编程语言都是采用<strong>可达性分析法</strong>来进行对象是否还有用的判断的，可达性分析法通过一系列的“GC ROOT”对象，通过其引用的对象以及这些对象的引用不断地循环扩展，构成一颗引用树，那些没有在这颗树上的对象就是没有用的，可以被回收的对象了。</p>
+<p>垃圾收集算法有很多，像标记清除算法，复制算法，标记整理算法，分代收集算法等等。</p>
+<h2 id="内存分配策略"><a href="#内存分配策略" class="headerlink" title="内存分配策略"></a>内存分配策略</h2><p>JVM在内存分配的时候遵循着一些规则：</p>
+<ol>
+<li><p>对象优先分配在Eden区</p>
+</li>
+<li><p>大对象直接分配在老年代，老年代的回收是非常少的，老年代的回收是一次Full GC。</p>
+</li>
+<li><p>长期存活的对象进入老年代</p>
+</li>
+<li><p>动态对对象年龄的判断，如果Eden区有相同年龄的对象内存之和超过新生代空间一半，则将年龄超过这些年龄相同对象的对象都移到老年区</p>
+</li>
+<li><p>空间分配担保，在进行minor GC前，虚拟机会先检查老年代最大可用的连续空间是否大于新生代所有对象的总空间，如果大于则直接GC，如果不大于，则要根据之前新生代到老年代的对象的平均大小来判断，如果老年代连续可用空间比平均大小大，则继续minor GC，如果不大，则进行一次Full GC。<br>内存代，新生代，老年代，永久代</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/09/10/jvm-class-format/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1473,154 +1472,6 @@ Accept:*/*
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/09/10/jvm-memory-manager/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2015/09/10/jvm-memory-manager/" itemprop="url">JVM内存管理</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-09-10T00:00:00+08:00">
-                2015-09-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p><img src="http://xxxzhi.github.io/images/beautiful4.jpg" alt="图片"></p>
-<h2 id="内存区域"><a href="#内存区域" class="headerlink" title="内存区域"></a>内存区域</h2><p>Java的内存区域主要包括虚拟机栈，本地方法栈，程序计数器，堆，方法区。</p>
-<p><strong><em>虚拟机栈</em></strong>是对应于每个线程运行时候的东西，JVM会给每个线程分配一个栈，线程运行就是执行栈里面的东西。这个栈又包含了帧，帧对应着线程函数。栈里面只能够出帧和入帧，对应着每个函数的运行和运行完成。</p>
-<p><strong><em>本地方法栈</em></strong>是每个线程native代码对应的部分。与虚拟机栈很相似，但是本地方法栈执行的是Java Native方法。</p>
-<p><strong><em>程序计数器</em></strong>可以看作是当前线程执行字节码的行号指示器。字节码解释器可以通过改变程序计数器的值来选取下一条需要执行的指令。分支，循环，跳转都需要这个计数器来实现。</p>
-<p><strong><em>JAVA堆</em></strong>是所有线程共享的，每次new的时候，JVM就会在Java堆里面划一块区域。平时的内存溢出也基本都是这块区域超出了。</p>
-<p><strong><em>JAVA方法区</em></strong>是存储着已经加载的类，常量，静态变量等数据。方法区，也常被称作永久代，方法区很少进行垃圾回收，回收也非常严苛。如果这个区域出现异常，则一般会提示PermGen space。</p>
-<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><p>Java中有四种引用，强引用，软引用，弱引用，虚引用。JVM对每种类型的回收是不一致的。</p>
-<p><strong>强引用</strong>是Java中最常见的，一般我们使用的<code>Object object = new Object</code>就是强引用。一个对象只要存在强引用，对象就不会被回收，如果内存不够，就抛出OutOfMemory异常。</p>
-<p><strong>软引用</strong>是如果一个对象只有软引用，那么在内存足够的时候对象不会回收该对象，如果内存不够的时候对象就会被回收。软引用适合作高速缓存。</p>
-<p>软引用可以和引用队列一起使用，当引用对象被回收的时候，会被虚拟机加入到引用队列里面去。</p>
-<pre><code>SoftReference&lt;Object&gt; softObject = new SoftReference(new Object(),new ReferenceQueue&lt;Object&gt;())
-</code></pre><p><strong>弱引用</strong>是一个对象如果只有弱引用，那么对象在下次垃圾回收的时候，不管内存足不足够都会被回收。它比软引用的周期更短，不过垃圾回收是一个优先级非常低的线程，对象实际上被回收也不会那么快。它也可以跟一个引用队列一起使用。</p>
-<p><strong>虚引用</strong>是一个更加弱小的引用，只有虚引用的对象不知道对象什么时候会被回收。它主要用来跟踪对象被垃圾回收的活动。它一定要跟一个引用队列一起使用。</p>
-<h2 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h2><p>Java会有一个单独垃圾回收进程，对虚拟机在程序新建的但已经没有用的对象进行回收。对于如何判断对象是否还在使用，这里面有两种常见的方式是引用计数法跟可达性分析法。<strong>引用计数法</strong>通过给每个对象的引用进行计数，这种方式很简单，并且效率高。但是在解决循环引用的时候效果并不好。而主流的编程语言都是采用<strong>可达性分析法</strong>来进行对象是否还有用的判断的，可达性分析法通过一系列的“GC ROOT”对象，通过其引用的对象以及这些对象的引用不断地循环扩展，构成一颗引用树，那些没有在这颗树上的对象就是没有用的，可以被回收的对象了。</p>
-<p>垃圾收集算法有很多，像标记清除算法，复制算法，标记整理算法，分代收集算法等等。</p>
-<h2 id="内存分配策略"><a href="#内存分配策略" class="headerlink" title="内存分配策略"></a>内存分配策略</h2><p>JVM在内存分配的时候遵循着一些规则：</p>
-<ol>
-<li><p>对象优先分配在Eden区</p>
-</li>
-<li><p>大对象直接分配在老年代，老年代的回收是非常少的，老年代的回收是一次Full GC。</p>
-</li>
-<li><p>长期存活的对象进入老年代</p>
-</li>
-<li><p>动态对对象年龄的判断，如果Eden区有相同年龄的对象内存之和超过新生代空间一半，则将年龄超过这些年龄相同对象的对象都移到老年区</p>
-</li>
-<li><p>空间分配担保，在进行minor GC前，虚拟机会先检查老年代最大可用的连续空间是否大于新生代所有对象的总空间，如果大于则直接GC，如果不大于，则要根据之前新生代到老年代的对象的平均大小来判断，如果老年代连续可用空间比平均大小大，则继续minor GC，如果不大，则进行一次Full GC。<br>内存代，新生代，老年代，永久代</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/06/21/android-childautomovi-layout/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1912,6 +1763,160 @@ tagRandomView.setAdapter(adapter, new BubbleLineUpMoving());
 </code></pre><p>这样程序就不会长时间卡在那里。甚至于去掉p。waitFor程序也是OK的。因为程序结束后，Stream就被close掉了。网上很多人是遇到了因为exec执行的程序出现了错误，结果Error信息占满了缓冲区，导致程序被挂起。</p>
 <h2 id="原因探究"><a href="#原因探究" class="headerlink" title="原因探究"></a>原因探究</h2><p>从网上看的那些信息只能让我猜测可能是因为打印信息太多，没有及时读出，导致程序卡住。但是我心里还是有疑问，为什么一台机器ok，另外一台机器会卡住，过很长时间才返回呢？这里面具体的细节方面的原因我觉得我还是没有找对。其实我python程序打印的东西也不多的。</p>
 <p>另外也有一个可能是python程序执行完后，很长时间都没有完全返回。这也是一个猜测的原因。<strong>虽然我按照网上的方式暂时解决了问题，但这些原因其实我觉得都不够充分，希望有人能够给出正确的解释</strong>。基础真的要牢靠。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/04/28/android-pageradapter-notifydatasetchanged/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2015/04/28/android-pageradapter-notifydatasetchanged/" itemprop="url">Android notifyDatasetChanged</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-04-28T00:00:00+08:00">
+                2015-04-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <div align="center"><img src="http://i1383.photobucket.com/albums/ah295/houzhi/20130519041943_18280_zpspnyvmavc.jpg" width="640"></div>
+
+
+<h2 id="forget-to-call-notifyDatasetChanged-错误"><a href="#forget-to-call-notifyDatasetChanged-错误" class="headerlink" title="forget to call notifyDatasetChanged 错误"></a>forget to call notifyDatasetChanged 错误</h2><p>这几天一直在完善之前自己的写的Android应用。想用ViewPager让之前界面能够滑动阅读。但是滑动过程中，经常会莫名其妙地遇到一个问题。莫名其妙地提示ViewPager expected 10 counts，but found 20.  forget to call notifyDatasetChanged. 意思很明显，就是ViewPager的数据集改变了，但是我却忘了去通过notifyDatasetChanged去通知PagerAdapter数据已经更新了。但是我其实在那个页面压根没有去更新数据。不过根据提示显然是因为哪个地方改变了数据的数量。还好我动态更新数据的地方不多。检查一下代码，根据自己的思路，立刻发现了问题。我会在已经载入当前列表的时候，去服务器取下一个列表。这样在我取完下一个列表的时候，数据就变了。然后就出现那个问题了。</p>
+<p>虽然没怎么浪费时间就解决了问题，但是在面对多个线程数据共享的时候确实得增加一些额外的考虑。PagerAdapter的数据如果改变，是需要调用notifyDatasetChanged方法的。多线程的共享需要考虑同步的问题，这个同步不仅仅是一个synchronize就能够避免的，每个线程都需要去预防共享的数据被另外一个线程更改了。</p>
+<h2 id="ViewPager与Fragment"><a href="#ViewPager与Fragment" class="headerlink" title="ViewPager与Fragment"></a>ViewPager与Fragment</h2><p>我在使用ViewPager的时候，使用了FragmentStatePagerAdapter作为它的Adapter，因为会有很多Fragment，如何从ViewPager控制它的Fragment就成了一个问题。</p>
+<p>当然，直接保存ViewPager的所有Fragment似乎就能够控制了，但是这实在是不科学，保存起来太耗空间。而实际上ViewPager每次只有几个View保存着。当前显示的View以及前后几个View，在这之外的View都会被destory掉。这样能够很好地控制占用的内存。</p>
+<p>但是幸运地是FragmentActivity的FragmentManager提供了一个getFragments的方法，该方法能够获取当前所有的Fragment。这样问题就解决了。获取Activity中所有的Fragment，然后判断是不是FragmentStatePagerAdapter的Fragment。这样ViewPager就能够直接控制它的Fragment Item了。</p>
+<p>对于FragmentPagerAdapter与FragmentStatePagerAdapter的区别，FragmentPagerAdapter会对每一个Fragment进行缓存，而FragmentStatePagerAdapter不会。两个的使用方法是一样的。</p>
+<h2 id="notifyDatasetChanged做了什么工作？"><a href="#notifyDatasetChanged做了什么工作？" class="headerlink" title="notifyDatasetChanged做了什么工作？"></a>notifyDatasetChanged做了什么工作？</h2><p>每个Adapter都会有<code>private DataSetObservable mObservable = new DataSetObservable();</code> 一个DataSetObservable观察者。这个观察者可以注册<code>registerDataSetObserver</code>。而notifyDatasetChanged函数做的就是通知注册这，我的数据已经改变了。</p>
+<p>这样就给了ViewPager监听Adapter数据集变化的机会。在ViewPager的setAdapter中，有下面这段代码:</p>
+<pre><code>431        if (mAdapter != null) {
+432            if (mObserver == null) {
+433                mObserver = new PagerObserver();
+434            }
+435            mAdapter.registerDataSetObserver(mObserver);
+436            mPopulatePending = false;
+437            final boolean wasFirstLayout = mFirstLayout;
+438            mFirstLayout = true;
+439            mExpectedAdapterCount = mAdapter.getCount();
+440            if (mRestoredCurItem &gt;= 0) {
+441                mAdapter.restoreState(mRestoredAdapterState, mRestoredClassLoader);
+442                setCurrentItemInternal(mRestoredCurItem, false, true);
+443                mRestoredCurItem = -1;
+444                mRestoredAdapterState = null;
+445                mRestoredClassLoader = null;
+446            } else if (!wasFirstLayout) {
+447                populate();
+448            } else {
+449                requestLayout();
+450            }
+451        }
+</code></pre><p>在上面的代码中，注册了数据集变化的观察者。而notifyDatasetChanged就是通知观察者。</p>
+<hr>
+<p>探究</p>
 
           
         

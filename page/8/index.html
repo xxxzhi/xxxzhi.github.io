@@ -228,7 +228,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2013/12/05/pragmatic-unit-testing-in-java-with-junit/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2013/12/01/repair-ubuntu/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="John Doe">
@@ -247,7 +247,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2013/12/05/pragmatic-unit-testing-in-java-with-junit/" itemprop="url">单元测试之道——基于junit的java单元测试 的读书笔记与思考</a></h1>
+                <a class="post-title-link" href="/2013/12/01/repair-ubuntu/" itemprop="url">修复ubuntu系统的思考</a></h1>
         
 
         <div class="post-meta">
@@ -259,8 +259,8 @@
               
                 <span class="post-meta-item-text">Veröffentlicht am</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2013-12-05T00:00:00+08:00">
-                2013-12-05
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2013-12-01T00:00:00+08:00">
+                2013-12-01
               </time>
             
 
@@ -282,8 +282,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
+                  <a href="/categories/思考/" itemprop="url" rel="index">
+                    <span itemprop="name">思考</span>
                   </a>
                 </span>
 
@@ -320,14 +320,16 @@
 
       
         
-          程序员三部曲
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2013/12/05/pragmatic-unit-testing-in-java-with-junit/">
-              Weiterlesen &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
+          
+            <h3 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h3><p>因为要使用一下android 的jni 来实践一下机器学习上面的一些算法。所以想要用回ubuntu 因为之前整黑苹果，把ubuntu的引导整没了。不过这件事，让我学到很多东西。实践了一些课堂上的东东。以及另外一点，打破砂锅问到底。</p>
+<p>记得那个时候装黑苹果的时候，整的我是可谓欲生欲死了。天天整那个东东，MBR改了几次，变色龙装了几次，黑苹果装了又删掉，尼玛驱动就是不成功。明明一模一样的机器，网上那人就搞定了，我就是不行，一装显卡驱动，电脑重新启动就会黑掉。。。后面还改了dsdt最后都是不行…总之最后就是没成功。不过体会到了打破沙锅问到底的好处，学了很多电脑的东西，也更深地体会到了mbr了。其实每次装个系统，可能就是改了引导，然后就是装系统那个盘了，其他的没啥关系的，所以现在即使ubuntu整没了，同样可以修复回去。改一下MBR引导。系统启动就是这样的，显示MBR，然后再找到各个系统的引导。打破砂锅问到底是好的，特别是在打破砂锅的过程中，学到了东西，然后又从汲取新的知识上获得动力。然后继续，良性循环。即使最后没能问到什么。过程中学到的东西是远远超出了那种价值了。</p>
+<p>特别是遇到让你crazy的事情，想想都特别美妙</p>
+<h3 id="操作"><a href="#操作" class="headerlink" title="操作"></a>操作</h3><p>其实做起来就是网上那一大堆的方式了，so easy。 用光盘进入ubuntu系统。然后在ubuntu下面将系统主引导修改。让ubuntu的那个引导成为主引导。相关操作如下（我也是参考了在网上找的那个）：</p>
+<p><a href="http://blog.csdn.net/kevin6216/article/details/7764292" target="_blank" rel="external">http://blog.csdn.net/kevin6216/article/details/7764292</a></p>
+<p>so,其实多思考下，maybe 不在ubuntu下面整也是能够弄好的，不过估计就比较麻烦了。那些代码估计不会是一般的多。其实MBR也就是一堆代码而已。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>多思考，多思考，多思考。</p>
+
+          
         
       
     </div>
