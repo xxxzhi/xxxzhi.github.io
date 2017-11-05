@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="android,socket," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="android socket 通信">
+<meta name="keywords" content="android,socket">
+<meta property="og:type" content="article">
+<meta property="og:title" content="android socket communication">
+<meta property="og:url" content="http://yoursite.com/2014/05/09/android-socket-communication/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="android socket 通信">
+<meta property="og:image" content="http://yoursite.com/images/android-socket.jpg">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="android socket communication">
+<meta name="twitter:description" content="android socket 通信">
+<meta name="twitter:image" content="http://yoursite.com/images/android-socket.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/05/09/android-socket-communication/"/>
+
+
+
+
+
+  <title>android socket communication | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/05/09/android-socket-communication/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">android socket communication</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-05-09T00:00:00+08:00">
+                2014-05-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">in</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android/" itemprop="url" rel="index">
+                    <span itemprop="name">android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  android socket 通信
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h3><p>最近一直在弄一些Android跟socket相关的东西，打算好好总结一下Android socket的使用。其实Android是将进程的概念给弱化了的，但是进程还是存在的，基本上一般的app，如果你没有特殊处理的话，一个app就是一个进程。我们平时开发App的时候，更多的是基于Android基本组件概念的，也就是说Android四大组件 Activity，Service，BroadCast receiver，Content provider。但是如果需要在进程间通信，socket 是一个很不错的选择。当然，上一篇博客也讲到过管道。管道也是可以实现进程间通信的。下面主要从NDK以及java层对Android socket 相关的一些东西进行总结介绍。</p>
+<p>我们在其他地方使用socket 一般是一个地址，一个端口。但是在Android中，建立socket 是通过一个叫做socketName 的东西。客户端和服务器端使用同一个socketName就可以建立连接。服务器端建一个指定socketName的socketserver，客户端连接到指定socketName的Socket服务器。下面介绍具体的方式。</p>
+<h3 id="NDK-层"><a href="#NDK-层" class="headerlink" title="NDK 层"></a>NDK 层</h3><p>android jni socket 其实就是linux socket。本身android就是基于linux 内核的。所以linux那一套东西，在android上面基本上是适用的，当然也有一些不同。</p>
+<h4 id="Socket-Server"><a href="#Socket-Server" class="headerlink" title="Socket Server"></a>Socket Server</h4><p>首先描述一下整个过程。先通过函数android_get_socket(SOCKET_NAME)来获取一个监听号。然后使用得到的监听号，以及设置的最大请求数，监听这个监听号。最后调用accept 函数等待请求。接收到数据方面的东西其实跟linux是一样的。下面看从网友提供的代码简化的具体的代码</p>
+<pre><code>#define SOCKET_NAME &quot;socketnamexxx&quot;
+
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;errno.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;netinet/in.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;sys/wait.h&gt;
+#include &lt;sys/un.h&gt;
+#include &lt;cutils/sockets.h&gt;
+#include &lt;utils/Log.h&gt;
+#include &lt;android/log.h&gt;
+
+
+int main(){
+    char log[200];
+
+    int connect_number = 6;
+    int fdListen = -1, new_fd = -1;
+    int ret;
+    struct sockaddr_un peeraddr;
+    socklen_t socklen = sizeof (peeraddr);
+    int numbytes ;
+    char buff[256];
+    //这一步很关键，就是获取init.rc中配置的名为 &quot;htfsk&quot; 的socket
+    //fdListen = android_get_control_socket(SOCKET_NAME);
+    //上面这个api 可能在高版本的ndk中已经不存在了。
+    fdListen = socket(AF_LOCAL, SOCK_STREAM, PF_UNIX);
+    if(fdListen &lt; 0)
+        return (false);
+
+    // set socket is reusable
+    int option = true;
+    if(setsockopt(fdListen, SOL_SOCKET, SO_REUSEADDR, (char *)&amp;option, sizeof(option)) &lt; 0)
+    {
+        //close(fdListen);
+        return (false);
+    }
+
+    if(bind(fdListen, (const struct sockaddr*)&amp; peeraddr, socklen) &lt; 0)
+    {
+        close(fdListen);
+        return (false);
+    }
+
+
+
+    if (fdListen &lt; 0) {
+        sprintf(log,&quot;Failed to get socket &apos;&quot; SOCKET_NAME &quot;&apos; errno:%d&quot;, errno);
+        __android_log_write(ANDROID_LOG_DEBUG,&quot;FTM_JNI&quot;,log);
+        exit(-1);
+    }
+    //开始监听
+    ret = listen(fdListen, connect_number);    
+
+
+    if (ret &lt; 0) {  //小于0 表示监听失
+        sprintf(log,&quot;Listen result %d&quot;,ret);
+            __android_log_write(ANDROID_LOG_DEBUG,&quot;FTM_JNI&quot;,log);
+        exit(-1);
+    }
+    //等待Socket客户端发启连接请求
+    new_fd = accept(fdListen, (struct sockaddr *) &amp;peeraddr, &amp;socklen);
+    sprintf(log,&quot;Accept_fd %d&quot;,new_fd);
+    __android_log_write(ANDROID_LOG_DEBUG,&quot;FTM_JNI&quot;,log);
+    if (new_fd &lt; 0 ) {
+        sprintf(log,&quot;%d&quot;,errno);
+        __android_log_write(ANDROID_LOG_DEBUG,&quot;FTM_JNI&quot;,log);
+        perror(&quot;accept error&quot;);
+        exit(-1);
+    }
+
+    while(1){
+        //循环等待Socket客户端发来消息
+        __android_log_write(ANDROID_LOG_DEBUG,&quot;FTM_JNI&quot;,&quot;Waiting for receive&quot;);
+        if((numbytes = recv(new_fd,buff,sizeof(buff),0))==-1){
+            sprintf(log,&quot;%d&quot;,errno);
+            __android_log_write(ANDROID_LOG_DEBUG,&quot;FTM_JNI&quot;,log);
+            perror(&quot;recv&quot;);
+            continue;
+        }
+        //发送消息回执给Socket客户端
+        if(send(new_fd,buff,strlen(buff),0)==-1)
+        {
+            perror(&quot;send&quot;);
+            close(new_fd);
+            exit(0);
+        }        
+    }
+
+    close(new_fd);
+    close(fdListen);
+    return 0;
+}
+</code></pre><p>其实认真跟linux的函数比较一下就会发现。这个函数android_get_socket(SOCKET_NAME) 是将端口，都整合好了。通过SocketName来指定对应的位置。弱化了原本端口和地址的概念。其他的accept，接收recv 和发送 send 其实是跟linux一样的。</p>
+<h4 id="Socket-Client"><a href="#Socket-Client" class="headerlink" title="Socket Client"></a>Socket Client</h4><p>Client 也是依据SOCKET_NAME 来与对应的Server建立连接。具体的Demo程序如下：</p>
+<pre><code>char[10] socketName = &quot;socketnamexxx&quot;; //socketName  
+int clientFD = 0 ;
+socklen_t serverLen = 0;
+struct sockaddr_un serverAddr;
+memset(&amp;serverAddr, 0, sizeof(serverAddr));
+//init socket
+// check socket name to avoid overflow
+if (strlen(socketName) &gt; (int) sizeof(serverAddr.sun_path))
+    return 0;
+
+serverAddr.sun_path[0] = &apos;\0&apos;;
+strcpy(serverAddr.sun_path + 1, socketName);
+serverAddr.sun_family = AF_LOCAL;
+serverLen = 1 +  strlen(socketName) + offsetof(struct sockaddr_un, sun_path);
+
+if ((clientFD = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+    __android_log_write(ANDROID_LOG_ERROR, LOGTAG_CCLIENT,
+            &quot;create socket error&quot;);
+    return 0;
+}
+
+sockaddr pserverAddr = (sockaddr) serverAddr;
+if (connect(&amp;clientFD, &amp;pserverAddr, serverLen) == -1) {
+    //连接失败        
+    return 0;
+}
+
+char[6] data=&quot;hello&quot;;
+if (send(clientFD, data, 6, 0) == -1) {
+    __android_log_write(ANDROID_LOG_ERROR, LOGTAG_CCLIENT,
+            &quot;send message error&quot;);
+    close(clientFD);
+    return 0;
+}
+</code></pre><h3 id="Java层"><a href="#Java层" class="headerlink" title="Java层"></a>Java层</h3><p>在java层的话，其实相对来说就简单了。当然指定位置的同样是SocketName。另外两个就是LocalSocket 跟LocalServerSocket了。接着就是java 通用的输入输出流了。</p>
+<p>借用一下网友的图片来直接描述一下他们直接的关系：</p>
+<p><img src="/images/android-socket.jpg" alt="android-socket.jpg"></p>
+<p>在Client Socket 范例代码是：</p>
+<pre><code>LocalSocket socket = new LocalSocket();
+LocalSocketAddress address = new LocalSocketAddress(SocketName,LocalSocketAddress.Namespace.RESERVED);//第二个参数是命名空间，直接用上面那个enum 选择一个就好
+socket.connect(address);
+
+
+//socket.getInputStream(); 读取
+//socket.getOutputStream(); 写入
+</code></pre><p>在Server Socket 如下：</p>
+<pre><code>LocalServerSocket server = new LocalServerSocket(SocketName);
+try{
+    LocalSocket receiver = server.accept();
+}catch(IOException e){
+    e.printStackTrace();
+}
+
+//读取与写入跟客户端类似，都是利用流来做的。
+//receiver.getInputStream(); 读取
+//receiver.getOutputStream(); 写入
+</code></pre><h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>其实Socket 连接关键还是在于地址。客户端和服务器端，其实都是指定了相同的地址。服务器端监听，客户端向该地址请求。在Android socket中，它替换了直接的地址，而是用名称来标志，这样就变得更加简单。但是万变不离其宗，概念还是依据于基本的socket的。</p>
+<p>之后再写一个demo程序。但是个人有时候觉得，demo能够让你快速了解，但是到了一定程度后，跑个程序时累赘。信手拈来才是Perfect的。</p>
+<p><a href="https://github.com/xxxzhi/AndroidSocketDemo" title="https://github.com/xxxzhi/AndroidSocketDemo" target="_blank" rel="external">https://github.com/xxxzhi/AndroidSocketDemo</a></p>
+<hr>
+<p>大四已经逐渐完了，在读研方面，曾对我有醍醐灌顶之效的一句话是：厚积薄发。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/android/" rel="tag"># android</a>
+          
+            <a href="/tags/socket/" rel="tag"># socket</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/04/17/using-fps-meter-to-obtain-fps/" rel="next" title="利用Fps meter 的pipe来获取android 的 Fps值">
+                <i class="fa fa-chevron-left"></i> 利用Fps meter 的pipe来获取android 的 Fps值
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/05/30/think-about-the-past-few-weeks/" rel="prev" title="最近几周做的东西的思考">
+                最近几周做的东西的思考 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#介绍"><span class="nav-number">1.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NDK-层"><span class="nav-number">2.</span> <span class="nav-text">NDK 层</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Socket-Server"><span class="nav-number">2.1.</span> <span class="nav-text">Socket Server</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Socket-Client"><span class="nav-number">2.2.</span> <span class="nav-text">Socket Client</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java层"><span class="nav-number">3.</span> <span class="nav-text">Java层</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

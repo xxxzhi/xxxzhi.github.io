@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="好久没有写过什么东西了。今天在调整一个Android应用的时候，让一个问题给卡了一下。出现这个问题给了我一个很大的警钟。 在Android中，如果使用ListView一类的View，里面会有Item，而Item中又会有像CheckBox，Button这种控件。如果再使用ListView的setOnItemClickListener，就会遇到一个问题。setOnItemClickListener的设">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Andrid item中有focus子View">
+<meta property="og:url" content="http://yoursite.com/2015/04/20/android-listview-item-focus/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="好久没有写过什么东西了。今天在调整一个Android应用的时候，让一个问题给卡了一下。出现这个问题给了我一个很大的警钟。 在Android中，如果使用ListView一类的View，里面会有Item，而Item中又会有像CheckBox，Button这种控件。如果再使用ListView的setOnItemClickListener，就会遇到一个问题。setOnItemClickListener的设">
+<meta property="og:image" content="http://i1383.photobucket.com/albums/ah295/houzhi/20130519042401_30662_zpstnqugdt4.jpg">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Andrid item中有focus子View">
+<meta name="twitter:description" content="好久没有写过什么东西了。今天在调整一个Android应用的时候，让一个问题给卡了一下。出现这个问题给了我一个很大的警钟。 在Android中，如果使用ListView一类的View，里面会有Item，而Item中又会有像CheckBox，Button这种控件。如果再使用ListView的setOnItemClickListener，就会遇到一个问题。setOnItemClickListener的设">
+<meta name="twitter:image" content="http://i1383.photobucket.com/albums/ah295/houzhi/20130519042401_30662_zpstnqugdt4.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/04/20/android-listview-item-focus/"/>
+
+
+
+
+
+  <title>Andrid item中有focus子View | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/04/20/android-listview-item-focus/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Andrid item中有focus子View</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-04-20T00:00:00+08:00">
+                2015-04-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><div align="center"><img src="http://i1383.photobucket.com/albums/ah295/houzhi/20130519042401_30662_zpstnqugdt4.jpg" width="640"></div><br>好久没有写过什么东西了。今天在调整一个Android应用的时候，让一个问题给卡了一下。出现这个问题给了我一个很大的警钟。</p>
+<p>在Android中，如果使用ListView一类的View，里面会有Item，而Item中又会有像CheckBox，Button这种控件。如果再使用ListView的setOnItemClickListener，就会遇到一个问题。setOnItemClickListener的设置无效。点击Item，OnItemClickListener不会响应。这个原因是CheckBox占用了focus，导致ListView没法占用focus。<strong>解决方法</strong>是将CheckBox的focusable设置为false，或者在Item的顶级VIewGroup设置<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">		beforeDescendants：viewgroup会优先其子类控件而获取到焦点</div><div class="line">		afterDescendants：viewgroup只有当其子类控件不需要获取焦点时才获取焦点</div><div class="line">		blocksDescendants：viewgroup会覆盖子类控件而直接获得焦点</div><div class="line"></div><div class="line"></div><div class="line">## descendantFocusablility取值</div><div class="line">网上很多人都介绍这些，但是三个值设置的具体效果和情况就很少人介绍了。</div><div class="line"></div><div class="line">### afterDescendants</div><div class="line">在Android中默认值是为afterDescendans，子类控件会占用焦点。英文原文为   只有当其子类控件不需要获取焦点时才获取焦点，也就是说如果他有一个子类控件需要获取焦点（这个获取焦点应该理解为想要获取，即focusable=true，不管子类控件位置如何，无论点击在哪里，子类控件都是想要获取focus的），那么它就不能获取，即使没有点击在子类控件上面。</div><div class="line"></div><div class="line">### beforeDescendants</div><div class="line">在这个设置值的情况下，viewGroup会优先获取，优先应该理解成如果子控件想要，并且也确实能够得到focus（比如说点击正好点到子控件上面），那还是给子控件获取到，如果没能获取到，ViewGroup将会得到。这种是正常情况下，我们最希望看到的。点击到背景时，还是父控件响应。</div><div class="line"></div><div class="line">### blocksDescendants</div><div class="line">这个是不让子控件获取到。完全阻塞，不把focus（点击事件）从父控件往下传了。只有父控件会响应。类似于设置子控件设置```focusable=false</div></pre></td></tr></table></figure></p>
+<h2 id="一些想法"><a href="#一些想法" class="headerlink" title="一些想法"></a>一些想法</h2><p>本来我之前就遇到过这个问题，但是这次再遇到，同样是被卡住了。说明之前没有总结好，理解透。我在技能方面已经是达到一定得高度了，如何能够更近一步，我觉得最主要的方式是总结，思考。孰能生巧是一种能力。对于一样东西够熟悉，能够让你快速地依据它解决问题。这也是我现在为什么能够在写Android应用上面那么快速的原因。但是有时候遇到问题，直接简单地通过搜索引擎去找到答案，并且不加思考地使用了。这个毛病非常严重。这样的做法连<strong><em>知其然</em></strong>都没能做到，如何更近一步做到<strong><em>知其所以然</em></strong>呢？</p>
+<p>如果没有足够的时间去探究，那正确地做法是争取更多地时间，因为现在花费时间是在为以后节省更多地时间。</p>
+<p><strong><em>知其然</em></strong>要对遇到的每一个问题，尽量了解，避免下次又出现同样地问题。<strong><em>知其然</em></strong>对遇到的问题，要有探究精神，要了解全面。</p>
+<h2 id="为什么只有ListView一系列的才会出现Focus问题。"><a href="#为什么只有ListView一系列的才会出现Focus问题。" class="headerlink" title="为什么只有ListView一系列的才会出现Focus问题。"></a>为什么只有ListView一系列的才会出现Focus问题。</h2><p>在网上找资料的时候有个人问了这个一个问题，为什么只有ListView会有这样的问题，而普通的viewgroup并不会出现说没有设置Descendantsfocus，导致父ViewGroup没有响应。</p>
+<p>想了半天，其实也没有什么找到验证的方式。我本来想有可能是ListView Descendantsfocusability默认值跟普通ViewGroup不同，但是我区看了一下ListView的属性设置，ListView并没有对Descendantsfocusability做个特殊的设值。在看源码的时候，看到有一些计算focus的代码，我又在想，会不会是因为listview因为滚动，导致计算focus的时候，把focus全部给了子控件。</p>
+<hr>
+<p>多思考，稳重，淡定，成熟。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/02/static-link/" rel="next" title="静态链接">
+                <i class="fa fa-chevron-left"></i> 静态链接
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/28/android-pageradapter-notifydatasetchanged/" rel="prev" title="Android notifyDatasetChanged">
+                Android notifyDatasetChanged <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一些想法"><span class="nav-number">1.</span> <span class="nav-text">一些想法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么只有ListView一系列的才会出现Focus问题。"><span class="nav-number">2.</span> <span class="nav-text">为什么只有ListView一系列的才会出现Focus问题。</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

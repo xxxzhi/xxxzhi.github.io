@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="应用," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="一个简单的cocos2d-x游戏，游戏游戏，放松生活。下载地址 上个月开始一段时间，乘着刚辞掉实习，偷闲了一段时间，利用之前学的cocos2d-x做了一个小游戏。虽然是一个很小的游戏，但是我考虑了挺多东西的，所谓麻雀虽小，五脏俱全，游戏虽小，细细琢磨。 哈哈，刚又找了场比赛看，感觉看比赛能够集中我的注意力。 界面其实我始终觉得，做这些手机应用，界面一定要漂亮，漂亮这个词可能用的不是很对，准确来说">
+<meta name="keywords" content="应用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="少侠请小心介绍">
+<meta property="og:url" content="http://yoursite.com/2014/08/12/introduce-Astro-Boy/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一个简单的cocos2d-x游戏，游戏游戏，放松生活。下载地址 上个月开始一段时间，乘着刚辞掉实习，偷闲了一段时间，利用之前学的cocos2d-x做了一个小游戏。虽然是一个很小的游戏，但是我考虑了挺多东西的，所谓麻雀虽小，五脏俱全，游戏虽小，细细琢磨。 哈哈，刚又找了场比赛看，感觉看比赛能够集中我的注意力。 界面其实我始终觉得，做这些手机应用，界面一定要漂亮，漂亮这个词可能用的不是很对，准确来说">
+<meta property="og:image" content="http://yoursite.com/images/astro-boy-1.jpg">
+<meta property="og:image" content="http://yoursite.com/images/astro-boy-2.jpg">
+<meta property="og:image" content="http://yoursite.com/images/astro-boy-3.jpg">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="少侠请小心介绍">
+<meta name="twitter:description" content="一个简单的cocos2d-x游戏，游戏游戏，放松生活。下载地址 上个月开始一段时间，乘着刚辞掉实习，偷闲了一段时间，利用之前学的cocos2d-x做了一个小游戏。虽然是一个很小的游戏，但是我考虑了挺多东西的，所谓麻雀虽小，五脏俱全，游戏虽小，细细琢磨。 哈哈，刚又找了场比赛看，感觉看比赛能够集中我的注意力。 界面其实我始终觉得，做这些手机应用，界面一定要漂亮，漂亮这个词可能用的不是很对，准确来说">
+<meta name="twitter:image" content="http://yoursite.com/images/astro-boy-1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/08/12/introduce-Astro-Boy/"/>
+
+
+
+
+
+  <title>少侠请小心介绍 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/08/12/introduce-Astro-Boy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">少侠请小心介绍</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-08-12T00:00:00+08:00">
+                2014-08-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p>一个简单的cocos2d-x游戏，游戏游戏，放松生活。<br><a href="http://www.wandoujia.com/apps/com.houzhi.liftjumper" title="下载地址" target="_blank" rel="external">下载地址</a></p>
+<p>上个月开始一段时间，乘着刚辞掉实习，偷闲了一段时间，利用之前学的cocos2d-x做了一个小游戏。虽然是一个很小的游戏，但是我考虑了挺多东西的，所谓麻雀虽小，五脏俱全，游戏虽小，细细琢磨。</p>
+<p>哈哈，刚又找了场比赛看，感觉看比赛能够集中我的注意力。</p>
+<h5 id="界面"><a href="#界面" class="headerlink" title="界面"></a>界面</h5><p>其实我始终觉得，做这些手机应用，界面一定要漂亮，漂亮这个词可能用的不是很对，准确来说应该是界面一定要人能够接受，界面要舒适，不要感觉太山寨。否则一下子，用户就没了兴趣了。如果能够把界面做的有意思一点，那就更好了，我个人觉得如果面向的用户不是很广泛，如果能够针对他们做一些特殊的，受他们这类人喜欢的界面，那就太好了。因为受众有特点的，你做出来的东西就方便有特点。</p>
+<p>对于我来说，因为我做的东西，其实我自己本身有个定位，本来不太可能有很广泛的用户，因为缺乏强大的推广。我只能依靠用户的喜欢，来靠用户之间来推广。所以一定要有特色，有舒适，要独特的专业。不管怎么说，界面首先得舒适合理，对于我这种个人开发使用的，我觉得还应该增加点特色。下面就是我应用的截图</p>
+<center> <img src="/images/astro-boy-1.jpg" alt="images-1"> </center>
+
+<center> <img src="/images/astro-boy-2.jpg" alt="images-2"> </center>
+
+<center> <img src="/images/astro-boy-3.jpg" alt="images-3"> </center>
+
+<h5 id="简单化"><a href="#简单化" class="headerlink" title="简单化"></a>简单化</h5><p>说实话，我这个应用的灵感来自于Flappy Bird，但是我几乎是完全不一样了，只是有一些特点比较像。我觉得像我这种，如果将应用做的太复杂，将会非常麻烦，因为东西越多，越麻烦。凑在一起很麻烦，可能会导致不搭，不美观。毕竟我不是一个做美工的，整体框架，我好把握，但是添加了太多元素后，就可能会有一些混乱了。就好像现在，我想加一个提示的，但是总觉得放在哪个地方都有一些不好。</p>
+<p>另外一个方面，我追求简单是有原因的，我觉得应该朝着一个简单的方向去做，如果一个东西使用起来很麻烦的话，那就很难一下子进入了。而且简单的东西，你要加上你自己独特的东西，就会很容易，很容易突出一些东西。</p>
+<p>最后我觉得，简单是一种美，很和谐。</p>
+<p>当然这些都不是绝对的，看具体而言。</p>
+<h5 id="个性化"><a href="#个性化" class="headerlink" title="个性化"></a>个性化</h5><p>我觉得应用应该是要代表我自己的想法的，如果我做一样东西，我要突出它的特点，个性；我应该加入自己的想法，一些独特的东西。我甚至还会加入自己的价值观之类，对生活的态度之类的。像个游戏，简单化，其实就是我对一些事情处理的态度。我喜欢将复杂的东西简单化，挑中关键点，抓要害，然后简单化。</p>
+<h5 id="虐心"><a href="#虐心" class="headerlink" title="虐心"></a>虐心</h5><p>我一直想增加它的难度，所以我让游戏变得虐心。这个地方我是偷师Flappy Bird,游戏内容简单了，在某些方面就应该有所特点，以吸引住玩家。</p>
+<hr>
+<p>夫天地者，万物之逆旅也，光阴者，百代之过客也。而浮生若梦，为欢几何。 —李白</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/应用/" rel="tag"># 应用</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/07/19/java-classload-sequnce/" rel="next" title="java类加载">
+                <i class="fa fa-chevron-left"></i> java类加载
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/09/07/summary-of-thread-safety/" rel="prev" title="线程安全总结">
+                线程安全总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#界面"><span class="nav-number">1.</span> <span class="nav-text">界面</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#简单化"><span class="nav-number">2.</span> <span class="nav-text">简单化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#个性化"><span class="nav-number">3.</span> <span class="nav-text">个性化</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#虐心"><span class="nav-number">4.</span> <span class="nav-text">虐心</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

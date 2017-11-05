@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近项目中接触到AppWidget，相对来说这部分比较简单，所以趁着空余时间详细阅读了AppWidget的源码。这篇文章主要是从源码上分析AppWidget中API类的相关原理，相关类的简单功能介绍和实现原理。关于使用，建议看指导文档。 简述AppWidget相关的API类（供我们应用开发者使用的类）主要有： AppWidgetProvider：继承这个类，来提供Appwidget。 AppWid">
+<meta name="keywords" content="Android,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AppWidget源码分析---接口类">
+<meta property="og:url" content="http://yoursite.com/2016/08/09/android-appwidget-api-source-code/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="最近项目中接触到AppWidget，相对来说这部分比较简单，所以趁着空余时间详细阅读了AppWidget的源码。这篇文章主要是从源码上分析AppWidget中API类的相关原理，相关类的简单功能介绍和实现原理。关于使用，建议看指导文档。 简述AppWidget相关的API类（供我们应用开发者使用的类）主要有： AppWidgetProvider：继承这个类，来提供Appwidget。 AppWid">
+<meta property="og:image" content="http://img.blog.csdn.net/20160809231430250">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AppWidget源码分析---接口类">
+<meta name="twitter:description" content="最近项目中接触到AppWidget，相对来说这部分比较简单，所以趁着空余时间详细阅读了AppWidget的源码。这篇文章主要是从源码上分析AppWidget中API类的相关原理，相关类的简单功能介绍和实现原理。关于使用，建议看指导文档。 简述AppWidget相关的API类（供我们应用开发者使用的类）主要有： AppWidgetProvider：继承这个类，来提供Appwidget。 AppWid">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20160809231430250">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/08/09/android-appwidget-api-source-code/"/>
+
+
+
+
+
+  <title>AppWidget源码分析---接口类 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/08/09/android-appwidget-api-source-code/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AppWidget源码分析---接口类</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-09T00:00:00+08:00">
+                2016-08-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近项目中接触到AppWidget，相对来说这部分比较简单，所以趁着空余时间详细阅读了AppWidget的源码。这篇文章主要是从源码上分析AppWidget中API类的相关原理，相关类的简单功能介绍和实现原理。关于使用，建议看<a href="https://developer.android.com/guide/topics/appwidgets/index.html" target="_blank" rel="external">指导文档</a>。</p>
+<h2 id="简述"><a href="#简述" class="headerlink" title="简述"></a>简述</h2><p>AppWidget相关的API类（供我们应用开发者使用的类）主要有：</p>
+<p>AppWidgetProvider：继承这个类，来提供Appwidget。</p>
+<p>AppWidgetManager：提供了AppWidget的管理接口，比如更新，绑定AppWidget id，根据Component获取AppWidget id等等。</p>
+<p>RemoteView：能够跨进程更新的View。</p>
+<p>AppWidgetHost：与AppWidgt 服务交互的类，获取App widget，显示出来</p>
+<p>AppwidgetHostView：实际上显示出来的View</p>
+<p>他们之间的关系简略来讲如下：</p>
+<p><img src="http://img.blog.csdn.net/20160809231430250" alt="这里写图片描述"></p>
+<p>AppWidget Service 是一些类的集合，是AppWidget的核心服务，在之后的文章会介绍，这篇就不介绍了。下面详细介绍每个类的功能以及实现原理。</p>
+<h3 id="AppWidgetProvider"><a href="#AppWidgetProvider" class="headerlink" title="AppWidgetProvider"></a>AppWidgetProvider</h3><p>这是我们在建立AppWidget的时候，需要去实现的类，它有几个重要的方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager,</div><div class="line">       int appWidgetId, Bundle newOptions) // 当Widget的布局到新的大小的时候会被调用</div><div class="line"></div><div class="line">public void onDeleted(Context context, int[] appWidgetIds) // 当某个Widget被移除的时候回调</div><div class="line"></div><div class="line">public void onDisabled(Context context) // 当最后一个Widget被移除的时候回调</div><div class="line"></div><div class="line">public void onEnabled(Context context) // 当第一个Widget被添加的时候回调</div><div class="line"></div><div class="line">public void onRestored(Context context, int[] oldWidgetIds, int[] newWidgetIds) // 当Widget从缓存的Widget恢复时</div><div class="line"></div><div class="line">public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) //当Widget需要被提供RemoteView的时候，每次添加Widget的时候会调用</div><div class="line"></div><div class="line">public void onReceive(Context context, Intent intent) // 后面介绍</div></pre></td></tr></table></figure>
+<p>这几个方法是我们在继承AppWidgetProvider的时候，可以根据自己的需要来实现的方法。注释里面是每个方法被回调的时机。</p>
+<p>实际上如果去查看AppWidgetProvider的源码，你会发现AppWidgetProvider是继承自BroadcastReceiver的，也就是说它是一种广播。所以它也有一个onReceive方法，这个方法我前面特意没有说明什么时候调用，其实就是收到广播的时候回调。看看onReceive方法的实现，你会发现前面的那几个方法都是在onReceiver中调用的，每一种方法都对应着一种广播Action:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public void onReceive(Context context, Intent intent) &#123;</div><div class="line">   // Protect against rogue update broadcasts (not really a security issue,</div><div class="line">   // just filter bad broacasts out so subclasses are less likely to crash).</div><div class="line">   String action = intent.getAction();</div><div class="line">   if (AppWidgetManager.ACTION_APPWIDGET_UPDATE.equals(action)) &#123;</div><div class="line">       Bundle extras = intent.getExtras();</div><div class="line">       if (extras != null) &#123;</div><div class="line">           int[] appWidgetIds = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);</div><div class="line">           if (appWidgetIds != null &amp;&amp; appWidgetIds.length &gt; 0) &#123;</div><div class="line">               this.onUpdate(context, AppWidgetManager.getInstance(context), appWidgetIds);</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">   &#125; else if (AppWidgetManager.ACTION_APPWIDGET_DELETED.equals(action)) &#123;</div><div class="line">       Bundle extras = intent.getExtras();</div><div class="line">       if (extras != null &amp;&amp; extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_ID)) &#123;</div><div class="line">           final int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);</div><div class="line">           this.onDeleted(context, new int[] &#123; appWidgetId &#125;);</div><div class="line">       &#125;</div><div class="line">   &#125; else if (AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED.equals(action)) &#123;</div><div class="line">       Bundle extras = intent.getExtras();</div><div class="line">       if (extras != null &amp;&amp; extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_ID)</div><div class="line">               &amp;&amp; extras.containsKey(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS)) &#123;</div><div class="line">           int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID);</div><div class="line">           Bundle widgetExtras = extras.getBundle(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS);</div><div class="line">           this.onAppWidgetOptionsChanged(context, AppWidgetManager.getInstance(context),</div><div class="line">                   appWidgetId, widgetExtras);</div><div class="line">       &#125;</div><div class="line">   &#125; else if (AppWidgetManager.ACTION_APPWIDGET_ENABLED.equals(action)) &#123;</div><div class="line">       this.onEnabled(context);</div><div class="line">   &#125; else if (AppWidgetManager.ACTION_APPWIDGET_DISABLED.equals(action)) &#123;</div><div class="line">       this.onDisabled(context);</div><div class="line">   &#125; else if (AppWidgetManager.ACTION_APPWIDGET_RESTORED.equals(action)) &#123;</div><div class="line">       Bundle extras = intent.getExtras();</div><div class="line">       if (extras != null) &#123;</div><div class="line">           int[] oldIds = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_OLD_IDS);</div><div class="line">           int[] newIds = extras.getIntArray(AppWidgetManager.EXTRA_APPWIDGET_IDS);</div><div class="line">           if (oldIds != null &amp;&amp; oldIds.length &gt; 0) &#123;</div><div class="line">               this.onRestored(context, oldIds, newIds);</div><div class="line">               this.onUpdate(context, AppWidgetManager.getInstance(context), newIds);</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>AppWidgetProvider是一个BroadcastReceiver，所以它的<code>onUpdate, onEnabled</code>等方法每次被调用前，都会调用onReceive方法。我们继承AppWidgetProvider，也可以重载onReceiver方法，修改<code>onUpdate</code>等方法被调用的时机，当然并不推荐这么做，破坏接口的语义会非常危险。另外一方面它是一个BroadcastReceiver，所以它就具备BroadcastReceiver的各种特性（需要说明的是AppWidgetProvider要在manifest文件中静态注册，因为系统在安装apk时需要知道应用有哪些方法桌面Widget），它能够注册自定义的ACTION，每次执行的时候是会创建一个新的AppWidgetProvider实例，Context不能绑定服务，执行时间不能超过10秒等等。</p>
+<p>AppWidgetProvider是一个BroadcastReceiver，明白这一点其实也就是理解AppWidget实现原理了。在onUpdate中提供了AppWidgetManager参数，这个AppWidgetMananger又是什么呢？下面来介绍一下。</p>
+<h2 id="AppWidgetManager"><a href="#AppWidgetManager" class="headerlink" title="AppWidgetManager"></a>AppWidgetManager</h2><p>名如其义，AppWidgetManager你可以理解为AppWidget的管理接口（实际上它只提供了管理AppWidget的部分接口，后面的文章会介绍真正管理AppWidget的接口，也就是AppWidget 的client）。我们可以用AppWidgetManager来更新AppWidget的内容，给AppWidget绑定id。AppWidgetManager是在实现AppWidgetProvider的时候，经常会用到的类，可以用<code>AppWidgetManager.updateAppWidget</code>来更新AppWidget。如果是有AdapterView的AppWidget，可以用<code>AppWidgetManager.notifyAppWidgetViewDataChanged</code>来通知Adapter的变化，用<code>partiallyUpdateAppWidget</code>部分更新Widget。这几个方法是经常在AppWidgetProvider的<code>onUpdate</code>方法中使用的。这几个方法的原型如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">public void notifyAppWidgetViewDataChanged(int appWidgetId, int viewId)</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">public void partiallyUpdateAppWidget(int appWidgetId, RemoteViews views)</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">public void updateAppWidget(int[] appWidgetIds, RemoteViews views)</div></pre></td></tr></table></figure>
+<p>另外可以通过<code>getAppWidgetIds</code>获取AppWidgetProvider组件对应的AppWidget的Id数组，我们经常通过这个方法获取所有的id，然后来更新所有的跟AppWidgetProvider相关的AppWidget。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">public int[] getAppWidgetIds(ComponentName provider)</div></pre></td></tr></table></figure>
+<p>另外还有<code>bindAppWidgetIdIfAllowed</code>方法和<code>getInstalledProviders</code>,这两个方法主要是在Launcher应用当中使用，分配AppWidget的id，然后用<code>bindAppWidgetIdIfAllowed</code>绑定AppWidgetProvider与id。用<code>getInstalledProviders</code>方法获取已经插入的AppWidgetProvider，可以用来供用户选择添加到桌面。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public boolean bindAppWidgetIdIfAllowed(int appWidgetId, ComponentName provider,</div><div class="line">       Bundle options)</div><div class="line"></div><div class="line">public List&lt;AppWidgetProviderInfo&gt; getInstalledProviders()</div></pre></td></tr></table></figure>
+<p>关于launcher可以参考aosp的源码:<a href="http://arnab.ch/blog/2013/08/how-to-write-custom-launcher-app-in-android/" target="_blank" rel="external">http://arnab.ch/blog/2013/08/how-to-write-custom-launcher-app-in-android/</a>。我们也可以自己开发launcher应用。</p>
+<h2 id="RemoteView"><a href="#RemoteView" class="headerlink" title="RemoteView"></a>RemoteView</h2><p>RemoteView顾名思义就是指远程View，通过本地进程修改RemoteView，能够使这些修改通过RemoteView为载体传递到远程进程。RemoteView不仅仅在AppWidget中有使用，Notification中也是使用了RemoteView。下面简单介绍一下RemoteView的实现原理。</p>
+<p>RemoteView继承自Parcelable，所以RemoteView本身就是可以跨进程传递的。RemoteView有个内部类叫做Action，它也是继承自Parcelable，对于不同的操作，RemoteView内部实现了不同的Action。</p>
+<p>比如点击事件，RemoteView内部有一个SetOnClickPendingIntent，它也是继承自Action，设置点击事件就是将点击事件保存在这里面，把点击事件作为一个Action。可以看看它的源码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">private class SetOnClickPendingIntent extends Action &#123;</div><div class="line">   public SetOnClickPendingIntent(int id, PendingIntent pendingIntent) &#123;</div><div class="line">       this.viewId = id;</div><div class="line">       this.pendingIntent = pendingIntent;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   public SetOnClickPendingIntent(Parcel parcel) &#123;</div><div class="line">       viewId = parcel.readInt();</div><div class="line"></div><div class="line">       // We check a flag to determine if the parcel contains a PendingIntent.</div><div class="line">       if (parcel.readInt() != 0) &#123;</div><div class="line">           pendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(parcel);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   public void writeToParcel(Parcel dest, int flags) &#123;</div><div class="line">       dest.writeInt(TAG);</div><div class="line">       dest.writeInt(viewId);</div><div class="line"></div><div class="line">       // We use a flag to indicate whether the parcel contains a valid object.</div><div class="line">       dest.writeInt(pendingIntent != null ? 1 : 0);</div><div class="line">       if (pendingIntent != null) &#123;</div><div class="line">           pendingIntent.writeToParcel(dest, 0 /* no flags */);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void apply(View root, ViewGroup rootParent, final OnClickHandler handler) &#123;</div><div class="line">       final View target = root.findViewById(viewId);</div><div class="line">       if (target == null) return;</div><div class="line"></div><div class="line">       // If the view is an AdapterView, setting a PendingIntent on click doesn&apos;t make much</div><div class="line">       // sense, do they mean to set a PendingIntent template for the AdapterView&apos;s children?</div><div class="line">       if (mIsWidgetCollectionChild) &#123;</div><div class="line">           Log.w(LOG_TAG, &quot;Cannot setOnClickPendingIntent for collection item &quot; +</div><div class="line">                   &quot;(id: &quot; + viewId + &quot;)&quot;);</div><div class="line">           ApplicationInfo appInfo = root.getContext().getApplicationInfo();</div><div class="line"></div><div class="line">           // We let this slide for HC and ICS so as to not break compatibility. It should have</div><div class="line">           // been disabled from the outset, but was left open by accident.</div><div class="line">           if (appInfo != null &amp;&amp;</div><div class="line">                   appInfo.targetSdkVersion &gt;= Build.VERSION_CODES.JELLY_BEAN) &#123;</div><div class="line">               return;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       // If the pendingIntent is null, we clear the onClickListener</div><div class="line">       OnClickListener listener = null;</div><div class="line">       if (pendingIntent != null) &#123;</div><div class="line">           listener = new OnClickListener() &#123;</div><div class="line">               public void onClick(View v) &#123;</div><div class="line">                   // Find target view location in screen coordinates and</div><div class="line">                   // fill into PendingIntent before sending.</div><div class="line">                   final Rect rect = getSourceBounds(v);</div><div class="line"></div><div class="line">                   final Intent intent = new Intent();</div><div class="line">                   intent.setSourceBounds(rect);</div><div class="line">                   handler.onClickHandler(v, pendingIntent, intent);</div><div class="line">               &#125;</div><div class="line">           &#125;;</div><div class="line">       &#125;</div><div class="line">       target.setOnClickListener(listener);</div><div class="line">   &#125;</div><div class="line">...</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中以Parcel为参数的构造函数相当于是从Parcel当中读取内容，而writeToParcel是将Action写入到Parcel。这两个函数是用来传递Action用的。而apply方法则是将Action解析出来，设置监听（这种监听是远程监听，在onClick方法里面发送一个PendingIntent），具体实现在RemoteView的OnClickHandler中。其他的Action也是类似的。关于Parcel实现原理可以借鉴我之前写的两篇关于Bitmap传输的文章:<a href="http://blog.csdn.net/xxxzhi/article/details/51531098" target="_blank" rel="external"> Android4.0 Bitmap Parcel传输源码分析</a>,<a href="http://blog.csdn.net/xxxzhi/article/details/51490253" target="_blank" rel="external">Android6.0 Bitmap存储以及Parcel传输源码分析</a></p>
+<p>RemoteView里面有一个mActions变量，是Action的列表。通过Parcel传递RemoteView的时候，RemoteView会将mActions里面的内容都写入到Parcel中。在readParcel的时候，使用Action的带Parcel参数的构造函数从Parcel里面读取Action，进行设置。Action其实就是一种模板方法模式。RemoteView很多设置是跟普通的View不一样的，RemoteView是一个能够跨进程设置相关内容的，如果需要设置监听函数之类的，只能设置PendingIntent。可以看看RemoteView里面的CREATOR和RemoteView对应的构造方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">/**</div><div class="line">* Parcelable.Creator that instantiates RemoteViews objects</div><div class="line">*/</div><div class="line">public static final Parcelable.Creator&lt;RemoteViews&gt; CREATOR = new Parcelable.Creator&lt;RemoteViews&gt;() &#123;</div><div class="line">   public RemoteViews createFromParcel(Parcel parcel) &#123;</div><div class="line">       return new RemoteViews(parcel);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   public RemoteViews[] newArray(int size) &#123;</div><div class="line">       return new RemoteViews[size];</div><div class="line">   &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">...</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">public RemoteViews(Parcel parcel) &#123;</div><div class="line">   this(parcel, null);</div><div class="line">&#125;</div><div class="line"></div><div class="line">private RemoteViews(Parcel parcel, BitmapCache bitmapCache) &#123;//实际上在构造函数中读取Parcel的内容，重新创建一个mActions</div><div class="line">   int mode = parcel.readInt();</div><div class="line"></div><div class="line">   // We only store a bitmap cache in the root of the RemoteViews.</div><div class="line">   if (bitmapCache == null) &#123;</div><div class="line">       mBitmapCache = new BitmapCache(parcel);</div><div class="line">   &#125; else &#123;</div><div class="line">       setBitmapCache(bitmapCache);</div><div class="line">       setNotRoot();</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   if (mode == MODE_NORMAL) &#123;</div><div class="line">       mApplication = parcel.readParcelable(null);</div><div class="line">       mLayoutId = parcel.readInt();</div><div class="line">       mIsWidgetCollectionChild = parcel.readInt() == 1;</div><div class="line"></div><div class="line">       int count = parcel.readInt();</div><div class="line">       if (count &gt; 0) &#123;</div><div class="line">           mActions = new ArrayList&lt;Action&gt;(count);</div><div class="line">           for (int i=0; i&lt;count; i++) &#123;</div><div class="line">               int tag = parcel.readInt();</div><div class="line">               switch (tag) &#123;</div><div class="line">                   case SetOnClickPendingIntent.TAG:</div><div class="line">                       mActions.add(new SetOnClickPendingIntent(parcel));</div><div class="line">                       break;</div><div class="line">                   case SetDrawableParameters.TAG:</div><div class="line">                       mActions.add(new SetDrawableParameters(parcel));</div><div class="line">                       break;</div><div class="line">                    ...</div><div class="line">                   default:</div><div class="line">                       throw new ActionException(&quot;Tag &quot; + tag + &quot; not found&quot;);</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">   &#125; else &#123;</div><div class="line">       // MODE_HAS_LANDSCAPE_AND_PORTRAIT</div><div class="line">       mLandscape = new RemoteViews(parcel, mBitmapCache);</div><div class="line">       mPortrait = new RemoteViews(parcel, mBitmapCache);</div><div class="line">       mApplication = mPortrait.mApplication;</div><div class="line">       mLayoutId = mPortrait.getLayoutId();</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   // setup the memory usage statistics</div><div class="line">   mMemoryUsageCounter = new MemoryUsageCounter();</div><div class="line">   recalculateMemoryUsage();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最后调用RemoteView的apply方法就在远程进程设置了相关内容了。我们AppWidget的远程进程是Launcher应用所在的进程。由AppWidgetHost管理这些。</p>
+<h2 id="AppWidgetHost"><a href="#AppWidgetHost" class="headerlink" title="AppWidgetHost"></a>AppWidgetHost</h2><p>这个类是Android提供的供应用与AppWidget service交互的类，我们的AppWidgetProvider提供了Widget，而AppWidgetHost则是读取Widget，将它显示出来。一般在home screen中使用，也就是我们的桌面，Launcher。与之相关的还有个AppWidgetHostView，由AppWidgetHost创建，它与AppWidgetProvider对应。可以看一下AppWidgetHost的createView方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public final AppWidgetHostView createView(Context context, int appWidgetId,</div><div class="line">       AppWidgetProviderInfo appWidget) &#123;</div><div class="line">   AppWidgetHostView view = onCreateView(context, appWidgetId, appWidget);</div><div class="line">   view.setOnClickHandler(mOnClickHandler);</div><div class="line">   view.setAppWidget(appWidgetId, appWidget);</div><div class="line">   synchronized (mViews) &#123;</div><div class="line">       mViews.put(appWidgetId, view);</div><div class="line">   &#125;</div><div class="line">   RemoteViews views;</div><div class="line">   try &#123;</div><div class="line">       views = sService.getAppWidgetViews(mContextOpPackageName, appWidgetId);</div><div class="line">   &#125; catch (RemoteException e) &#123;</div><div class="line">       throw new RuntimeException(&quot;system server dead?&quot;, e);</div><div class="line">   &#125;</div><div class="line">   view.updateAppWidget(views);</div><div class="line"></div><div class="line">   return view;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个主要是在launcher应用使用，就不详细介绍了。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>这一篇主要是介绍AppWidget相关的一些类，分析里面的源码功能，以及实现方式。通过深入了解它的实现方式才能够更好地使用它，分析遇到的问题。下一篇将从源码角度上介绍一些方法的处理流程。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/04/android-accessibility-introduce/" rel="next" title="Android Accessibility使用及事件流程简介">
+                <i class="fa fa-chevron-left"></i> Android Accessibility使用及事件流程简介
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/08/13/android-appwidget-sourcecode2/" rel="prev" title="AppWidget源码分析（2）---updateAppWidget过程分析">
+                AppWidget源码分析（2）---updateAppWidget过程分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简述"><span class="nav-number">1.</span> <span class="nav-text">简述</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#AppWidgetProvider"><span class="nav-number">1.1.</span> <span class="nav-text">AppWidgetProvider</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AppWidgetManager"><span class="nav-number">2.</span> <span class="nav-text">AppWidgetManager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RemoteView"><span class="nav-number">3.</span> <span class="nav-text">RemoteView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AppWidgetHost"><span class="nav-number">4.</span> <span class="nav-text">AppWidgetHost</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

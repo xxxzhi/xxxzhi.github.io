@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Hugo是JakeWharton大神开发的一个通过注解触发的Debug日志库。它是一个非常好的AOP框架，在Debug模式下，Hugo利用aspectj库来进行切面编程，插入日志代码。通过分析Hugo的代码能够对gradle以及aspectj有一个非常好的了解。 使用示例通过使用来看Hugo具体的功能，这样也能够更好的明白Hugo的实现方式。 首先把下面的编译配置文件添加到项目当中: 123456">
+<meta name="keywords" content="Android,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Hugo源码分析">
+<meta property="og:url" content="http://yoursite.com/2016/10/05/hugo-sourcecode-analysis/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Hugo是JakeWharton大神开发的一个通过注解触发的Debug日志库。它是一个非常好的AOP框架，在Debug模式下，Hugo利用aspectj库来进行切面编程，插入日志代码。通过分析Hugo的代码能够对gradle以及aspectj有一个非常好的了解。 使用示例通过使用来看Hugo具体的功能，这样也能够更好的明白Hugo的实现方式。 首先把下面的编译配置文件添加到项目当中: 123456">
+<meta property="og:updated_time" content="2017-11-05T15:34:25.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hugo源码分析">
+<meta name="twitter:description" content="Hugo是JakeWharton大神开发的一个通过注解触发的Debug日志库。它是一个非常好的AOP框架，在Debug模式下，Hugo利用aspectj库来进行切面编程，插入日志代码。通过分析Hugo的代码能够对gradle以及aspectj有一个非常好的了解。 使用示例通过使用来看Hugo具体的功能，这样也能够更好的明白Hugo的实现方式。 首先把下面的编译配置文件添加到项目当中: 123456">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/10/05/hugo-sourcecode-analysis/"/>
+
+
+
+
+
+  <title>Hugo源码分析 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/05/hugo-sourcecode-analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Hugo源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-10-05T00:00:00+08:00">
+                2016-10-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><a href="https://github.com/JakeWharton/hugo" target="_blank" rel="external">Hugo</a>是JakeWharton大神开发的一个通过注解触发的Debug日志库。它是一个非常好的AOP框架，在Debug模式下，Hugo利用aspectj库来进行切面编程，插入日志代码。通过分析Hugo的代码能够对gradle以及aspectj有一个非常好的了解。</p>
+<h3 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h3><p>通过使用来看Hugo具体的功能，这样也能够更好的明白Hugo的实现方式。</p>
+<p>首先把下面的编译配置文件添加到项目当中:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">buildscript &#123;</div><div class="line">  repositories &#123;</div><div class="line">    mavenCentral()</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  dependencies &#123;</div><div class="line">    classpath &apos;com.jakewharton.hugo:hugo-plugin:1.2.1&apos;</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">apply plugin: &apos;com.android.application&apos;</div><div class="line">apply plugin: &apos;com.jakewharton.hugo&apos;</div></pre></td></tr></table></figure>
+<p>使用的时候直接使用@DebugLog注解给想要调试的方法就好了，它会打印函数的参数，执行时间，以及返回值:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">@DebugLog</div><div class="line">public String getName(String first, String last) &#123;</div><div class="line">  SystemClock.sleep(15); // Don&apos;t ever really do this!</div><div class="line">  return first + &quot; &quot; + last;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>输出:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">V/Example: ⇢ getName(first=&quot;Jake&quot;, last=&quot;Wharton&quot;)</div><div class="line">V/Example: ⇠ getName [16ms] = &quot;Jake Wharton&quot;</div></pre></td></tr></table></figure>
+<p>需要指出的，Hugo只会在Debug模式下打印log。DebugLog的源码如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">package hugo.weaving;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import java.lang.annotation.Retention;</div><div class="line"></div><div class="line">import java.lang.annotation.Target;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import static java.lang.annotation.ElementType.CONSTRUCTOR;</div><div class="line"></div><div class="line">import static java.lang.annotation.ElementType.METHOD;</div><div class="line"></div><div class="line">import static java.lang.annotation.ElementType.TYPE;</div><div class="line"></div><div class="line">import static java.lang.annotation.RetentionPolicy.CLASS;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">@Target(&#123;TYPE, METHOD, CONSTRUCTOR&#125;) @Retention(CLASS)</div><div class="line"></div><div class="line">public @interface DebugLog &#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>就是注解，Target也包含了TYPE，DebugLog也可以添加到类上面:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">@DebugLog</div><div class="line"></div><div class="line">static class Greeter &#123;</div><div class="line"></div><div class="line">  private final String name;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  Greeter(String name) &#123;</div><div class="line"></div><div class="line">    this.name = name;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  private String sayHello() &#123;</div><div class="line"></div><div class="line">    return &quot;Hello, &quot; + name;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="AspectJ"><a href="#AspectJ" class="headerlink" title="AspectJ"></a>AspectJ</h3><p>AspectJ是一个面向切面的框架，它有一个专门的编译器用来生成遵守Java字节编码规范的class文件。在<a href="http://www.eclipse.org/aspectj/downloads.php" target="_blank" rel="external">这里</a>下载安装，实际上它有自己的语法。看个简单的例子:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">// 我们有一个TestService类，TestService.java</div><div class="line"></div><div class="line">public class TestService&#123;</div><div class="line"></div><div class="line">    public void test()&#123;</div><div class="line"></div><div class="line">        System.out.println(&quot;test&quot;);</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String[]args)&#123;</div><div class="line"></div><div class="line">            new TestService().test();</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>现在我们想要给test()方法增加一些东西，比如打印test方法进入的时间。如果用aspectj则可以增加一个文件:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public aspect LogAspect &#123;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">        pointcut logPointcut():execution(void TestService.test());</div><div class="line"></div><div class="line">        void around():logPointcut()&#123;</div><div class="line"></div><div class="line">                System.out.println(&quot;start time: &quot; + System.currentTimeMillis());</div><div class="line"></div><div class="line">                proceed();</div><div class="line"></div><div class="line">                System.out.println(&quot;end time: &quot; + System.currentTimeMillis());</div><div class="line"></div><div class="line">        &#125;</div></pre></td></tr></table></figure>
+<p>通过执行命令 ajc -d . TestService.java LogAspect.java生成TestService.class，然后执行命令java TestService，输出为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">start time: 1478071231659</div><div class="line"></div><div class="line">test</div><div class="line"></div><div class="line">end time: 1478071231659</div></pre></td></tr></table></figure>
+<p>实际上将ajc理解为类似于javac的编译工具就好了，它编译的目标跟javac一样的都是java class文件，只是源文件的语法是符合aspect语法的。可以看看TestService.class反编译后的源码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">org.aspectj.runtime.internal.AroundClosureTestService &#123;</div><div class="line">    TestService() &#123;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    test() &#123;</div><div class="line">        test_aroundBody1$advice(LogAspect.aspectOf()(AroundClosure))&#125;</div><div class="line"></div><div class="line">    main(String[] args) &#123;</div><div class="line">        (TestService()).test()&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>将aspect理解编译时期对源文件按照指定的描述（aspect语法文件）进行编译，得到进行切入后的字节码文件。详细的介绍可以参看这篇文章<a href="https://www.ibm.com/developerworks/cn/java/j-lo-springaopcglib/" target="_blank" rel="external">spring aop</a>。</p>
+<p>我们看看Hugo项目中是如何使用aspect，实际的aspect部分代码是在hugo-runtime子模块当中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">package hugo.weaving.internal;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import android.os.Build;</div><div class="line"></div><div class="line">import android.os.Looper;</div><div class="line"></div><div class="line">import android.os.Trace;</div><div class="line"></div><div class="line">import android.util.Log;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import org.aspectj.lang.JoinPoint;</div><div class="line"></div><div class="line">import org.aspectj.lang.ProceedingJoinPoint;</div><div class="line"></div><div class="line">import org.aspectj.lang.Signature;</div><div class="line"></div><div class="line">import org.aspectj.lang.annotation.Around;</div><div class="line"></div><div class="line">import org.aspectj.lang.annotation.Aspect;</div><div class="line"></div><div class="line">import org.aspectj.lang.annotation.Pointcut;</div><div class="line"></div><div class="line">import org.aspectj.lang.reflect.CodeSignature;</div><div class="line"></div><div class="line">import org.aspectj.lang.reflect.MethodSignature;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">import java.util.concurrent.TimeUnit;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">@Aspect</div><div class="line"></div><div class="line">public class Hugo &#123;</div><div class="line"></div><div class="line">  private static volatile boolean enabled = true;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;within(@hugo.weaving.DebugLog *)&quot;)</div><div class="line"></div><div class="line">  public void withinAnnotatedClass() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(!synthetic * *(..)) &amp;&amp; withinAnnotatedClass()&quot;)</div><div class="line"></div><div class="line">  public void methodInsideAnnotatedType() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(!synthetic *.new(..)) &amp;&amp; withinAnnotatedClass()&quot;)</div><div class="line"></div><div class="line">  public void constructorInsideAnnotatedType() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(@hugo.weaving.DebugLog * *(..)) || methodInsideAnnotatedType()&quot;)</div><div class="line"></div><div class="line">  public void method() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Pointcut(&quot;execution(@hugo.weaving.DebugLog *.new(..)) || constructorInsideAnnotatedType()&quot;)</div><div class="line"></div><div class="line">  public void constructor() &#123;&#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  public static void setEnabled(boolean enabled) &#123;</div><div class="line"></div><div class="line">    Hugo.enabled = enabled;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  @Around(&quot;method() || constructor()&quot;)</div><div class="line"></div><div class="line">  public Object logAndExecute(ProceedingJoinPoint joinPoint) throws Throwable &#123;</div><div class="line"></div><div class="line">    enterMethod(joinPoint);</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    long startNanos = System.nanoTime();</div><div class="line"></div><div class="line">    Object result = joinPoint.proceed();</div><div class="line"></div><div class="line">    long stopNanos = System.nanoTime();</div><div class="line"></div><div class="line">    long lengthMillis = TimeUnit.NANOSECONDS.toMillis(stopNanos - startNanos);</div><div class="line"></div><div class="line">    exitMethod(joinPoint, result, lengthMillis);</div><div class="line"></div><div class="line">    return result;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  private static void enterMethod(JoinPoint joinPoint) &#123;</div><div class="line"></div><div class="line">    if (!enabled) return;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">     // ...</div><div class="line"></div><div class="line">    //组织相关信息到builder当中</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    if (Looper.myLooper() != Looper.getMainLooper()) &#123;</div><div class="line"></div><div class="line">      builder.append(&quot; [Thread:\&quot;&quot;).append(Thread.currentThread().getName()).append(&quot;\&quot;]&quot;);</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    Log.v(asTag(cls), builder.toString());</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.JELLY_BEAN_MR2) &#123;</div><div class="line"></div><div class="line">      final String section = builder.toString().substring(2);</div><div class="line"></div><div class="line">      Trace.beginSection(section);</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  private static void exitMethod(JoinPoint joinPoint, Object result, long lengthMillis) &#123;</div><div class="line"></div><div class="line">    if (!enabled) return;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.JELLY_BEAN_MR2) &#123;</div><div class="line"></div><div class="line">      Trace.endSection();</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    // ...</div><div class="line"></div><div class="line">    //组织相关信息为builder</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    Log.v(asTag(cls), builder.toString());</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">  private static String asTag(Class&lt;?&gt; cls) &#123;</div><div class="line"></div><div class="line">    if (cls.isAnonymousClass()) &#123;</div><div class="line"></div><div class="line">      return asTag(cls.getEnclosingClass());</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    return cls.getSimpleName();</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面只是给出的代码去除了相关详细内容，具体代码可以直接看源码<a href="https://github.com/JakeWharton/hugo/blob/master/hugo-runtime/src/main/java/hugo/weaving/internal/Hugo.java" target="_blank" rel="external">Hugo.java</a>。</p>
+<p>上面是使用了<strong><em>aspect注解</em></strong>来描述相关插入代码的:</p>
+<p>@Aspect 表示这个类由AspectJ处理</p>
+<p>@Pointcut 描述切面内容，可以理解为针对哪些方法，类，进行拦截，插入代码。</p>
+<p>@Around 实际上拦截方法，这个注解可以同时拦截方法的执行前后，另外有@Before, @After，顾名思义，表示方法执行前跟方法执行后拦截。</p>
+<p>关于aspectj，邓凡平的这篇文章<a href="http://blog.csdn.net/innost/article/details/49387395" target="_blank" rel="external">深入理解Android之AOP</a>介绍的挺详细的。aspectj编译器会根据这些描述信息对项目中的源码进行插入。另外还有cglib能够有类似的功能，CGlib是在运行期对类进行动态代理（Proxy.newProxyInstance只能对接口进行动态代理），具体可以Google一下。</p>
+<h3 id="gradle代码"><a href="#gradle代码" class="headerlink" title="gradle代码"></a>gradle代码</h3><p>Hugo源码中除了aspect的使用，我觉得另外就是项目的编译控制了，因为Hugo只会在Debug模式下打印日志，而控制只在Debug模式下打印日志是在编译脚本中实现的。Hugo源码中目录树主要是:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">|- hugo-plugin</div><div class="line"></div><div class="line">|- hugo-runtime</div><div class="line"></div><div class="line">|- hugo-annotations</div><div class="line"></div><div class="line">|- hugo-example</div></pre></td></tr></table></figure>
+<p>我们使用过程的方式是：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">buildscript &#123;</div><div class="line">  repositories &#123;</div><div class="line">    mavenCentral()</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  dependencies &#123;</div><div class="line">    classpath &apos;com.jakewharton.hugo:hugo-plugin:1.2.1&apos;</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">apply plugin: &apos;com.android.application&apos;</div><div class="line">apply plugin: &apos;com.jakewharton.hugo&apos;</div></pre></td></tr></table></figure>
+<h4 id="Gradle-实现Debug插入代码"><a href="#Gradle-实现Debug插入代码" class="headerlink" title="Gradle 实现Debug插入代码"></a>Gradle 实现Debug插入代码</h4><p>所以先看com.jakewharton.hugo插件，这个插件的实现是在hugo-plugin当中，hugo-plugin模块的hugo-plugin/src/main/resources/META-INF/gradle-plugins/目录下面有com.jakewharton.hugo.properties，这就表示插件的声明。该文件的内容是:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">implementation-class=hugo.weaving.plugin.HugoPlugin</div></pre></td></tr></table></figure>
+<p>指定了插件实现的代码。然后看hugo.weaving.plugin.HugoPlugin的内容(对应hugo-plugin/src/main/groovy/hugo/weaving/plugin/HugoPlugin.groovy文件)，这是groovy源文件，groovy也是一种编程语言，跟Java差不多。关于gradle插件声明使用可以参看gradle源码目录下面的samples/customPlugin项目(比如~/.gradle/wrapper/dists/gradle-2.10-all/a4w5fzrkeut1ox71xslb49gst/gradle-2.10/samples)。HugoPlugin.groovy的文件内容如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">class HugoPlugin implements Plugin&lt;Project&gt; &#123;</div><div class="line"></div><div class="line">  @Override void apply(Project project) &#123;</div><div class="line"></div><div class="line">    def hasApp = project.plugins.withType(AppPlugin)</div><div class="line"></div><div class="line">    def hasLib = project.plugins.withType(LibraryPlugin)</div><div class="line"></div><div class="line">    if (!hasApp &amp;&amp; !hasLib) &#123;</div><div class="line"></div><div class="line">      throw new IllegalStateException(&quot;&apos;android&apos; or &apos;android-library&apos; plugin required.&quot;)</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    final def log = project.logger</div><div class="line"></div><div class="line">    final def variants // variants是构造变种版本，为同一个应用创建不同的版本。</div><div class="line"></div><div class="line">    if (hasApp) &#123;</div><div class="line"></div><div class="line">      variants = project.android.applicationVariants</div><div class="line"></div><div class="line">    &#125; else &#123;</div><div class="line"></div><div class="line">      variants = project.android.libraryVariants</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    project.dependencies &#123; // 声明的项目依赖</div><div class="line"></div><div class="line">      debugCompile &apos;com.jakewharton.hugo:hugo-runtime:1.2.2-SNAPSHOT&apos;</div><div class="line"></div><div class="line">      // TODO this should come transitively</div><div class="line"></div><div class="line">      debugCompile &apos;org.aspectj:aspectjrt:1.8.6&apos;</div><div class="line"></div><div class="line">      compile &apos;com.jakewharton.hugo:hugo-annotations:1.2.2-SNAPSHOT&apos;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    project.extensions.create(&apos;hugo&apos;, HugoExtension)</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    variants.all &#123; variant -&gt;</div><div class="line"></div><div class="line">      if (!variant.buildType.isDebuggable()) &#123; // 非Debug情况下，直接返回</div><div class="line"></div><div class="line">        log.debug(&quot;Skipping non-debuggable build type &apos;$&#123;variant.buildType.name&#125;&apos;.&quot;)</div><div class="line"></div><div class="line">        return;</div><div class="line"></div><div class="line">      &#125; else if (!project.hugo.enabled) &#123; //关闭Hugo</div><div class="line"></div><div class="line">        log.debug(&quot;Hugo is not disabled.&quot;)</div><div class="line"></div><div class="line">        return;</div><div class="line"></div><div class="line">      &#125;</div><div class="line"></div><div class="line">      // 使用Hugo的情况下，调用aspect编译，args指定了aspect相关参数。</div><div class="line"></div><div class="line">      JavaCompile javaCompile = variant.javaCompile</div><div class="line"></div><div class="line">      javaCompile.doLast &#123;</div><div class="line"></div><div class="line">        String[] args = [</div><div class="line"></div><div class="line">            &quot;-showWeaveInfo&quot;,</div><div class="line"></div><div class="line">            &quot;-1.5&quot;,</div><div class="line"></div><div class="line">            &quot;-inpath&quot;, javaCompile.destinationDir.toString(),</div><div class="line"></div><div class="line">            &quot;-aspectpath&quot;, javaCompile.classpath.asPath,</div><div class="line"></div><div class="line">            &quot;-d&quot;, javaCompile.destinationDir.toString(),</div><div class="line"></div><div class="line">            &quot;-classpath&quot;, javaCompile.classpath.asPath,</div><div class="line"></div><div class="line">            &quot;-bootclasspath&quot;, project.android.bootClasspath.join(File.pathSeparator)</div><div class="line"></div><div class="line">        ]</div><div class="line"></div><div class="line">        log.debug &quot;ajc args: &quot; + Arrays.toString(args)</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">        MessageHandler handler = new MessageHandler(true);</div><div class="line"></div><div class="line">        new Main().run(args, handler);// 运行aspect</div><div class="line"></div><div class="line">        // ... 省略了log运行结果的代码</div><div class="line"></div><div class="line">      &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面这个HogoPlugin.groovy指定了编译的时候区分Debug和release版本编译。非Debug并且没有disable Hugo的时候，使用aspect给应用中的代码插入。aspect会找到有@Aspect注解的类，然后解析这个类，处理代码。这样整个过程就完了。</p>
+<h4 id="Gradle与maven"><a href="#Gradle与maven" class="headerlink" title="Gradle与maven"></a>Gradle与maven</h4><p>在hugo目录下面有个build.gradle，先看一下dependencies:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">buildscript &#123;</div><div class="line"></div><div class="line">  repositories &#123;</div><div class="line"></div><div class="line">    mavenCentral()</div><div class="line"></div><div class="line">    jcenter()</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">  dependencies &#123;</div><div class="line"></div><div class="line">    classpath &apos;org.gradle.api.plugins:gradle-nexus-plugin:0.7&apos;</div><div class="line"></div><div class="line">    classpath &apos;com.android.tools.build:gradle:1.3.1&apos;</div><div class="line"></div><div class="line">    classpath &apos;org.aspectj:aspectjtools:1.8.6&apos;</div><div class="line"></div><div class="line">    classpath &apos;com.github.dcendents:android-maven-gradle-plugin:1.3&apos;</div><div class="line"></div><div class="line">  &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>mavenCentral()和jcenter是指定了repositories，也就是远程仓库，gradle编译的时候，可以从这些仓库里面获取引用库的包。</p>
+<ul>
+<li><p>org.aspectj:aspectjtools : 是aspectj的库</p>
+</li>
+<li><p>com.github.dcendents:android-maven-gradle-plugin: 修改自maven插件，是一个让maven与android库(arr)相兼容的库。</p>
+</li>
+<li><p>gradle-nexus-plugin: 是配置和上传组件的gradle插件</p>
+</li>
+</ul>
+<p>build.gradle里面定义了几个Task，我们看一下cleanExample的定义来简单了解一下Task:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">task cleanExample(type: Exec) &#123;</div><div class="line"></div><div class="line">  executable = &apos;../gradlew&apos;</div><div class="line"></div><div class="line">  workingDir = project.file(&apos;hugo-example&apos;)</div><div class="line"></div><div class="line">  args = [ &apos;clean&apos; ]</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>Task cleanExample 是清理example项目的task，上述代码使用gradlew脚本，将工作目录设置为hugo-example目录下面，设置gradle的参数为clean，这样就清理hugo-example项目了。</p>
+<p>这里只是简单介绍一下gradle，如果不了解gradle，建议先看看gradle的介绍文档，比如<a href="https://avatarqing.gitbooks.io/gradlepluginuserguidechineseverision/content/introduction/README.html" target="_blank" rel="external">Gradle for Android中文</a>，另外就是邓凡平的<a href="http://www.infoq.com/cn/articles/android-in-depth-gradle" target="_blank" rel="external">深入理解Android（一）：Gradle详解</a>。</p>
+<p>我觉得对于gradle，正确的理解方式是它是基于groovy脚本的一种构建框架，它提供了Android编译的框架及其API。另外groovy种充满了闭包，理解好闭包的概念，然后查看API，这样入手和理解Gradle会很容易明白。</p>
+<h3 id="Hugo-改进"><a href="#Hugo-改进" class="headerlink" title="Hugo 改进"></a>Hugo 改进</h3><p>因为Hugo当中DebugLog使用的Retention是CLASS类型，所以打包之后，注解还是会存在，这样release的apk包就会增加一些大小。就拿Hugo的example来说，如果DebugLog的Retention是CLASS，release包大概是3476bytes，如果DebugLog的retention是Source的时候，release包是3444bytes。还是能够减少一点包大小的。目前我还没有完全地弄好这个问题，不过如果是导入library的方式使用Hugo的话，可以这样来弄:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">debugCompile &apos;com.jakewharton.hugo:hugo-annotations:1.2.2-SNAPSHOT&apos;</div><div class="line">releaseCompile &apos;com.jakewharton.hugo:hugo-annotations-release:1.2.2-SNAPSHOT&apos;</div></pre></td></tr></table></figure>
+<p>hugo-annotations-release里面使用SOURCE retention的DebugLog。这样就能够在debug版本使用CLASS retention的DebugLog，而release版本使用SOURCE retention的DebugLog。不过这种配置只能适合debug和release打包时。如果有更好地idea，我在hugo上面提了个issues：<a href="https://github.com/JakeWharton/hugo/issues/146" target="_blank" rel="external">support release build type use DebugLog with SOURCE Retention</a> ，直接评论。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>Hugo是一个比较小的项目，但是里面却包含了优秀的思想以及先进的技术。AOP编程，注解的理解，Gradle编译的理解，Aspect的使用，以及gradle-maven在Hugo项目中都用到了，看一下Hugo的源码是学习这些东西的一个非常好的方式。</p>
+<p>参考:</p>
+<ol>
+<li><p><a href="http://www.jianshu.com/p/fe8d1e8bd63e" target="_blank" rel="external">Spring AOP,AspectJ, CGLIB 有点晕:http://www.jianshu.com/p/fe8d1e8bd63e</a></p>
+</li>
+<li><p><a href="https://www.ibm.com/developerworks/cn/java/j-lo-springaopcglib/" target="_blank" rel="external">Spring AOP 实现原理与 CGLIB 应用:https://www.ibm.com/developerworks/cn/java/j-lo-springaopcglib/</a></p>
+</li>
+<li><p><a href="http://blog.csdn.net/innost/article/details/49387395" target="_blank" rel="external">深入理解Android之AOP:http://blog.csdn.net/innost/article/details/49387395</a></p>
+</li>
+<li><p><a href="https://yq.aliyun.com/articles/7104" target="_blank" rel="external">Hugo 探究:https://yq.aliyun.com/articles/7104</a></p>
+</li>
+<li><p><a href="https://avatarqing.gitbooks.io/gradlepluginuserguidechineseverision/content/introduction/README.html" target="_blank" rel="external">Gradle for Android中文:https://avatarqing.gitbooks.io/gradlepluginuserguidechineseverision/content/introduction/README.html</a></p>
+</li>
+<li><p><a href="http://www.infoq.com/cn/articles/android-in-depth-gradle" target="_blank" rel="external">深入理解Android（一）：Gradle详解:http://www.infoq.com/cn/articles/android-in-depth-gradle</a></p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/13/android-appwidget-sourcecode2/" rel="next" title="AppWidget源码分析（2）---updateAppWidget过程分析">
+                <i class="fa fa-chevron-left"></i> AppWidget源码分析（2）---updateAppWidget过程分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/17/android-messagequeue-sourcecode-analysis/" rel="prev" title="Android MessageQueue源码分析">
+                Android MessageQueue源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用示例"><span class="nav-number">1.</span> <span class="nav-text">使用示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AspectJ"><span class="nav-number">2.</span> <span class="nav-text">AspectJ</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gradle代码"><span class="nav-number">3.</span> <span class="nav-text">gradle代码</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Gradle-实现Debug插入代码"><span class="nav-number">3.1.</span> <span class="nav-text">Gradle 实现Debug插入代码</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Gradle与maven"><span class="nav-number">3.2.</span> <span class="nav-text">Gradle与maven</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hugo-改进"><span class="nav-number">4.</span> <span class="nav-text">Hugo 改进</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

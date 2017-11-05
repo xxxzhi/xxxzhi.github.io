@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="机器学习," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近老师叫我了解一下深度学习的东西。看了一些东西，顺便总结一下，记录一下自己的想法。 深度学习是机器学习研究中的一个新的领域，其在语音识别、图像处理等方面已经取得了巨大成功。把学习结构看作一个网络，则深度学习的核心思路如下：  无监督学习用于每一层网络的pre-train; 每次用无监督学习只训练一层，将其训练结果作为其高一层的输入； 用自顶而下的监督算法去调整所有层  上面是深度学习的核心思想，">
+<meta name="keywords" content="机器学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="深度学习学习">
+<meta property="og:url" content="http://yoursite.com/2014/07/15/deep-learning-record/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="最近老师叫我了解一下深度学习的东西。看了一些东西，顺便总结一下，记录一下自己的想法。 深度学习是机器学习研究中的一个新的领域，其在语音识别、图像处理等方面已经取得了巨大成功。把学习结构看作一个网络，则深度学习的核心思路如下：  无监督学习用于每一层网络的pre-train; 每次用无监督学习只训练一层，将其训练结果作为其高一层的输入； 用自顶而下的监督算法去调整所有层  上面是深度学习的核心思想，">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="深度学习学习">
+<meta name="twitter:description" content="最近老师叫我了解一下深度学习的东西。看了一些东西，顺便总结一下，记录一下自己的想法。 深度学习是机器学习研究中的一个新的领域，其在语音识别、图像处理等方面已经取得了巨大成功。把学习结构看作一个网络，则深度学习的核心思路如下：  无监督学习用于每一层网络的pre-train; 每次用无监督学习只训练一层，将其训练结果作为其高一层的输入； 用自顶而下的监督算法去调整所有层  上面是深度学习的核心思想，">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/07/15/deep-learning-record/"/>
+
+
+
+
+
+  <title>深度学习学习 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/07/15/deep-learning-record/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">深度学习学习</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-07-15T00:00:00+08:00">
+                2014-07-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近老师叫我了解一下深度学习的东西。看了一些东西，顺便总结一下，记录一下自己的想法。</p>
+<p>深度学习是机器学习研究中的一个新的领域，其在语音识别、图像处理等方面已经取得了巨大成功。把学习结构看作一个网络，则深度学习的核心思路如下：</p>
+<ol>
+<li>无监督学习用于每一层网络的pre-train;</li>
+<li>每次用无监督学习只训练一层，将其训练结果作为其高一层的输入；</li>
+<li>用自顶而下的监督算法去调整所有层</li>
+</ol>
+<p>上面是深度学习的核心思想，刚开始接触深度学习的时候，完全就是看着那个RBM的经典demo，以至于思维完全限制在那些东西上面，后面接触多了，再回过头来看深度学习一些基本的介绍，思维才开阔起来，深度学习是一种学习方式，更多的应该是在于思想，就像上面那三个点。我开始看深度学习的时候，看到一篇论文，它是用卷积神经网络+SVM来进行人脸表情识别的。在我没明白了解深度学习时看的，那时候都没有明白，CNN其实本身就是有很多层的，对于卷积神经网络，在这篇文章中有详细的介绍：<a href="http://ibillxia.github.io/blog/2013/04/06/Convolutional-Neural-Networks/" target="_blank" rel="external">http://ibillxia.github.io/blog/2013/04/06/Convolutional-Neural-Networks/</a></p>
+<h5 id="pylearn2"><a href="#pylearn2" class="headerlink" title="pylearn2"></a>pylearn2</h5><p>深度学习有一个非常著名的库Theano，它是深度学习的Python库。pylearn2是基于Theano弄的一个库，它的源码在：<a href="https://github.com/lisa-lab/pylearn2" target="_blank" rel="external">https://github.com/lisa-lab/pylearn2</a>,这个库中，提供了很多深度学习的基本算法。我最近基本就是使用这个库来做一些实验。而且这样弄出来的效果，能够快速的投入到使用中。</p>
+<p>我使用的主要是<a href="https://github.com/lisa-lab/pylearn2/tree/master/pylearn2/scripts/icml_2013_wrepl/emotions" target="_blank" rel="external">https://github.com/lisa-lab/pylearn2/tree/master/pylearn2/scripts/icml_2013_wrepl/emotions</a>这部分。</p>
+<p>pylearn2使用了yaml格式文件，这种方式，让深度学习几乎就不用再去编码，直接修改yaml文件就好了。个人觉得非常好。下面是一个模型的例子：</p>
+<pre><code> model: !obj:pylearn2.models.mlp.MLP {
+    layers : [
+        # To make this baseline simple to run, we use a very small and cheap convolutional
+        # network. It only has one hidden layer, consisting of rectifier units with spatial
+        # max pooling.
+        !obj:pylearn2.models.mlp.ConvRectifiedLinear {
+            layer_name: &apos;h0&apos;,
+            kernel_shape: [8, 8],
+            pool_shape: [4, 4],
+            pool_stride: [2, 2],
+            output_channels: 32,
+            irange: .05,
+            # Rather than using weight decay, we constrain the norms of the convolution kernels
+            # to be at most this value
+            max_kernel_norm: .9
+        },
+
+        !obj:pylearn2.models.mlp.Softmax {
+            layer_name: &apos;y&apos;,
+            # The classes are unbalanced. Set the bias parameters of the softmax regression
+            # to make the model start with the right marginals. This should speed convergence
+            # of the training algorithm.
+            init_bias_target_marginals: *train,
+            irange: .0,
+            # There are seven different emotions to learn to recognize, i.e., 7 class labels
+            n_classes: 7
+        }
+    ],
+    # The inputs are 48x48 pixel images
+    input_space: !obj:pylearn2.space.Conv2DSpace {
+        shape: [48, 48],
+        num_channels: 1
+    }
+},
+</code></pre><p>一层一层的，并且输入空间也通过这种方式，直接进行描述，非常直观。上面就是一个两层的模型，一个MLP线性卷积层，一个Softmax。</p>
+<p>上面只是一个非常简单的demo。我在使用的过程中，老师一直说应该要多一些层次，但是有的时候，如果数据量小的话，深度学习其实压根没有用。不过我尝试了通过加多层次，虽然测试集的准确率变低了，但是我使用其他的数据集作为测试集的时候，准确率还有显著的提高。说明增加多层，能够增加模型的稳定判断性。</p>
+<h5 id="使用总结"><a href="#使用总结" class="headerlink" title="使用总结"></a>使用总结</h5><p>我不是一个理论方面的擅长者，但是做实验还是过得去的，而且深度学习本身也是无法解释的。我直接总结一下实验经验。</p>
+<p>第一个就是上面说的，多层能够提高模型的对不同数据集的准确率。</p>
+<p>深度学习需要在学习的过程中，自顶向下用监督算法学习每一层。所以在训练过程中，还需要指定一部分数据作为训练过程中的测试集。我一开始总是追求测试集跟训练集不一样，但是在小的数据集进行训练的时候，就发现结果非常不好，本身数据集就几百条数据，还抽取出一部分数据不用来训练，可能导致效果更加不佳，而且增加了训练结果的不确定性。所以我把整个数据集作为训练，然后抽取其中的一部分作为调整测试集。所以在训练过程中测试集其实也在训练集中使用过了。</p>
+<p>不要光顾着使用多层，而忘了具体的数据，我一开始粗暴地使用了5层，结果发现经过5层的卷积后，特征直接就没了，压根就不够5层的，所以后面我在调小的每次卷积的大小，以使通过多层卷积后，还是能够得到一个合适的输出，用来作为最后的判断。</p>
+<p>最后得到的结果也是相对不错的，虽然没有很高的准确率，但是平均5成的准确率还是能够勉强投入实用了。而且通过深度学习来判断，模型本身就相对于其他的更加可靠，预测出来的结果不会非常离谱。</p>
+<p>####目前实验过程中一个最有效的模型<br>demo:</p>
+<pre><code>!obj:pylearn2.train.Train {
+# Here we specify the dataset to train on. We train on only the first 25k of the examples, so
+# that the rest may be used as a validation set.
+# The &quot;&amp;train&quot; syntax lets us refer back to this object as &quot;*train&quot; elsewhere in the yaml file
+dataset: &amp;train !obj:pylearn2.scripts.icml_2013_wrepl.emotions_yaxin.emotions_dataset.EmotionsDataset {
+    which_set: &apos;train&apos;,
+    start: 0,
+    stop: 2593,
+    # We preprocess the data with global contrast normalization
+    preprocessor: &amp;prepro !obj:pylearn2.datasets.preprocessing.GlobalContrastNormalization {
+        sqrt_bias: 10,
+        use_std: 1
+        }
+},
+# Here we specify the model to train as being an MLP
+model: !obj:pylearn2.models.mlp.MLP {
+    layers : [
+        # To make this baseline simple to run, we use a very small and cheap convolutional
+        # network. It only has one hidden layer, consisting of rectifier units with spatial
+        # max pooling.
+        !obj:pylearn2.models.mlp.ConvRectifiedLinear {
+            layer_name: &apos;h0&apos;,
+            kernel_shape: [5, 5],
+            pool_shape: [3, 3],
+            pool_stride: [2, 2],
+            output_channels: 64,
+            irange: .05,
+            # Rather than using weight decay, we constrain the norms of the convolution kernels
+            # to be at most this value
+            max_kernel_norm: .9
+        },
+
+        !obj:pylearn2.models.mlp.ConvRectifiedLinear {
+            layer_name: &apos;h1&apos;,
+            kernel_shape: [5, 5],
+            pool_shape: [3, 3],
+            pool_stride: [2, 2],
+            output_channels: 64,
+            irange: .05,
+            # Rather than using weight decay, we constrain the norms of the convolution kernels
+            # to be at most this value
+            max_kernel_norm: .9
+        },
+
+
+        !obj:pylearn2.models.mlp.ConvRectifiedLinear {
+            layer_name: &apos;h2&apos;,
+            kernel_shape: [3, 3],
+            pool_shape: [2, 2],
+            pool_stride: [1, 1],
+            output_channels: 32,
+            irange: .05,
+            # Rather than using weight decay, we constrain the norms of the convolution kernels
+            # to be at most this value
+            max_kernel_norm: .9
+        },
+
+        !obj:pylearn2.models.mlp.ConvRectifiedLinear {
+            layer_name: &apos;h3&apos;,
+            kernel_shape: [3, 3],
+            pool_shape: [2, 2],
+            pool_stride: [1, 1],
+            output_channels: 32,
+            irange: .05,
+            # Rather than using weight decay, we constrain the norms of the convolution kernels
+            # to be at most this value
+            max_kernel_norm: .9
+        },
+
+        !obj:pylearn2.models.mlp.Softmax {
+            layer_name: &apos;y&apos;,
+            # The classes are unbalanced. Set the bias parameters of the softmax regression
+            # to make the model start with the right marginals. This should speed convergence
+            # of the training algorithm.
+            init_bias_target_marginals: *train,
+            irange: .0,
+            # There are seven different emotions to learn to recognize, i.e., 7 class labels
+            n_classes: 7
+        }
+    ],
+    # The inputs are 48x48 pixel images
+    input_space: !obj:pylearn2.space.Conv2DSpace {
+        shape: [128, 128],
+        num_channels: 1
+    }
+},
+# We train using SGD and momentum
+algorithm: !obj:pylearn2.training_algorithms.sgd.SGD {
+        batch_size: 100,
+        learning_rate: .001,
+        learning_rule: !obj:pylearn2.training_algorithms.learning_rule.Momentum {
+            init_momentum: .5,
+        },
+        # We monitor how well we&apos;re doing during training on a validation set
+        monitoring_dataset:
+            {
+                &apos;valid&apos; : !obj:pylearn2.scripts.icml_2013_wrepl.emotions_yaxin.emotions_dataset.EmotionsDataset {
+                    which_set: &apos;train&apos;,
+                    start: 2000,
+                    stop: 2608,
+                    preprocessor: *prepro
+                }
+            },
+        # We stop when validation set classification error hasn&apos;t decreased for 10 epochs
+        termination_criterion: !obj:pylearn2.termination_criteria.MonitorBased {
+            channel_name: &quot;valid_y_misclass&quot;,
+            prop_decrease: 0.,
+            N: 50
+        },
+    },
+    # We save the model whenever we improve on the validation set classification error
+    extensions: [
+        !obj:pylearn2.train_extensions.best_params.MonitorBasedSaveBest {
+             channel_name: &apos;valid_y_misclass&apos;,
+             save_path: &quot;${PYLEARN2_TRAIN_FILE_FULL_STEM}_best.pkl&quot;
+        },
+    ],
+}
+</code></pre><hr>
+<p>井底之蛙</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/机器学习/" rel="tag"># 机器学习</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/07/02/introduce-ersatz/" rel="next" title="ersatz简介">
+                <i class="fa fa-chevron-left"></i> ersatz简介
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/07/19/java-classload-sequnce/" rel="prev" title="java类加载">
+                java类加载 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#pylearn2"><span class="nav-number">1.</span> <span class="nav-text">pylearn2</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用总结"><span class="nav-number">2.</span> <span class="nav-text">使用总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

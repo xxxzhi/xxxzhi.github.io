@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,JVM," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前几天看《深入理解java虚拟机》中关于.class文件的详细解析，实际上Class文件里面就是包含着运行时候的指令，以及数据等内容。如果想要能够读懂Class文件，那一定需要对Class的文件结构以及Java虚拟机指令集有一定的了解 JVM指令集java虚拟机也有自己的指令集（字节码指令集），指令占一个字节长度，也就是说JVM中的指令最多也就256个。一常用的指令如:iload,iadd,is">
+<meta name="keywords" content="Java,JVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java虚拟机Class格式与指令">
+<meta property="og:url" content="http://yoursite.com/2015/09/10/jvm-class-format/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前几天看《深入理解java虚拟机》中关于.class文件的详细解析，实际上Class文件里面就是包含着运行时候的指令，以及数据等内容。如果想要能够读懂Class文件，那一定需要对Class的文件结构以及Java虚拟机指令集有一定的了解 JVM指令集java虚拟机也有自己的指令集（字节码指令集），指令占一个字节长度，也就是说JVM中的指令最多也就256个。一常用的指令如:iload,iadd,is">
+<meta property="og:image" content="http://xxxzhi.github.io/images/beautiful5.jpg">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="java虚拟机Class格式与指令">
+<meta name="twitter:description" content="前几天看《深入理解java虚拟机》中关于.class文件的详细解析，实际上Class文件里面就是包含着运行时候的指令，以及数据等内容。如果想要能够读懂Class文件，那一定需要对Class的文件结构以及Java虚拟机指令集有一定的了解 JVM指令集java虚拟机也有自己的指令集（字节码指令集），指令占一个字节长度，也就是说JVM中的指令最多也就256个。一常用的指令如:iload,iadd,is">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/beautiful5.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/09/10/jvm-class-format/"/>
+
+
+
+
+
+  <title>java虚拟机Class格式与指令 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/09/10/jvm-class-format/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">java虚拟机Class格式与指令</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-09-10T00:00:00+08:00">
+                2015-09-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="http://xxxzhi.github.io/images/beautiful5.jpg" alt="#java虚拟机Class格式与指令"></p>
+<p>前几天看《深入理解java虚拟机》中关于.class文件的详细解析，实际上Class文件里面就是包含着运行时候的指令，以及数据等内容。如果想要能够读懂Class文件，那一定需要对Class的文件结构以及Java虚拟机指令集有一定的了解</p>
+<h2 id="JVM指令集"><a href="#JVM指令集" class="headerlink" title="JVM指令集"></a>JVM指令集</h2><p>java虚拟机也有自己的指令集（<strong><em>字节码指令集</em></strong>），指令占一个字节长度，也就是说JVM中的指令最多也就256个。一常用的指令如:iload,iadd,isub,imul…,这里举的例子只是对应于int类型的运算操作码，如果float类型，对应的指令为：fload,fadd,fsub,fmul…。由指令加上对应的数据就是一次运算了。</p>
+<p>与指令紧密相关的就是操作数了，JVM里面有操作数栈，本地变量表。</p>
+<h2 id="Class文件结构"><a href="#Class文件结构" class="headerlink" title="Class文件结构"></a>Class文件结构</h2><p>对一个非常简单的java文件：</p>
+<pre><code>public class Test{
+    private int a;
+
+    public int value(){
+       return a;
+    }
+}
+</code></pre><p>使用<figure class="highlight plain"><figcaption><span>Test.java```得到Test.class.</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">使用```javap -verbose Test.class```可以获得Class文件可视化结果.其中包括常量池，函数字节码代码</div></pre></td></tr></table></figure></p>
+<pre><code>Classfile /Users/houzhi/Test.class
+Last modified Sep 8, 2015; size 265 bytes
+  MD5 checksum 7a6cc538f28ef4dc4978891008b41ed8
+  Compiled from &quot;Test.java&quot;
+public class Test
+  SourceFile: &quot;Test.java&quot;
+  minor version: 0
+  major version: 51
+  flags: ACC_PUBLIC, ACC_SUPER
+Constant pool:
+   #1 = Methodref          #4.#15         //  java/lang/Object.&quot;&lt;init&gt;&quot;:()V
+   #2 = Fieldref           #3.#16         //  Test.a:I
+   #3 = Class              #17            //  Test
+   #4 = Class              #18            //  java/lang/Object
+   #5 = Utf8               a
+   #6 = Utf8               I
+   #7 = Utf8               &lt;init&gt;
+   #8 = Utf8               ()V
+   #9 = Utf8               Code
+  #10 = Utf8               LineNumberTable
+  #11 = Utf8               value
+  #12 = Utf8               ()I
+  #13 = Utf8               SourceFile
+  #14 = Utf8               Test.java
+  #15 = NameAndType        #7:#8          //  &quot;&lt;init&gt;&quot;:()V
+  #16 = NameAndType        #5:#6          //  a:I
+  #17 = Utf8               Test
+  #18 = Utf8               java/lang/Object
+{
+  public Test();
+    flags: ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         0: aload_0       
+         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V
+         4: return        
+      LineNumberTable:
+        line 2: 0
+
+  public int value();
+    flags: ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         0: aload_0       
+         1: getfield      #2                  // Field a:I
+         4: ireturn       
+      LineNumberTable:
+        line 7: 0
+}
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">从上面的结果可以大概看出一些内容，其中major version是java的版本，java7对应是51.然后是类的访问标志，public。然后是常量表，记录字符的表，包括函数名称，变了名称，类路径名称等等。</div><div class="line">再之后是函数，每个函数其实是方法表，方法表里面再包括了访问标志，代码表，LineNumberTable是指函数是在第几行。</div><div class="line"></div><div class="line">代码段里面的内容主要是刚刚操作码的指令，从这些字节代码是完全可以查看函数的功能的。</div><div class="line"></div><div class="line">## 利用查看Class解决bug</div><div class="line">这里顺便提一下我昨天干的一件事，因为部署的服务器应用的源代码在另外一个开发者那里，暂时他去有事了。但是我重新部署他的代码发现有问题，保存图片的位置一直不对，经过测试，感觉他可能是在程序里面写了一个固定的地址，导致换了服务器后，路径总是不太对。正巧这段时间有空的时候就在虚拟机的相关东西，而且基本能确定很大可能是路径问题，所以直接尝试去查看class的内容，就使用了```javap -verbose```来查看对应的class文件的内容，查看引用的地方最终找到了保存的代码，发现确实是他把保存路径写死了。</div><div class="line"></div><div class="line">找到了问题，一下子没源码，就尝试修改class文件去解决这个问题，毕竟class文件是编译后，按照规范的，只要class是符合规范，程序验证通过的话，就会被JVM接受。使用修改的方式如下</div><div class="line"></div><div class="line">1. 使用vim -b Upload.class，这个时候是打开二进制文件，一堆乱码</div><div class="line">2. 输入vim的命令 :%!xxd 把文件转换成二进制的读入，转化后内容会变成这样</div></pre></td></tr></table></figure>
+<pre><code>0000010: 1400 1508 0016 0a00 1700 1807 0016 0700  ................
+
+0000020: 1901 0004 5445 5354 0100 124c 6a61 7661  ....TEST...Ljava
+
+0000030: 2f6c 616e 672f 5374 7269 6e67 3b01 000d  /lang/String;...
+</code></pre><p>```</p>
+<ol>
+<li>然后看着右边那里的解释修改。我是直接改了路径，所以相对比较简单，如果太复杂就最好先编译。输入 :%!xxd -r 可以切换回原来的模式。修改后保存。修改可以直接改那些数字。</li>
+<li>一次非常好的class文件学习实践体验。</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/JVM/" rel="tag"># JVM</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/09/10/http-protocol/" rel="next" title="Http协议">
+                <i class="fa fa-chevron-left"></i> Http协议
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/10/07/retorfit-analyse/" rel="prev" title="Retrofit源码解析">
+                Retrofit源码解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#JVM指令集"><span class="nav-number">1.</span> <span class="nav-text">JVM指令集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Class文件结构"><span class="nav-number">2.</span> <span class="nav-text">Class文件结构</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

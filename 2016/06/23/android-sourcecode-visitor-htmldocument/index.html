@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,设计模式,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="访问者模式是设计模式中相对比较复杂的设计模式，在Android源码中的UnifiedEmail项目中的HtmlDocument就使用了访问者模式，Email中的内容可以是Html文档，而Html文档需要解析保存，HtmlDocument就是html节点的一个容器，本文将介绍HtmlDocument与访问者模式。文中对访问者模式介绍的会相对简单，如果想理解好，建议去看一下Gof的描述，更侧重于与An">
+<meta name="keywords" content="Android,设计模式,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android源码访问者模式---HtmlDocument">
+<meta property="og:url" content="http://yoursite.com/2016/06/23/android-sourcecode-visitor-htmldocument/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="访问者模式是设计模式中相对比较复杂的设计模式，在Android源码中的UnifiedEmail项目中的HtmlDocument就使用了访问者模式，Email中的内容可以是Html文档，而Html文档需要解析保存，HtmlDocument就是html节点的一个容器，本文将介绍HtmlDocument与访问者模式。文中对访问者模式介绍的会相对简单，如果想理解好，建议去看一下Gof的描述，更侧重于与An">
+<meta property="og:image" content="http://houzhi.me/photo/uploads/big/708fc91d287fc3f86d78c9b843b4e131.png">
+<meta property="og:image" content="http://houzhi.me/photo/uploads/big/e0c184b635d5991bfba5146e5aadd843.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android源码访问者模式---HtmlDocument">
+<meta name="twitter:description" content="访问者模式是设计模式中相对比较复杂的设计模式，在Android源码中的UnifiedEmail项目中的HtmlDocument就使用了访问者模式，Email中的内容可以是Html文档，而Html文档需要解析保存，HtmlDocument就是html节点的一个容器，本文将介绍HtmlDocument与访问者模式。文中对访问者模式介绍的会相对简单，如果想理解好，建议去看一下Gof的描述，更侧重于与An">
+<meta name="twitter:image" content="http://houzhi.me/photo/uploads/big/708fc91d287fc3f86d78c9b843b4e131.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/06/23/android-sourcecode-visitor-htmldocument/"/>
+
+
+
+
+
+  <title>Android源码访问者模式---HtmlDocument | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/06/23/android-sourcecode-visitor-htmldocument/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android源码访问者模式---HtmlDocument</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-23T00:00:00+08:00">
+                2016-06-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>访问者模式是设计模式中相对比较复杂的设计模式，在Android源码中的UnifiedEmail项目中的HtmlDocument就使用了访问者模式，Email中的内容可以是Html文档，而Html文档需要解析保存，HtmlDocument就是html节点的一个容器，本文将介绍HtmlDocument与访问者模式。文中对访问者模式介绍的会相对简单，如果想理解好，建议去看一下Gof的描述，更侧重于与Android源码的结合（源码基于6.0.1_r30）。</p>
+<h2 id="访问者模式"><a href="#访问者模式" class="headerlink" title="访问者模式"></a>访问者模式</h2><p>首先看一下访问者模式相关内容。</p>
+<h3 id="意图"><a href="#意图" class="headerlink" title="意图"></a>意图</h3><p>表示一个作用于对象内部结构中的各元素的操作。它使你可以在不改变各元素的类的前提下定义作用于这些元素的新操作。</p>
+<h3 id="UML图"><a href="#UML图" class="headerlink" title="UML图"></a>UML图</h3><p><img src="http://houzhi.me/photo/uploads/big/708fc91d287fc3f86d78c9b843b4e131.png" alt="http://houzhi.me/photo/uploads/big/708fc91d287fc3f86d78c9b843b4e131.png"></p>
+<p>上面就是访问者模式的简单UML图，通过定义一个外在的Visitor来访问ObjectStructor对象结构中的Element，这样可以变化访问者来访问对象结构中的元素，但又不会影响元素内部结构。</p>
+<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line">abstract class Visitor&#123;</div><div class="line">      public abstract void visitorElement1(ConcreteElement1 element);</div><div class="line">      public abstract void visitorElement2(ConcreteElement2 element);</div><div class="line">&#125;</div><div class="line"></div><div class="line">class ConcreteVisitor1 extends Visitor&#123; </div><div class="line">      public abstract void visitorElement1(ConcreteElement1 element)&#123;</div><div class="line">           element.operate1();</div><div class="line">           // do other things.</div><div class="line">      &#125;</div><div class="line">      public abstract void visitorElement2(ConcreteElement2 element)&#123;</div><div class="line">           element.operate2();</div><div class="line">           // do other things.</div><div class="line">      &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">abstract class Element&#123;</div><div class="line">    public abstract void accept(Visitor visitor);</div><div class="line">&#125;</div><div class="line"></div><div class="line">class ConcreteElement1 extends Element&#123;</div><div class="line">    public void accept(Visitor visitor)&#123;</div><div class="line">        visitor.visitorElement1(this);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">class ConcreteElement2 extends Element&#123;</div><div class="line">    public void accept(Visitor visitor)&#123;</div><div class="line">        visitor.visitorElement2(this);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public class ObjectStructor&#123;</div><div class="line">    List&lt;Element&gt; elements = new ArrayList&lt;Element&gt;();</div><div class="line"></div><div class="line">    elements.add(new ConcreteElement1());</div><div class="line">    elements.add(new ConcreteElement2());</div><div class="line"></div><div class="line">    public void accept(Visitor visitor)&#123;</div><div class="line">        for(Element element: elements)&#123;</div><div class="line">             element.accept(visitor);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String [] args)&#123;</div><div class="line">         ConcreteVisitor1 visitor = new ConcreteVisitor1();</div><div class="line">         ObjectStructor stru = new ObjectStructor();</div><div class="line">         stru.accept(visitor);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面就是一段简单的访问者模式的代码，访问者模式有几个特点：对象结构内部的元素不会变化，如果变化了，那么Visitor又得变了；对象结构内部元素有不同的接口；需要对对象内部元素有不同的不相关访问，而放在元素内部，又会”污染“元素。</p>
+<h3 id="UnifiedEmail-中的HtmlDocument"><a href="#UnifiedEmail-中的HtmlDocument" class="headerlink" title="UnifiedEmail 中的HtmlDocument"></a>UnifiedEmail 中的HtmlDocument</h3><p><img src="http://houzhi.me/photo/uploads/big/e0c184b635d5991bfba5146e5aadd843.png" alt="http://houzhi.me/photo/uploads/big/e0c184b635d5991bfba5146e5aadd843.png"></p>
+<p>上面就是整个HtmlDocument的观察者UML图，它是一个非常经典的观察者模式。HtmlDocument表示html文档，里面包含了Html的组成内容，它包含了Comment(注释)，Text(文本)，Tag(标签)，EndTag(结束标签)这些元素。</p>
+<h3 id="类介绍"><a href="#类介绍" class="headerlink" title="类介绍"></a>类介绍</h3><p>所有的类都在UnifiedEmail项目的com.google.android.mail.common.html.parser包中。</p>
+<h4 id="HtmlDocument"><a href="#HtmlDocument" class="headerlink" title="HtmlDocument"></a>HtmlDocument</h4><p>表示Html文档，它是Html节点的容器，包含了一个<code>List&lt;Node&gt; node</code>属性，这个属性就是包含了html的所有节点。另外它也包含了一些将html转换为String的接口:</p>
+<ul>
+<li>toHTML</li>
+<li>toXHTML</li>
+<li>toOriginalHTML</li>
+</ul>
+<p>它是Node元素的容器，访问者就是直接与HtmlDocument打交道。另外HtmlDocument是一个非常大的类，Node, Comment, Text, Tag, EndTag, Visitor都是HtmlDocument的静态内部类。并且它还包含了Comment，Text，Tag的静态创建方法。</p>
+<h4 id="Visitor"><a href="#Visitor" class="headerlink" title="Visitor"></a>Visitor</h4><p>观察者基类，它有几个实现者:</p>
+<ul>
+<li>Builder: 这个是用来创建HtmlDocument的</li>
+<li>HtmlTreeBuilder: 这个类是用来创建HtmlTree的，通过访问所有的节点元素，创建一个HtmlTree。</li>
+<li>DebugPrinter: 这个使用来调试的，只是打印了节点元素的内容。</li>
+<li>VisitorWrapper：　这是一个Visitor的装饰类。</li>
+</ul>
+<p>通过变化访问者（或创建新的访问者）来操作HtmlDocument的节点元素，而不是直接修改HtmlDocument节点元素，这样避免了修改节点元素内部内容。</p>
+<h4 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h4><p>基础的节点元素类，它是所有节点元素的父类，表示Html文档中的相关节点元素（标签，文本，注释等等）。在HtmlDocument中保存在一个List列表里面。</p>
+<h4 id="HtmlTreeBuilder"><a href="#HtmlTreeBuilder" class="headerlink" title="HtmlTreeBuilder"></a>HtmlTreeBuilder</h4><p>HtmlTreeBuilder是一个访问者，HtmlTreeBuilder的作用是通过访问HtmlDocument中的节点来创建HtmlTree。HtmlTree是一个表示解析好了的，有较好的格式化了的html文本的对象。它提供了方法直接将html转换为文本，并且提供了查找文本标签的方法，比HtmlDocument格式化要更好些。</p>
+<p>在HtmlTreeBuilder中有一段对节点元素的访问测试代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">/** For testing */</div><div class="line">public static void main(String[] args) throws IOException &#123;</div><div class="line">  logger.setLevel(Level.FINEST);</div><div class="line"></div><div class="line">  String html = new String(ByteStreams.toByteArray(System.in));</div><div class="line">  HtmlParser parser = new HtmlParser();</div><div class="line">  HtmlDocument doc = parser.parse(html);</div><div class="line"></div><div class="line">  HtmlTreeBuilder builder = new HtmlTreeBuilder();</div><div class="line">  doc.accept(builder);</div><div class="line">  String outputHtml = builder.getTree().getHtml();</div><div class="line"></div><div class="line">  System.out.println(outputHtml);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="HtmlParser"><a href="#HtmlParser" class="headerlink" title="HtmlParser"></a>HtmlParser</h4><p>在com.google.android.mail.common.html.parser包里面还有HtmlParser类，它是用来解析Html文档的，把Html文档文本解析为HtmlDocument。</p>
+<h3 id="设计思考"><a href="#设计思考" class="headerlink" title="设计思考"></a>设计思考</h3><p>访问者模式适合结构对象中的元素不会经常变化，每个元素的接口又不会很一致，但是需要对针对每一种元素进行操作，而对这些元素又经常需要变化操作。而Html的节点就很适合这些特征，每个节点元素的接口其实是不一致的，但是他们总共也就那几种元素（Comment, Tag, EndTag,Text)，而有时候又需要添加一些新的操作。</p>
+<p>如果说元素之间的接口都是一致的话，那么可以直接使用迭代器模式，迭代器模式代码结构更加简单。如果经常需要增加新的节点类型，那么对节点操作最好直接放在节点内部，因为增加新的节点类型，意味着访问者也要增加一种新的接口。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在UnifiedEmail中还有其他的使用了访问者模式的，比如<code>org.apache.james.mime4j.field.address.parser.AddressListParserVisitor</code>，<code>com.android.mail.utils.DequeMap.Visitor</code>。通过具体使用的源码来学习设计模式会更加有效率，当然最好是自己在实践中使用，通过设计模式来看代码结构会更加明朗，清晰，也能更好地看细节。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/设计模式/" rel="tag"># 设计模式</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/06/19/android-bitmap-introduce-3/" rel="next" title="Android Bitmap深入介绍（三）--- 开源加载框架简述">
+                <i class="fa fa-chevron-left"></i> Android Bitmap深入介绍（三）--- 开源加载框架简述
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/07/20/android-sharedpreferences-sourcecode-analysis/" rel="prev" title="Android SharedPreferences源码分析">
+                Android SharedPreferences源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#访问者模式"><span class="nav-number">1.</span> <span class="nav-text">访问者模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#意图"><span class="nav-number">1.1.</span> <span class="nav-text">意图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UML图"><span class="nav-number">1.2.</span> <span class="nav-text">UML图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码示例"><span class="nav-number">1.3.</span> <span class="nav-text">代码示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UnifiedEmail-中的HtmlDocument"><span class="nav-number">1.4.</span> <span class="nav-text">UnifiedEmail 中的HtmlDocument</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类介绍"><span class="nav-number">1.5.</span> <span class="nav-text">类介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#HtmlDocument"><span class="nav-number">1.5.1.</span> <span class="nav-text">HtmlDocument</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Visitor"><span class="nav-number">1.5.2.</span> <span class="nav-text">Visitor</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Node"><span class="nav-number">1.5.3.</span> <span class="nav-text">Node</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HtmlTreeBuilder"><span class="nav-number">1.5.4.</span> <span class="nav-text">HtmlTreeBuilder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HtmlParser"><span class="nav-number">1.5.5.</span> <span class="nav-text">HtmlParser</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#设计思考"><span class="nav-number">1.6.</span> <span class="nav-text">设计思考</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">1.7.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

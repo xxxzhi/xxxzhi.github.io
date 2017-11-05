@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="如果想要对Android Bitmap进行更多的操作，理解好Bitmap的实现将会有非常大的帮助，另外Android在6.0中增加了asm存储图片。这篇文章就通过源码来分析Android6.0中的Bitmap。本文主要分析Java层与native层的Bitmap，以及Bitmap的储存和Parcel传输。源码基于6.0，所以会有一些新的特性。 Bitmap存储方式以及包含的属性计算机里面图片都是作">
+<meta name="keywords" content="Android,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android6.0 Bitmap存储以及Parcel传输源码分析">
+<meta property="og:url" content="http://yoursite.com/2016/05/24/android-bitmap-sourcecode-analysis/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="如果想要对Android Bitmap进行更多的操作，理解好Bitmap的实现将会有非常大的帮助，另外Android在6.0中增加了asm存储图片。这篇文章就通过源码来分析Android6.0中的Bitmap。本文主要分析Java层与native层的Bitmap，以及Bitmap的储存和Parcel传输。源码基于6.0，所以会有一些新的特性。 Bitmap存储方式以及包含的属性计算机里面图片都是作">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android6.0 Bitmap存储以及Parcel传输源码分析">
+<meta name="twitter:description" content="如果想要对Android Bitmap进行更多的操作，理解好Bitmap的实现将会有非常大的帮助，另外Android在6.0中增加了asm存储图片。这篇文章就通过源码来分析Android6.0中的Bitmap。本文主要分析Java层与native层的Bitmap，以及Bitmap的储存和Parcel传输。源码基于6.0，所以会有一些新的特性。 Bitmap存储方式以及包含的属性计算机里面图片都是作">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/05/24/android-bitmap-sourcecode-analysis/"/>
+
+
+
+
+
+  <title>Android6.0 Bitmap存储以及Parcel传输源码分析 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/24/android-bitmap-sourcecode-analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android6.0 Bitmap存储以及Parcel传输源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-24T00:00:00+08:00">
+                2016-05-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>如果想要对Android Bitmap进行更多的操作，理解好Bitmap的实现将会有非常大的帮助，另外Android在6.0中增加了asm存储图片。这篇文章就通过源码来分析Android6.0中的Bitmap。本文主要分析Java层与native层的Bitmap，以及Bitmap的储存和Parcel传输。源码基于6.0，所以会有一些新的特性。</p>
+<h2 id="Bitmap存储方式以及包含的属性"><a href="#Bitmap存储方式以及包含的属性" class="headerlink" title="Bitmap存储方式以及包含的属性"></a>Bitmap存储方式以及包含的属性</h2><p>计算机里面图片都是作为数组来存储的，而在Android中Bitmap也是一样。在Java层的Bitmap数组保存为mBuffer。而在native层，Bitmap有四种保存方式，在Bitmap.h文件中有个枚举类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">enum class PixelStorageType &#123;</div><div class="line">    Invalid,</div><div class="line">    External,</div><div class="line">    Java,</div><div class="line">    Ashmem,</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<p>Invalid表示图片已经失效了，一般图片free掉之后就会是这种状态。External是外部存储。Java是表示这个Bitmap对应着Java的Bitmap，此时Bitmap会保存着Java层Bitmap的存储数组的弱引用。而Ashmem则是对应着匿名共享内存，表示图片是存储在匿名共享内存当中。后三种类型在Bitmap中对应着一个union类型：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">union &#123;</div><div class="line">    struct &#123;</div><div class="line">        void* address;</div><div class="line">        void* context;</div><div class="line">        FreeFunc freeFunc;</div><div class="line">    &#125; external;</div><div class="line">    struct &#123;</div><div class="line">        void* address;</div><div class="line">        int fd;</div><div class="line">        size_t size;</div><div class="line">    &#125; ashmem;</div><div class="line">    struct &#123;</div><div class="line">        JavaVM* jvm;</div><div class="line">        jweak jweakRef;</div><div class="line">        jbyteArray jstrongRef;</div><div class="line">    &#125; java;</div><div class="line">&#125; mPixelStorage;</div></pre></td></tr></table></figure>
+<p>另外因为图片是直接保存在一片内存区域，那么它也可以保存在匿名共享内存当中，这就是Fresco在5.0之前干的事情，而将图片放到匿名共享内存当中，不会自动GC，应用会更加流畅，因为不在Java堆，也不用关心Java堆大小的限制而导致OOM。</p>
+<p>另外还包含几种属性：<br>width, height: 图片宽度和高度<br>mDensity: 设备密度<br>colorType: 图片颜色类型，RGB或者gray等，图片通道数量<br>rowBytes: 用来表示图片像素的字节数<br>alphaType: 图像透明度类型，是否有透明度或者没有透明度<br>isMutable: 是否易变的</p>
+<p>这些属性在进行Parcel传输的时候，都会通过Parcel传递，另外也是为了方便图片操作。</p>
+<h2 id="Java层与native层Bitmap"><a href="#Java层与native层Bitmap" class="headerlink" title="Java层与native层Bitmap"></a>Java层与native层Bitmap</h2><p>Bitmap的主要实现是在native层，Java层的Bitmap相当于是native层的接口。</p>
+<h3 id="Java层Bitmap"><a href="#Java层Bitmap" class="headerlink" title="Java层Bitmap"></a>Java层Bitmap</h3><p>Bitmap实际上分为Java层和native层的，Java层包含了一个mBuffer数组用来存储像素，但总的来说Java层只是一个方便Java层应用访问的接口，最终还是通过native层来保存图片内容。在Java层中，我们常用的接口可能是createBitmap，getPixel，setPixel等，但实际上这些函数最终都是调用native层接口实现的，下面是Java层Bitmap的创建函数:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">private static Bitmap createBitmap(DisplayMetrics display, int width, int height,</div><div class="line">        Config config, boolean hasAlpha) &#123;</div><div class="line">    if (width &lt;= 0 || height &lt;= 0) &#123;</div><div class="line">        throw new IllegalArgumentException(&quot;width and height must be &gt; 0&quot;);</div><div class="line">    &#125;</div><div class="line">    Bitmap bm = nativeCreate(null, 0, width, width, height, config.nativeInt, true);　// 这！！！</div><div class="line">    if (display != null) &#123;</div><div class="line">        bm.mDensity = display.densityDpi;</div><div class="line">    &#125;</div><div class="line">    bm.setHasAlpha(hasAlpha);</div><div class="line">    if (config == Config.ARGB_8888 &amp;&amp; !hasAlpha) &#123;</div><div class="line">        nativeErase(bm.mFinalizer.mNativeBitmap, 0xff000000);</div><div class="line">    &#125;</div><div class="line">    // No need to initialize the bitmap to zeroes with other configs;</div><div class="line">    // it is backed by a VM byte array which is by definition preinitialized</div><div class="line">    // to all zeroes.</div><div class="line">    return bm;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>Bitmap还有很多native方法，具体可以看<a href="http://grepcode.com/file/repository.grepcode.com/java/ext/com.google.android/android/5.1.1_r1/android/graphics/Bitmap.java#1618" target="_blank" rel="external">Bitmap native 方法</a>。我们重点看createBitmap。</p>
+<p>另外在Java层与native层对应的标记是mNativeBitmap变量，它保存的是native层Bitmap的指针地址。这样在native层通过reinterpret_cast即可得到具体的对象。关于这个，可以看Binder机制的实现<a href="http://blog.csdn.net/xxxzhi/article/details/51225455" target="_blank" rel="external">Android源码代理模式—Binder</a>。</p>
+<h3 id="native层"><a href="#native层" class="headerlink" title="native层"></a>native层</h3><p>既然Bitmap的具体实现都是在native，那么看一下native层的Bitmap，native层的Bitmap在frameworks/base/core/jni/android/graphics/Bitmap.cpp中，对应的jni注册部分也在该文件下。看一下native层Bitmap的创建nativeCreate对应的Bitmap_creator函数:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">static jobject Bitmap_creator(JNIEnv* env, jobject, jintArray jColors,</div><div class="line">                              jint offset, jint stride, jint width, jint height,</div><div class="line">                              jint configHandle, jboolean isMutable) &#123;</div><div class="line">    SkColorType colorType = GraphicsJNI::legacyBitmapConfigToColorType(configHandle);</div><div class="line">    if (NULL != jColors) &#123;</div><div class="line">        size_t n = env-&gt;GetArrayLength(jColors);</div><div class="line">        if (n &lt; SkAbs32(stride) * (size_t)height) &#123;</div><div class="line">            doThrowAIOOBE(env);</div><div class="line">            return NULL;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // ARGB_4444 is a deprecated format, convert automatically to 8888</div><div class="line">    if (colorType == kARGB_4444_SkColorType) &#123;</div><div class="line">        colorType = kN32_SkColorType;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    SkBitmap bitmap;</div><div class="line">    bitmap.setInfo(SkImageInfo::Make(width, height, colorType, kPremul_SkAlphaType));</div><div class="line"></div><div class="line">    Bitmap* nativeBitmap = GraphicsJNI::allocateJavaPixelRef(env, &amp;bitmap, NULL);</div><div class="line">    if (!nativeBitmap) &#123;</div><div class="line">        return NULL;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (jColors != NULL) &#123;</div><div class="line">        GraphicsJNI::SetPixels(env, jColors, offset, stride,</div><div class="line">                0, 0, width, height, bitmap);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    return GraphicsJNI::createBitmap(env, nativeBitmap,</div><div class="line">            getPremulBitmapCreateFlags(isMutable));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>看看Bitmap的创建函数，从一创建开始，Bitmap就是先出现在native层的，Android中2D绘图是由skia框架实现的，在上述代码中就对应着SkBitmap。</p>
+<p>而对于Java存储类型的Bitmap的创建是由GraphicsJNI的allocateJavaPixelRef完成的，allocateJavaPixelRef是从Java层分配像素数组，看看allocateJavaPixelRef的源码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">android::Bitmap* GraphicsJNI::allocateJavaPixelRef(JNIEnv* env, SkBitmap* bitmap,</div><div class="line">                                             SkColorTable* ctable) &#123;</div><div class="line">    const SkImageInfo&amp; info = bitmap-&gt;info();</div><div class="line">    if (info.fColorType == kUnknown_SkColorType) &#123;</div><div class="line">        doThrowIAE(env, &quot;unknown bitmap configuration&quot;);</div><div class="line">        return NULL;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    size_t size;</div><div class="line">    if (!computeAllocationSize(*bitmap, &amp;size)) &#123;</div><div class="line">        return NULL;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // we must respect the rowBytes value already set on the bitmap instead of</div><div class="line">    // attempting to compute our own.</div><div class="line">    const size_t rowBytes = bitmap-&gt;rowBytes();</div><div class="line">    // 在这里分配</div><div class="line">    jbyteArray arrayObj = (jbyteArray) env-&gt;CallObjectMethod(gVMRuntime,</div><div class="line">                                                             gVMRuntime_newNonMovableArray,</div><div class="line">                                                             gByte_class, size); //在这创建Java层Array</div><div class="line">    if (env-&gt;ExceptionCheck() != 0) &#123;</div><div class="line">        return NULL;</div><div class="line">    &#125;</div><div class="line">    SkASSERT(arrayObj);</div><div class="line">    jbyte* addr = (jbyte*) env-&gt;CallLongMethod(gVMRuntime, gVMRuntime_addressOf, arrayObj); //获取地址</div><div class="line">    if (env-&gt;ExceptionCheck() != 0) &#123;</div><div class="line">        return NULL;</div><div class="line">    &#125;</div><div class="line">    SkASSERT(addr);</div><div class="line">    android::Bitmap* wrapper = new android::Bitmap(env, arrayObj, (void*) addr,</div><div class="line">            info, rowBytes, ctable); //创建native层对象, 在Bitmap构造函数中mPixelStorage中存储了jweak引用。</div><div class="line">    wrapper-&gt;getSkBitmap(bitmap);　// 在这里会将mPixelStorage的弱引用转换为强引用</div><div class="line">    // since we&apos;re already allocated, we lockPixels right away</div><div class="line">    // HeapAllocator behaves this way too</div><div class="line">    bitmap-&gt;lockPixels();</div><div class="line"></div><div class="line">    return wrapper;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到，native层是通过JNI方法，在Java层创建一个数组对象的，这个数组是对应在Java层的Bitmap对象的buffer数组，所以图像还是保存在Java堆的。而在native层这里它是通过weak指针来引用的，在需要的时候会转换为strong指针，用完之后又去掉strong指针，这样这个数组对象还是能够被Java堆自动回收。可以看一下native层的Bitmap构造函数:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Bitmap::Bitmap(JNIEnv* env, jbyteArray storageObj, void* address,</div><div class="line">            const SkImageInfo&amp; info, size_t rowBytes, SkColorTable* ctable)</div><div class="line">        : mPixelStorageType(PixelStorageType::Java) &#123;</div><div class="line">    env-&gt;GetJavaVM(&amp;mPixelStorage.java.jvm);</div><div class="line">    mPixelStorage.java.jweakRef = env-&gt;NewWeakGlobalRef(storageObj);//创建对Java层对象的弱引用</div><div class="line">    mPixelStorage.java.jstrongRef = nullptr;</div><div class="line">    mPixelRef.reset(new WrappedPixelRef(this, address, info, rowBytes, ctable));</div><div class="line">    // Note: this will trigger a call to onStrongRefDestroyed(), but</div><div class="line">    // we want the pixel ref to have a ref count of 0 at this point</div><div class="line">    mPixelRef-&gt;unref();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>里面jstrongRef一开始是赋值为null的，但是在bitmap的getSkBitmap方法会使用weakRef给他赋值:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">void Bitmap::getSkBitmap(SkBitmap* outBitmap) &#123;</div><div class="line">    assertValid();</div><div class="line">    android::AutoMutex _lock(mLock);</div><div class="line">    // Safe because mPixelRef is a WrappedPixelRef type, otherwise rowBytes()</div><div class="line">    // would require locking the pixels first.</div><div class="line">    outBitmap-&gt;setInfo(mPixelRef-&gt;info(), mPixelRef-&gt;rowBytes());</div><div class="line">    outBitmap-&gt;setPixelRef(refPixelRefLocked())-&gt;unref(); //refPixelRefLocked</div><div class="line">    outBitmap-&gt;setHasHardwareMipMap(hasHardwareMipMap());</div><div class="line">&#125;</div><div class="line">void Bitmap::pinPixelsLocked() &#123;  //refPixelRefLocked会调用这个方法</div><div class="line">    switch (mPixelStorageType) &#123;</div><div class="line">    case PixelStorageType::Invalid:</div><div class="line">        LOG_ALWAYS_FATAL(&quot;Cannot pin invalid pixels!&quot;);</div><div class="line">        break;</div><div class="line">    case PixelStorageType::External:</div><div class="line">    case PixelStorageType::Ashmem:</div><div class="line">        // Nothing to do</div><div class="line">        break;</div><div class="line">    case PixelStorageType::Java: &#123;</div><div class="line">        JNIEnv* env = jniEnv();</div><div class="line">        if (!mPixelStorage.java.jstrongRef) &#123;</div><div class="line">            mPixelStorage.java.jstrongRef = reinterpret_cast&lt;jbyteArray&gt;(</div><div class="line">                    env-&gt;NewGlobalRef(mPixelStorage.java.jweakRef));//赋值</div><div class="line">            if (!mPixelStorage.java.jstrongRef) &#123;</div><div class="line">                LOG_ALWAYS_FATAL(&quot;Failed to acquire strong reference to pixels&quot;);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在native层随时添加删除一个强引用，这样有利于更好地配合Java堆的垃圾回收。图片的数组可能会是非常耗内存的。</p>
+<p>在创建了native层的Bitmap后，再用GraphicsJNI的createBitmap创建Java层的Bitmap对象:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">jobject GraphicsJNI::createBitmap(JNIEnv* env, android::Bitmap* bitmap,</div><div class="line">        int bitmapCreateFlags, jbyteArray ninePatchChunk, jobject ninePatchInsets,</div><div class="line">        int density) &#123;</div><div class="line">    bool isMutable = bitmapCreateFlags &amp; kBitmapCreateFlag_Mutable;</div><div class="line">    bool isPremultiplied = bitmapCreateFlags &amp; kBitmapCreateFlag_Premultiplied;</div><div class="line">    // The caller needs to have already set the alpha type properly, so the</div><div class="line">    // native SkBitmap stays in sync with the Java Bitmap.</div><div class="line">    assert_premultiplied(bitmap-&gt;info(), isPremultiplied);</div><div class="line"></div><div class="line">    jobject obj = env-&gt;NewObject(gBitmap_class, gBitmap_constructorMethodID,</div><div class="line">            reinterpret_cast&lt;jlong&gt;(bitmap), bitmap-&gt;javaByteArray(),</div><div class="line">            bitmap-&gt;width(), bitmap-&gt;height(), density, isMutable, isPremultiplied,</div><div class="line">            ninePatchChunk, ninePatchInsets);//创建Java层Bitmap对象</div><div class="line">    hasException(env); // For the side effect of logging.</div><div class="line">    return obj;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在创建过程中，将刚刚创建的Java层Array和native层的bitmap指针也都会传给Java层Bitmap的构造函数。</p>
+<p>另外对于External存储类型的Bitmap，它的创建如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Bitmap::Bitmap(void* address, void* context, FreeFunc freeFunc,</div><div class="line">            const SkImageInfo&amp; info, size_t rowBytes, SkColorTable* ctable)</div><div class="line">        : mPixelStorageType(PixelStorageType::External) &#123;</div><div class="line">    mPixelStorage.external.address = address;</div><div class="line">    mPixelStorage.external.context = context;</div><div class="line">    mPixelStorage.external.freeFunc = freeFunc;</div><div class="line">    mPixelRef.reset(new WrappedPixelRef(this, address, info, rowBytes, ctable));</div><div class="line">    // Note: this will trigger a call to onStrongRefDestroyed(), but</div><div class="line">    // we want the pixel ref to have a ref count of 0 at this point</div><div class="line">    mPixelRef-&gt;unref();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>而Ashmem则是保存一个fd，以及asm地址和大小:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Bitmap::Bitmap(void* address, int fd,</div><div class="line">            const SkImageInfo&amp; info, size_t rowBytes, SkColorTable* ctable)</div><div class="line">        : mPixelStorageType(PixelStorageType::Ashmem) &#123;</div><div class="line">    mPixelStorage.ashmem.address = address;</div><div class="line">    mPixelStorage.ashmem.fd = fd;</div><div class="line">    mPixelStorage.ashmem.size = ashmem_get_size_region(fd);</div><div class="line">    mPixelRef.reset(new WrappedPixelRef(this, address, info, rowBytes, ctable));</div><div class="line">    // Note: this will trigger a call to onStrongRefDestroyed(), but</div><div class="line">    // we want the pixel ref to have a ref count of 0 at this point</div><div class="line">    mPixelRef-&gt;unref();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>native层Bitmap会针对不同的存储类型，做不同的处理。</p>
+<h2 id="Parcel传递"><a href="#Parcel传递" class="headerlink" title="Parcel传递"></a>Parcel传递</h2><p>首先在Java层Bitmap实现了Parcelable接口，所以他是能够通过Parcel来传递的,看看Bitmap的parcelable部分的源码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">public final class Bitmap implements Parcelable &#123;</div><div class="line">    ...</div><div class="line">    /**</div><div class="line">     * Write the bitmap and its pixels to the parcel. The bitmap can be</div><div class="line">     * rebuilt from the parcel by calling CREATOR.createFromParcel().</div><div class="line">     * @param p    Parcel object to write the bitmap data into</div><div class="line">     */</div><div class="line">    public void writeToParcel(Parcel p, int flags) &#123;</div><div class="line">        checkRecycled(&quot;Can&apos;t parcel a recycled bitmap&quot;);</div><div class="line">        if (!nativeWriteToParcel(mFinalizer.mNativeBitmap, mIsMutable, mDensity, p)) &#123;</div><div class="line">            throw new RuntimeException(&quot;native writeToParcel failed&quot;);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    public static final Parcelable.Creator&lt;Bitmap&gt; CREATOR</div><div class="line">              = new Parcelable.Creator&lt;Bitmap&gt;() &#123;</div><div class="line">            </div><div class="line">    </div><div class="line">        public Bitmap More ...createFromParcel(Parcel p) &#123;</div><div class="line">            Bitmap bm = nativeCreateFromParcel(p);</div><div class="line">            if (bm == null) &#123;</div><div class="line">                 throw new RuntimeException(&quot;Failed to unparcel Bitmap&quot;);</div><div class="line">            &#125;</div><div class="line">            return bm;</div><div class="line">        &#125;</div><div class="line">        public Bitmap[] More ...newArray(int size) &#123;</div><div class="line">            return new Bitmap[size];</div><div class="line">        &#125;</div><div class="line">    &#125;;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>写入和读取分别调用了nativeWriteToParcel，nativeCreateFromParcel。先看看nativeWriteToParcel对应的native层方法Bitmap_writeToParcel:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div></pre></td><td class="code"><pre><div class="line">static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,</div><div class="line">                                     jlong bitmapHandle,</div><div class="line">                                     jboolean isMutable, jint density,</div><div class="line">                                     jobject parcel) &#123;</div><div class="line">    </div><div class="line">    //根据handle创建native层图片，写入图片相关的一些附加信息，width,height,colorType,density等等。</div><div class="line">    if (parcel == NULL) &#123;</div><div class="line">        SkDebugf(&quot;------- writeToParcel null parcel\n&quot;);</div><div class="line">        return JNI_FALSE;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    android::Parcel* p = android::parcelForJavaObject(env, parcel);</div><div class="line">    SkBitmap bitmap;</div><div class="line"></div><div class="line">    android::Bitmap* androidBitmap = reinterpret_cast&lt;Bitmap*&gt;(bitmapHandle);</div><div class="line">    androidBitmap-&gt;getSkBitmap(&amp;bitmap);</div><div class="line"></div><div class="line">    p-&gt;writeInt32(isMutable);</div><div class="line">    p-&gt;writeInt32(bitmap.colorType());</div><div class="line">    p-&gt;writeInt32(bitmap.alphaType());</div><div class="line">    p-&gt;writeInt32(bitmap.width());</div><div class="line">    p-&gt;writeInt32(bitmap.height());</div><div class="line">    p-&gt;writeInt32(bitmap.rowBytes());</div><div class="line">    p-&gt;writeInt32(density);</div><div class="line"></div><div class="line">    if (bitmap.colorType() == kIndex_8_SkColorType) &#123;</div><div class="line">        SkColorTable* ctable = bitmap.getColorTable();</div><div class="line">        if (ctable != NULL) &#123;</div><div class="line">            int count = ctable-&gt;count();</div><div class="line">            p-&gt;writeInt32(count);</div><div class="line">            memcpy(p-&gt;writeInplace(count * sizeof(SkPMColor)),</div><div class="line">                   ctable-&gt;readColors(), count * sizeof(SkPMColor));</div><div class="line">        &#125; else &#123;</div><div class="line">            p-&gt;writeInt32(0);   // indicate no ctable</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    // 关键看这部分传输代码！！！！</div><div class="line">    // Transfer the underlying ashmem region if we have one and it&apos;s immutable.</div><div class="line">    android::status_t status;</div><div class="line">    int fd = androidBitmap-&gt;getAshmemFd();　//获取匿名共享内存，如果是图片是在匿名共享内存</div><div class="line">    if (fd &gt;= 0 &amp;&amp; !isMutable &amp;&amp; p-&gt;allowFds()) &#123;　//如果成功获取，并且图片不是mutable，同时允许fd(mAllowFds默认为True)</div><div class="line">        status = p-&gt;writeDupImmutableBlobFileDescriptor(fd); //最终会直接把文件fd传过去</div><div class="line">        if (status) &#123;</div><div class="line">            doThrowRE(env, &quot;Could not write bitmap blob file descriptor.&quot;);</div><div class="line">            return JNI_FALSE;</div><div class="line">        &#125;</div><div class="line">        return JNI_TRUE;</div><div class="line">    &#125;</div><div class="line">    // 如果不能通过fd传递，则传输Blob数据，也就是相当于直接把像素数据传递过去。</div><div class="line">    // Copy the bitmap to a new blob.</div><div class="line">    bool mutableCopy = isMutable;</div><div class="line"></div><div class="line">    size_t size = bitmap.getSize();</div><div class="line">    android::Parcel::WritableBlob blob;</div><div class="line">    status = p-&gt;writeBlob(size, mutableCopy, &amp;blob);</div><div class="line">    if (status) &#123;</div><div class="line">        doThrowRE(env, &quot;Could not copy bitmap to parcel blob.&quot;);</div><div class="line">        return JNI_FALSE;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    bitmap.lockPixels();</div><div class="line">    const void* pSrc =  bitmap.getPixels();</div><div class="line">    if (pSrc == NULL) &#123;</div><div class="line">        memset(blob.data(), 0, size);</div><div class="line">    &#125; else &#123;</div><div class="line">        memcpy(blob.data(), pSrc, size);</div><div class="line">    &#125;</div><div class="line">    bitmap.unlockPixels();</div><div class="line"></div><div class="line">    blob.release();</div><div class="line">    return JNI_TRUE;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>从源码可以知道，如果是匿名共享内存存储，那么writeToParcel会通过匿名共享内存的方式将匿名共享文件传递过去，看看writeDupFileDescriptor方法:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">status_t Parcel::writeDupFileDescriptor(int fd)</div><div class="line">&#123;</div><div class="line">    int dupFd = dup(fd);</div><div class="line">    if (dupFd &lt; 0) &#123;</div><div class="line">        return -errno;</div><div class="line">    &#125;</div><div class="line">    status_t err = writeFileDescriptor(dupFd, true /*takeOwnership*/);</div><div class="line">    if (err) &#123;</div><div class="line">        close(dupFd);</div><div class="line">    &#125;</div><div class="line">    return err;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>如果是保存的数组数据，那么会直接将像素数据转换为Blob来传递。这是在6.0的源码中是如此的，在5.0的源码中，还没有增加这些东西，5.0的源码中只有普通的将像素存储区域memcopy来传。Android在3.0中增加了inBitmap，在4.4增加了不同大小的图片使用inBitmap。</p>
+<p>而nativeCreateFromParcel对应了native层的Bitmap_createFromParcel，在6.0的源码里面源码如下(去掉了DEBUG_PARCEL):</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div></pre></td><td class="code"><pre><div class="line">static jobject Bitmap_createFromParcel(JNIEnv* env, jobject, jobject parcel) &#123;</div><div class="line">    ......</div><div class="line">    // 一开始读取图片相关的一些信息，比如说width, height, density, colorType等等，并存于SkImageInfo中。并且对ColorType的相关处理，这些占用的内存都很小，关键看像素的传递</div><div class="line">   </div><div class="line">    SkColorTable* ctable = NULL;</div><div class="line">    if (colorType == kIndex_8_SkColorType) &#123;</div><div class="line">        int count = p-&gt;readInt32();</div><div class="line">        if (count &lt; 0 || count &gt; 256) &#123;</div><div class="line">            // The data is corrupt, since SkColorTable enforces a value between 0 and 256,</div><div class="line">            // inclusive.</div><div class="line">            return NULL;</div><div class="line">        &#125;</div><div class="line">        if (count &gt; 0) &#123;</div><div class="line">            size_t size = count * sizeof(SkPMColor);</div><div class="line">            const SkPMColor* src = (const SkPMColor*)p-&gt;readInplace(size);</div><div class="line">            if (src == NULL) &#123;</div><div class="line">                return NULL;</div><div class="line">            &#125;</div><div class="line">            ctable = new SkColorTable(src, count);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // Read the bitmap blob.</div><div class="line">    size_t size = bitmap-&gt;getSize();</div><div class="line">    android::Parcel::ReadableBlob blob;</div><div class="line">    android::status_t status = p-&gt;readBlob(size, &amp;blob);　//这里对应writeDupFileDescriptor</div><div class="line">    if (status) &#123;</div><div class="line">        SkSafeUnref(ctable);</div><div class="line">        doThrowRE(env, &quot;Could not read bitmap blob.&quot;);</div><div class="line">        return NULL;</div><div class="line">    &#125;</div><div class="line">     // 关键看这部分传输代码！！！！</div><div class="line">    // Map the bitmap in place from the ashmem region if possible otherwise copy.</div><div class="line">    Bitmap* nativeBitmap;</div><div class="line">    if (blob.fd() &gt;= 0 &amp;&amp; (blob.isMutable() || !isMutable) &amp;&amp; (size &gt;= ASHMEM_BITMAP_MIN_SIZE)) &#123;</div><div class="line"></div><div class="line">        // Dup the file descriptor so we can keep a reference to it after the Parcel</div><div class="line">        // is disposed.</div><div class="line">        int dupFd = dup(blob.fd());</div><div class="line">        if (dupFd &lt; 0) &#123;</div><div class="line">            blob.release();</div><div class="line">            SkSafeUnref(ctable);</div><div class="line">            doThrowRE(env, &quot;Could not allocate dup blob fd.&quot;);</div><div class="line">            return NULL;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // Map the pixels in place and take ownership of the ashmem region.</div><div class="line">        nativeBitmap = GraphicsJNI::mapAshmemPixelRef(env, bitmap.get(),</div><div class="line">                ctable, dupFd, const_cast&lt;void*&gt;(blob.data()), !isMutable);</div><div class="line">        SkSafeUnref(ctable);</div><div class="line">        if (!nativeBitmap) &#123;</div><div class="line">            close(dupFd);</div><div class="line">            blob.release();</div><div class="line">            doThrowRE(env, &quot;Could not allocate ashmem pixel ref.&quot;);</div><div class="line">            return NULL;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // Clear the blob handle, don&apos;t release it.</div><div class="line">        blob.clear();</div><div class="line">    &#125; else &#123;</div><div class="line"></div><div class="line">        // Copy the pixels into a new buffer.</div><div class="line">        nativeBitmap = GraphicsJNI::allocateJavaPixelRef(env, bitmap.get(), ctable);</div><div class="line">        SkSafeUnref(ctable);</div><div class="line">        if (!nativeBitmap) &#123;</div><div class="line">            blob.release();</div><div class="line">            doThrowRE(env, &quot;Could not allocate java pixel ref.&quot;);</div><div class="line">            return NULL;</div><div class="line">        &#125;</div><div class="line">        bitmap-&gt;lockPixels();</div><div class="line">        memcpy(bitmap-&gt;getPixels(), blob.data(), size);</div><div class="line">        bitmap-&gt;unlockPixels();</div><div class="line"></div><div class="line">        // Release the blob handle.</div><div class="line">        blob.release();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    return GraphicsJNI::createBitmap(env, nativeBitmap,</div><div class="line">            getPremulBitmapCreateFlags(isMutable), NULL, NULL, density);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个是与writeToParcel相互对应的，如果是asm则直接读取文件fd，如果是数据，则传对应数据。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>上面就是Bitmap在Java层与native的表现，Bitmap的操作基本都是在native层，Java层与native层通过一个handle相互对应。在6.0Bitmap总共有四种存储形式，也增加了asm的存储。在进行Parcel传输的时候，针对asm，Parcel传输的fd，这样能够减少很多内存的消耗。在Android6.0内部，很多图片也开始存储在asm里面了。不过在Java层还没有提供将图片保存在匿名共享内存里面。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/20/xposed-source-read-summary/" rel="next" title="Xposed源码阅读小结">
+                <i class="fa fa-chevron-left"></i> Xposed源码阅读小结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/29/android-parcel-bitmap-2/" rel="prev" title="Android4.0之后Parcel传输Bitmap源码分析">
+                Android4.0之后Parcel传输Bitmap源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Bitmap存储方式以及包含的属性"><span class="nav-number">1.</span> <span class="nav-text">Bitmap存储方式以及包含的属性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Java层与native层Bitmap"><span class="nav-number">2.</span> <span class="nav-text">Java层与native层Bitmap</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Java层Bitmap"><span class="nav-number">2.1.</span> <span class="nav-text">Java层Bitmap</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#native层"><span class="nav-number">2.2.</span> <span class="nav-text">native层</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parcel传递"><span class="nav-number">3.</span> <span class="nav-text">Parcel传递</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

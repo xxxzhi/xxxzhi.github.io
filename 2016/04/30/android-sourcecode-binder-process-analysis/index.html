@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前两天看到Service的onBind函数返回值的三种情况（扩展Binder对象，Messenger，aidl），一直在想他们内部的实现有什么不一样的，网上很多文章都介绍了Service的绑定过程，但是并没有介绍对于跨进程与非跨进程，对于不同的返回值，其具体有什么区别，以及具体是怎么实现的。这篇文章就根据源码分析Android究竟是在哪部分来控制跨进程与非跨进程Binder的传输的，Binder究">
+<meta name="keywords" content="Android,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Binder跨进程与非跨进程的传输异同源码分析">
+<meta property="og:url" content="http://yoursite.com/2016/04/30/android-sourcecode-binder-process-analysis/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前两天看到Service的onBind函数返回值的三种情况（扩展Binder对象，Messenger，aidl），一直在想他们内部的实现有什么不一样的，网上很多文章都介绍了Service的绑定过程，但是并没有介绍对于跨进程与非跨进程，对于不同的返回值，其具体有什么区别，以及具体是怎么实现的。这篇文章就根据源码分析Android究竟是在哪部分来控制跨进程与非跨进程Binder的传输的，Binder究">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android Binder跨进程与非跨进程的传输异同源码分析">
+<meta name="twitter:description" content="前两天看到Service的onBind函数返回值的三种情况（扩展Binder对象，Messenger，aidl），一直在想他们内部的实现有什么不一样的，网上很多文章都介绍了Service的绑定过程，但是并没有介绍对于跨进程与非跨进程，对于不同的返回值，其具体有什么区别，以及具体是怎么实现的。这篇文章就根据源码分析Android究竟是在哪部分来控制跨进程与非跨进程Binder的传输的，Binder究">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/04/30/android-sourcecode-binder-process-analysis/"/>
+
+
+
+
+
+  <title>Android Binder跨进程与非跨进程的传输异同源码分析 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/30/android-sourcecode-binder-process-analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android Binder跨进程与非跨进程的传输异同源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-30T00:00:00+08:00">
+                2016-04-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前两天看到Service的onBind函数返回值的三种情况（扩展Binder对象，Messenger，aidl），一直在想他们内部的实现有什么不一样的，网上很多文章都介绍了Service的绑定过程，但是并没有介绍对于跨进程与非跨进程，对于不同的返回值，其具体有什么区别，以及具体是怎么实现的。这篇文章就根据源码分析Android究竟是在哪部分来控制跨进程与非跨进程Binder的传输的，Binder究竟是怎么传输的。</p>
+<p>首先看一下Service的绑定中，Binder跨进程与非跨进程的区别代码中的体现。</p>
+<h2 id="Service跨进程绑定与非跨进程绑定的表象"><a href="#Service跨进程绑定与非跨进程绑定的表象" class="headerlink" title="Service跨进程绑定与非跨进程绑定的表象"></a>Service跨进程绑定与非跨进程绑定的表象</h2><p>想知道具体是怎么样的，其实直接在ServiceConnection的onServiceConnection回调函数中，以及在Service的onBind中分别打印一下Binder就好了，如下代码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//Service onBind</span></div><div class="line"><span class="function"><span class="keyword">public</span> Binder <span class="title">onBind</span><span class="params">()</span></span>&#123;</div><div class="line">    Binder binder ; <span class="comment">//这里并没有初始化，可以使扩展Binder，也可以是aidl的Stub</span></div><div class="line">    Log.i(<span class="string">"TestLog"</span>,<span class="string">"onBind: "</span>+binder.hashCode()+<span class="string">","</span>+binder.toString());</div><div class="line">    <span class="keyword">return</span> binder;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">//ServiceConnection</span></div><div class="line">ServiceConnection connection = <span class="keyword">new</span> ServiceConnection()&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onServiceConnection</span><span class="params">(ComponentName component, Binder binder)</span></span>&#123;</div><div class="line">        Log.i(<span class="string">"TestLog"</span>,<span class="string">"onServiceConnection: "</span>+binder.hashCode()+<span class="string">","</span>+binder.toString());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>通过设置Service的android:process，可以将Service远程进程与相同进程进行实验。<br>通过log可以发现，如果是跨进程的话，在ServiceConnection的onServiceConnection返回的结果是一个BinderProxy对象，与onBind中打印的结果是不一致的。如果是非跨进程，在onServiceConnection与onBind的打印的内容是一模一样的。<strong><em>这里跟onBind是返回扩展Binder还是返回扩展aidl自动产生Stub类是没有关系的，只跟是否跨进程有关</em></strong>。</p>
+<p>从这里可以看出，如果是跨进程则返回BinderProxy，非跨进程则返回原来在onBind中返回的对象。我困惑的问题是，Android是怎么实现这个根据不同的进程来返回不同的结果呢？下面先看一下Service的绑定过程是否有针对不同进程的区别处理。</p>
+<h2 id="Service绑定过程"><a href="#Service绑定过程" class="headerlink" title="Service绑定过程"></a>Service绑定过程</h2><h3 id="绑定过程"><a href="#绑定过程" class="headerlink" title="绑定过程"></a>绑定过程</h3><p>首先简单介绍一下Service的绑定过程：</p>
+<ol>
+<li>Activity通过bindService请求绑定相应的Service(由Intent指定），并设置了ServiceConnection回调接口。</li>
+<li>实际上会调用ContextImpl.bindService，然后调用ActivityManagerNative.getDefault().bindService，也就是通过IPC调用ActivityManagerService的bindService函数。</li>
+<li>在ActivityManagerService的bindService函数中，先通过retrieve创建ServiceRecord，这个就是对应着我们想要绑定的Service</li>
+<li>然后根据结果创建ConnectionRecord，将ServiceConnection保存在这里面。ConnectionRecord保存在一个ArrayList中，可能有多个客户端想要绑定。</li>
+<li>接着在bringUpServiceLocked函数中判断是否需要重新创建一个进程来运行Service，根据android:processd的设置</li>
+<li>启动服务，通过ApplicationThreadProxy(app.thread)远程调用ApplicationThread的scheduleCreateService来发送Message给主线程消息循环(ActivityThread,ActivityThread.H)，启动服务。</li>
+<li><p>绑定服务，通过ApplicationThreadProxy(app.thread)远程调用ApplicationThread的scheduleBindService来发送Message给主线程消息循环(ActivityThread,ActivityThread.H)，绑定服务(handleBindService)。这里看一下源码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">try</span> &#123;</div><div class="line">    <span class="keyword">if</span> (!data.rebind) &#123;</div><div class="line">        IBinder binder = s.onBind(data.intent);</div><div class="line">        ActivityManagerNative.getDefault().publishService(</div><div class="line">            data.token, data.intent, binder);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        s.onRebind(data.intent);</div><div class="line">        ActivityManagerNative.getDefault().serviceDoneExecuting(</div><div class="line">            data.token, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">    &#125;</div><div class="line">    ensureJitEnabled();</div><div class="line">&#125; <span class="keyword">catch</span> (RemoteException ex) &#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>在绑定服务中，调用Service的onBind方法得到Binder，并且通过ActivityManagerNative.getDefault().publishService发布服务。</p>
+</li>
+<li>在publishServcie中使用ServiceRecord获取ConnectionRecord，最终调用保存在ConnectionRecord里面的ServiceConnection的onServiceConnection函数。其中ServiceRecord，ServiceConnection都是Binder类，可以通过IPC访问。</li>
+</ol>
+<p>这里只是简单介绍一下绑定Service的流程，也并没有把具体对象名称写出来。如果想要更详细的了解整个过程可以去看一下老罗的博客，其实最好是照着别人的博客看一下源码。</p>
+<h3 id="绑定过程是否处理了不同onBind返回值"><a href="#绑定过程是否处理了不同onBind返回值" class="headerlink" title="绑定过程是否处理了不同onBind返回值"></a>绑定过程是否处理了不同onBind返回值</h3><p>我一直觉得是在绑定服务的过程中会针对不同的onBind返回值有不同的处理，但实际上并没有。看第7步中的源码就知道了，上面的过程中，并没有针对不同的onBind返回值进行特殊处理。</p>
+<p>既然绑定过程中没有对不同进程进行处理，那么只能看看Parcel了。而实际上确实是在Parcel中有体现出来了跨进程与非跨进程的区别。下面看看Parcel读取和写入Binder。</p>
+<h2 id="Parcel中写入读取Binder"><a href="#Parcel中写入读取Binder" class="headerlink" title="Parcel中写入读取Binder"></a>Parcel中写入读取Binder</h2><h3 id="Parcel写入Binder"><a href="#Parcel写入Binder" class="headerlink" title="Parcel写入Binder"></a>Parcel写入Binder</h3><p>Parcel写入Binder是通过writeStrongBinder的，Java层的writeStrongBinder是一个native函数，对应的JNI实现为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">static void android_os_Parcel_writeStrongBinder(JNIEnv* env, jclass clazz, jlong nativePtr, jobject object)</div><div class="line">&#123;</div><div class="line">    Parcel* parcel = reinterpret_cast&lt;Parcel*&gt;(nativePtr);</div><div class="line">    if (parcel != NULL) &#123;</div><div class="line">        const status_t err = parcel-&gt;writeStrongBinder(ibinderForJavaObject(env, object));</div><div class="line">        if (err != NO_ERROR) &#123;</div><div class="line">            signalExceptionForError(env, clazz, err);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中ibinderForJavaObject是将java层的对象转换成native层的Binder对象，实际上对应的是JavaBBinder。</p>
+<p>然后native层的parcel会调用它的writeStrognBinder:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">status_t Parcel::writeStrongBinder(const sp&lt;IBinder&gt;&amp; val)</div><div class="line">&#123;</div><div class="line">    return flatten_binder(ProcessState::self(), val, this);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最终调用flatten_binder:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">status_t</span> flatten_binder(<span class="keyword">const</span> sp&lt;ProcessState&gt;&amp; <span class="comment">/*proc*/</span>,</div><div class="line">    <span class="keyword">const</span> sp&lt;IBinder&gt;&amp; binder, Parcel* out)</div><div class="line">&#123;</div><div class="line">    flat_binder_object obj;</div><div class="line"></div><div class="line">    obj.flags = <span class="number">0x7f</span> | FLAT_BINDER_FLAG_ACCEPTS_FDS;</div><div class="line">    <span class="keyword">if</span> (binder != <span class="literal">NULL</span>) &#123;</div><div class="line">        IBinder *local = binder-&gt;localBinder();   <span class="comment">//JavaBBinder返回的是this,也就是自己</span></div><div class="line">        <span class="keyword">if</span> (!local) &#123;</div><div class="line">            BpBinder *proxy = binder-&gt;remoteBinder();</div><div class="line">            <span class="keyword">if</span> (proxy == <span class="literal">NULL</span>) &#123;</div><div class="line">                ALOGE(<span class="string">"null proxy"</span>);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">const</span> <span class="keyword">int32_t</span> handle = proxy ? proxy-&gt;handle() : <span class="number">0</span>;</div><div class="line">            obj.type = BINDER_TYPE_HANDLE;</div><div class="line">            obj.binder = <span class="number">0</span>; <span class="comment">/* Don't pass uninitialized stack data to a remote process */</span></div><div class="line">            obj.handle = handle;</div><div class="line">            obj.cookie = <span class="number">0</span>;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;<span class="comment">// 写入JavaBBinder将会对应这一段。</span></div><div class="line">            obj.type = BINDER_TYPE_BINDER;</div><div class="line">            obj.binder = <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">uintptr_t</span>&gt;(local-&gt;getWeakRefs());</div><div class="line">            obj.cookie = <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">uintptr_t</span>&gt;(local);   <span class="comment">//把对应的JavaBBinder的指针转换成整形uintptr_t</span></div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        obj.type = BINDER_TYPE_BINDER;</div><div class="line">        obj.binder = <span class="number">0</span>;</div><div class="line">        obj.cookie = <span class="number">0</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> finish_flatten_binder(binder, obj, out); <span class="comment">//finish_flatten_binder是将obj写入到out里面。</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里就根据是本地binder还是远程binder，对Binder的写入采取了两种不同的方式。Binder如果是JavaBBinder，则它的localBinder会返回localBinder，如果是BpBinder则localBinder会为null。我们写入的时候，ibinderForJavaObject就返回的是JavaBBinder。flat_binder_object是Binder写入的时候的对象，它对应着Binder。handle表示Binder对象在Binder驱动中的标志，比如ServiceManager的handle为0。type表示当前传输的Binder是本地的（同进程），还是一个proxy（跨进程）。binder，cookie保存着Binder对象的指针。finish_flatten_binder会将obj写入到out里面，最终写入到Binder驱动中，写入部分也就完了。从上面的流程可以看出，在写入的时候，Parcel会针对不同的Binder（BBinder/JavaBBinder,BpBinder）有不同的处理，而他们确实就是对应着跟Service端Binder是同一个进程的还是不同进程的情况。</p>
+<h4 id="Parcel读取Binder"><a href="#Parcel读取Binder" class="headerlink" title="Parcel读取Binder"></a>Parcel读取Binder</h4><p>接下来就是读取了，同样的，Java层的Parcel也是通过native函数来读取的。在这里我们从最底层开始分析，首先从unflatten_binder开始：</p>
+<p>unflatten_binder:<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">status_t</span> unflatten_binder(<span class="keyword">const</span> sp&lt;ProcessState&gt;&amp; proc,</div><div class="line">    <span class="keyword">const</span> Parcel&amp; in, sp&lt;IBinder&gt;* out)</div><div class="line">&#123;</div><div class="line">    <span class="keyword">const</span> flat_binder_object* flat = in.readObject(<span class="literal">false</span>);</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (flat) &#123;</div><div class="line">        <span class="keyword">switch</span> (flat-&gt;type) &#123;</div><div class="line">            <span class="keyword">case</span> BINDER_TYPE_BINDER:</div><div class="line">                *out = <span class="keyword">reinterpret_cast</span>&lt;IBinder*&gt;(flat-&gt;cookie);</div><div class="line">                <span class="keyword">return</span> finish_unflatten_binder(<span class="literal">NULL</span>, *flat, in);</div><div class="line">            <span class="keyword">case</span> BINDER_TYPE_HANDLE:</div><div class="line">                *out = proc-&gt;getStrongProxyForHandle(flat-&gt;handle);</div><div class="line">                <span class="keyword">return</span> finish_unflatten_binder(</div><div class="line">                    <span class="keyword">static_cast</span>&lt;BpBinder*&gt;(out-&gt;get()), *flat, in);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> BAD_TYPE;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>首先从Binder驱动中读取一个flat_binder_object—flat。flat的处理是关键，它会根据flat-&gt;type的值分别处理，如果是BINDER_TYPE_BINDER，则使用cookie中的值强制转换成指针。如果是BINDER_TYPE_HANDLE，则使用Proxy，getStringProxyForHandle会返回BpBinder。而调用unflatten_binder的是native层的Parcel的readStringBinder。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">sp&lt;IBinder&gt; Parcel::readStrongBinder() <span class="keyword">const</span></div><div class="line">&#123;</div><div class="line">    sp&lt;IBinder&gt; val;</div><div class="line">    unflatten_binder(ProcessState::self(), *<span class="keyword">this</span>, &amp;val);</div><div class="line">    <span class="keyword">return</span> val;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>调用readStrongBinder的是jni函数的实现:</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> jobject <span class="title">android_os_Parcel_readStrongBinder</span><span class="params">(JNIEnv* env, jclass clazz, jlong nativePtr)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">    Parcel* parcel = <span class="keyword">reinterpret_cast</span>&lt;Parcel*&gt;(nativePtr);</div><div class="line">    <span class="keyword">if</span> (parcel != <span class="literal">NULL</span>) &#123;</div><div class="line">        <span class="keyword">return</span> javaObjectForIBinder(env, parcel-&gt;readStrongBinder());</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="literal">NULL</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>javaObjectForIBinder与ibinderForJavaObject相对应，把IBinder对象转换成对应的Java层的Object。这个函数是关键。看看它的实现：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div></pre></td><td class="code"><pre><div class="line"><span class="function">jobject <span class="title">javaObjectForIBinder</span><span class="params">(JNIEnv* env, <span class="keyword">const</span> sp&lt;IBinder&gt;&amp; val)</span></span></div><div class="line"><span class="function"></span>&#123;</div><div class="line">     <span class="keyword">if</span> (val == <span class="literal">NULL</span>) <span class="keyword">return</span> <span class="literal">NULL</span>;</div><div class="line"> </div><div class="line">     <span class="keyword">if</span> (val-&gt;checkSubclass(&amp;gBinderOffsets)) &#123;  <span class="comment">//如果是本地的，那么会直接进入这部分代码，因为这个val是写入的时候同一个对象，gBinderOffsets也是一致。如果val是一种proxy对象，则不然，会继续往下执行找到一个Proxy对象。</span></div><div class="line">         <span class="comment">// One of our own!</span></div><div class="line">         jobject object = <span class="keyword">static_cast</span>&lt;JavaBBinder*&gt;(val.get())-&gt;object();</div><div class="line">         LOGDEATH(<span class="string">"objectForBinder %p: it's our own %p!\n"</span>, val.get(), object);</div><div class="line">         <span class="keyword">return</span> object;</div><div class="line">     &#125;</div><div class="line"> </div><div class="line">     <span class="comment">// For the rest of the function we will hold this lock, to serialize</span></div><div class="line">     <span class="comment">// looking/creation of Java proxies for native Binder proxies.</span></div><div class="line">     AutoMutex _l(mProxyLock);</div><div class="line"> </div><div class="line">     <span class="comment">// Someone else's...  do we know about it?</span></div><div class="line">     jobject object = (jobject)val-&gt;findObject(&amp;gBinderProxyOffsets);</div><div class="line">     <span class="keyword">if</span> (object != <span class="literal">NULL</span>) &#123;</div><div class="line">        jobject res = jniGetReferent(env, object);</div><div class="line">        <span class="keyword">if</span> (res != <span class="literal">NULL</span>) &#123;</div><div class="line">            ALOGV(<span class="string">"objectForBinder %p: found existing %p!\n"</span>, val.get(), res);</div><div class="line">            <span class="keyword">return</span> res;</div><div class="line">        &#125;</div><div class="line">        LOGDEATH(<span class="string">"Proxy object %p of IBinder %p no longer in working set!!!"</span>, object, val.get());</div><div class="line">        android_atomic_dec(&amp;gNumProxyRefs);</div><div class="line">        val-&gt;detachObject(&amp;gBinderProxyOffsets);</div><div class="line">        env-&gt;DeleteGlobalRef(object);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    object = env-&gt;NewObject(gBinderProxyOffsets.mClass, gBinderProxyOffsets.mConstructor);<span class="comment">//gBinderProxyOffsets保存的是Java层BinderProxy的信息，这里也是创建BinderProxy。</span></div><div class="line">    <span class="keyword">if</span> (object != <span class="literal">NULL</span>) &#123;</div><div class="line">        LOGDEATH(<span class="string">"objectForBinder %p: created new proxy %p !\n"</span>, val.get(), object);</div><div class="line">        <span class="comment">// The proxy holds a reference to the native object.</span></div><div class="line">        env-&gt;SetLongField(object, gBinderProxyOffsets.mObject, (jlong)val.get());</div><div class="line">        val-&gt;incStrong((<span class="keyword">void</span>*)javaObjectForIBinder);</div><div class="line"></div><div class="line">        <span class="comment">// The native object needs to hold a weak reference back to the</span></div><div class="line">        <span class="comment">// proxy, so we can retrieve the same proxy if it is still active.</span></div><div class="line">        jobject refObject = env-&gt;NewGlobalRef(</div><div class="line">                env-&gt;GetObjectField(object, gBinderProxyOffsets.mSelf));</div><div class="line">        val-&gt;attachObject(&amp;gBinderProxyOffsets, refObject,</div><div class="line">                jnienv_to_javavm(env), proxy_cleanup);</div><div class="line"></div><div class="line">        <span class="comment">// Also remember the death recipients registered on this proxy</span></div><div class="line">        sp&lt;DeathRecipientList&gt; drl = <span class="keyword">new</span> DeathRecipientList;</div><div class="line">        drl-&gt;incStrong((<span class="keyword">void</span>*)javaObjectForIBinder);</div><div class="line">        env-&gt;SetLongField(object, gBinderProxyOffsets.mOrgue, <span class="keyword">reinterpret_cast</span>&lt;jlong&gt;(drl.get()));</div><div class="line"></div><div class="line">        <span class="comment">// Note that a new object reference has been created.</span></div><div class="line">        android_atomic_inc(&amp;gNumProxyRefs);</div><div class="line">        incRefsCreated(env);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> object;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">//IBinder</div><div class="line">checkSubclass(const void* subclassID) const</div><div class="line">&#123;</div><div class="line">    return subclassID == &amp;gBinderOffsets;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面的处理中，如果是跟Service是同一个进程，也就是val是JavaBBinder。那么在checkSubclass中，它所包含的gBinderOffsets指针与参数传入的gBinderOffsets的指针必然是同一个值，则满足if条件。直接将指针强制转换成JavaBBinder，返回对应的jobject。如果是不同的进程，那么val也就会是BpBinder，最终会返回一个BinderProxy,不同的进程这一部分网上很多介绍Binder的文章都介绍了。</p>
+<h3 id="Parcel读取写入总结"><a href="#Parcel读取写入总结" class="headerlink" title="Parcel读取写入总结"></a>Parcel读取写入总结</h3><p>上面介绍了Parcel整个写入读取的流程，最后代替Binder传输的是flat_binder_object。在native的Parcel中，根据跨进程还是非跨进程，flat_binder_object的值是不一样的，跨进程的时候flat_binder_object的type为BINDER_TYPE_HANDLE，非跨进程的时候flat_binder_object的type为BINDER_TYPE_BINDER。在这里已经可以发现跨进程与非跨进程的时候传输的数据的区别了。客户端的Parcel在读取Binder的时候，根据是flat_binder_object的type的值进行区分对待，返回不同的内容。</p>
+<h2 id="Binder驱动的处理"><a href="#Binder驱动的处理" class="headerlink" title="Binder驱动的处理"></a>Binder驱动的处理</h2><p>但是我们还没有发现Android是如何区分跨进程与非跨进程的呢？显然它的实现在Binder驱动里面。关于如何判断读取的时候是跟Service同一个进程还是不同的进程，脑子里随便一想基本就能够想到怎么去实现了。因为每个进程进行系统调用陷入内核的时候，内核的当然是可以知道当前进入内核空间的进程的信息了啦，这样就可以判断当前请求读取信息的是跟Service同一个进程还是不同的进程了。</p>
+<p>实际上Binder驱动保存着Service端的Binder地址和handle的信息，将两者相互映射，根据不同的服务端进程和客户端进程来区别处理。这篇文章详细介绍了Binder驱动<a href="http://blog.csdn.net/yangwen123/article/details/9316987" target="_blank" rel="external">深入分析Android Binder 驱动</a>。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>实际上真正控制跨进程与非跨进程返回Binder类型的，不是绑定服务的过程，而是Binder驱动。Parcel是根据从驱动中读取的数据作出不同的处理，而Binder驱动真正控制。如果是与Service端同一个进程则返回Binder(在底层是Binder指针)，如果是不同的进程则返回handle。真正在传输的过程中，是作为flat_binder_object对象来传递的。</p>
+<p>其实也可以在Service的绑定过程中来根据是否是相同进程来进行处理的，但那样就局限于Service的绑定部分了,而Android中用的Binder传输的实在是太多了，所以直接在Binder驱动中进行控制更加方便。</p>
+<hr>
+<blockquote>
+<p>积跬步，至千里；积小流，成江海</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/26/android-sourcecode-bridge-fragmentcompat/" rel="next" title="Android源码桥梁模式---FragmentCompat">
+                <i class="fa fa-chevron-left"></i> Android源码桥梁模式---FragmentCompat
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/05/android-thinking-about-mvp/" rel="prev" title="关于Android MVP模式的思考">
+                关于Android MVP模式的思考 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Service跨进程绑定与非跨进程绑定的表象"><span class="nav-number">1.</span> <span class="nav-text">Service跨进程绑定与非跨进程绑定的表象</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Service绑定过程"><span class="nav-number">2.</span> <span class="nav-text">Service绑定过程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#绑定过程"><span class="nav-number">2.1.</span> <span class="nav-text">绑定过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#绑定过程是否处理了不同onBind返回值"><span class="nav-number">2.2.</span> <span class="nav-text">绑定过程是否处理了不同onBind返回值</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parcel中写入读取Binder"><span class="nav-number">3.</span> <span class="nav-text">Parcel中写入读取Binder</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Parcel写入Binder"><span class="nav-number">3.1.</span> <span class="nav-text">Parcel写入Binder</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Parcel读取Binder"><span class="nav-number">3.1.1.</span> <span class="nav-text">Parcel读取Binder</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Parcel读取写入总结"><span class="nav-number">3.2.</span> <span class="nav-text">Parcel读取写入总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Binder驱动的处理"><span class="nav-number">4.</span> <span class="nav-text">Binder驱动的处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

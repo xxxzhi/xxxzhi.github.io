@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="linux," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="centos 4.4 中编译linux 2.6.18 ###1. 系统环境：ubuntu14.04 LTS 中安装virtual box ，在virtualbox 中安装centos4.4 （其内核版本为2.6.9），编译的内核版本为：linux 2.6.18.  2. 编译步骤：1. 下载内核源码wget https://www.kernel.org/pub/linux/kernel/v2.6/">
+<meta name="keywords" content="linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="centos 4.4 中编译linux 2.6.18 ">
+<meta property="og:url" content="http://yoursite.com/2014/10/13/make-linux-kernel/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="centos 4.4 中编译linux 2.6.18 ###1. 系统环境：ubuntu14.04 LTS 中安装virtual box ，在virtualbox 中安装centos4.4 （其内核版本为2.6.9），编译的内核版本为：linux 2.6.18.  2. 编译步骤：1. 下载内核源码wget https://www.kernel.org/pub/linux/kernel/v2.6/">
+<meta property="og:image" content="http://xxxzhi.github.io/images/make_linux_uname.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/make_linux_menuconfig1.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/make_linux_menuconfig2.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/make_linux_uname2.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="centos 4.4 中编译linux 2.6.18 ">
+<meta name="twitter:description" content="centos 4.4 中编译linux 2.6.18 ###1. 系统环境：ubuntu14.04 LTS 中安装virtual box ，在virtualbox 中安装centos4.4 （其内核版本为2.6.9），编译的内核版本为：linux 2.6.18.  2. 编译步骤：1. 下载内核源码wget https://www.kernel.org/pub/linux/kernel/v2.6/">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/make_linux_uname.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/10/13/make-linux-kernel/"/>
+
+
+
+
+
+  <title>centos 4.4 中编译linux 2.6.18  | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/10/13/make-linux-kernel/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">centos 4.4 中编译linux 2.6.18 </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-10-13T00:00:00+08:00">
+                2014-10-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="centos-4-4-中编译linux-2-6-18"><a href="#centos-4-4-中编译linux-2-6-18" class="headerlink" title="centos 4.4 中编译linux 2.6.18"></a>centos 4.4 中编译linux 2.6.18</h1><hr>
+<p>###1. 系统环境：<br>ubuntu14.04 LTS 中安装virtual box ，在virtualbox 中安装centos4.4 （其内核版本为2.6.9），<br>编译的内核版本为：linux 2.6.18.</p>
+<p><img src="http://xxxzhi.github.io/images/make_linux_uname.png" alt="此处输入图片的描述"></p>
+<h3 id="2-编译步骤："><a href="#2-编译步骤：" class="headerlink" title="2. 编译步骤："></a>2. 编译步骤：</h3><h5 id="1-下载内核源码"><a href="#1-下载内核源码" class="headerlink" title="1. 下载内核源码"></a>1. 下载内核源码</h5><pre><code>wget https://www.kernel.org/pub/linux/kernel/v2.6/linux-2.6.18.tar.gz --no-check-certificate
+</code></pre><h5 id="2-检查并安装gcc"><a href="#2-检查并安装gcc" class="headerlink" title="2. 检查并安装gcc"></a>2. 检查并安装gcc</h5><p>在我下载的centos4.4 中，并没有gcc，所以必须要重新安装，使用下列命令安装gcc<br>    yum -y install gcc<br>    yum -y install gcc-c++<br>    yum install make<br>如果使用的是centos4.4的话，在我实验过程中就遇到了一个问题：</p>
+<blockquote>
+<p>Setting up Update Process<br>Setting up repositories<br>not using ftp, http[s], or file for repos, skipping - 4 is not a valid release or hasnt been released yet<br>Cannot find a valid baseurl for repo: update<br>Error: Cannot find a valid baseurl for repo: update</p>
+</blockquote>
+<p>在网上查找了一些资料后，发现是4.4已经被depresed掉了，连yum安装都不行了，但是网上有个人介绍了一个CentOS-Base.repo是可以使用的。上面错误的具体原因，参见：<a href="http://blog.sina.com.cn/s/blog_4a5eb9980102v2e1.html" target="_blank" rel="external">yum Cannot find a valid baseurl for repo: update</a>。我对他的解决方案进行了简化，直接表述：</p>
+<pre><code>wget http://vault.centos.org/4.9/CentOS-Base.repo
+mv CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+</code></pre><p>上面需要root用户的，直接用su然后输入root 密码，上面是使用4.9 的yum。</p>
+<h5 id="3-解压，并把它放到-usr-src-目录下"><a href="#3-解压，并把它放到-usr-src-目录下" class="headerlink" title="3. 解压，并把它放到/usr/src/目录下"></a>3. 解压，并把它放到/usr/src/目录下</h5><pre><code>gzip -d linux-2.6.18.tar.gz
+tar -xvf linux-2.6.18.tar
+//获取root 权限
+su
+mv -rf linux-2.6.18 /usr/src
+</code></pre><h5 id="4-在-usr-src-建立一个软链接到linux-2-6-18目录"><a href="#4-在-usr-src-建立一个软链接到linux-2-6-18目录" class="headerlink" title="4. 在/usr/src/建立一个软链接到linux-2.6.18目录"></a>4. 在/usr/src/建立一个软链接到linux-2.6.18目录</h5><pre><code>cd /usr/src
+ln -s linux-2.6.18 linux
+cd linux
+</code></pre><h5 id="5-清理源代码（如果是之前已生成一些中间文件可运行此命令，否则不必了）"><a href="#5-清理源代码（如果是之前已生成一些中间文件可运行此命令，否则不必了）" class="headerlink" title="5. 清理源代码（如果是之前已生成一些中间文件可运行此命令，否则不必了）"></a>5. 清理源代码（如果是之前已生成一些中间文件可运行此命令，否则不必了）</h5><pre><code>make mrproper
+</code></pre><h5 id="6-生成config文件"><a href="#6-生成config文件" class="headerlink" title="6. 生成config文件"></a>6. 生成config文件</h5><pre><code>cp /boot/config-2.6.9-42.EL ./.config
+make menuconfig
+</code></pre><p>在make menuconfig 的过程中出现ncurses.h 缺失的错误，用命令解决</p>
+<pre><code>yum install ncurses ncurses-devel
+</code></pre><p>在make menuconfig的配置界面中，先选择Load config file，把该才拷贝的文件加载进来再进行修改，修改完成后，直接选Exit，然后在提示中选择保当前配置文件。如下所示：</p>
+<p><img src="http://xxxzhi.github.io/images/make_linux_menuconfig1.png" alt="load config file"></p>
+<p>save:</p>
+<p><img src="http://xxxzhi.github.io/images/make_linux_menuconfig2.png" alt="save"></p>
+<h5 id="7-编译"><a href="#7-编译" class="headerlink" title="7. 编译"></a>7. 编译</h5><pre><code>make
+</code></pre><h5 id="8-安装模块"><a href="#8-安装模块" class="headerlink" title="8. 安装模块"></a>8. 安装模块</h5><pre><code>make modules_install
+</code></pre><p>该命令会把模块及相关文件放到目录/lib/modules/2.6.18/下，并不会与当前内核产生冲突，除非内核版本是一样的。之后wait…</p>
+<h5 id="9-安装内核"><a href="#9-安装内核" class="headerlink" title="9. 安装内核"></a>9. 安装内核</h5><pre><code>make install
+</code></pre><p>该命令会把内核相关文件(bzImage, initrd.img，System.map config）放到/boot/目录下，文件名均带有内核版本名，与其它版本相关区别。</p>
+<p>重启进行新内核。</p>
+<h5 id="10-重启无法进入"><a href="#10-重启无法进入" class="headerlink" title="10. 重启无法进入"></a>10. 重启无法进入</h5><blockquote>
+<p>Enforcing mode requested but no policy loaded. Halting now.<br>kernel panic - not syncing:  Attempted to kill init!<br>出现以上错误</p>
+</blockquote>
+<p>解决方法：</p>
+<blockquote>
+<p>1、在grub.conf里把 kernel /vmlinuz-2.6.19 ro root=LABEL=/ rhgb quiet 变为： kernel /vmlinuz-2.6.19 ro root=LABEL=/ enforcing=0 rhgb quiet<br>2、修改/etc/selinux/config配置文件,只要把SELINUX的值改成disabled就好了</p>
+</blockquote>
+<p>原因：</p>
+<blockquote>
+<p>selinux的问题。<br>enforcing参数是在启动内核时传递给selinux的内核参数，它用来决定你系统的内核运行于强制（enforcing ）模式还是自由（permissive） 模式。</p>
+<p>在自由模式下SELinux只是记录他该做什么，而事实上并不做任何动作。在强制模式下SElinux会来真格的。如果你的策略有错误，在强制模式下系统可能会阻止你登陆！所以正常情况下你应改在启动时传enforcing=1 给内核，当你的SELinux策略有问题时，你可以临时传enforcing=0给内核来查错。在/etc/selinux/config这个init的 配置文件中相应的有一个选项，通过设置它，也可以使系统进入自由模式。</p>
+</blockquote>
+<p><img src="http://xxxzhi.github.io/images/make_linux_uname2.png" alt="after make uname"></p>
+<h3 id="3-总结与思考"><a href="#3-总结与思考" class="headerlink" title="3. 总结与思考"></a>3. 总结与思考</h3><p>感觉编译内核就是照着葫芦画瓢，参照别网上的人的经历，然后一步一步地去做，遇到问题，去思考应该怎么做，可能遇到什么问题，比如说上面我遇到过的gcc没有，那这样的话，直接就去安装gcc继续来就好了。遇到yum使用不了，也是通过找资料解决的。耐心淡定地去找资料，思考问题就能够解决问题。</p>
+<p>感觉我对linux 的各种命令已经很熟悉了，而且越来越偏好使用命令行了。网络实在是不行，在安装gcc的过程中，下载系统的过程中花费了不少时间。另外低版本的linux不少已经depressed了，可能存在一些东西，官方已经不支持了。</p>
+<hr>
+<hr>
+<p>参考</p>
+<ol>
+<li><a href="http://blog.csdn.net/linyt/article/details/3995435" target="_blank" rel="external">http://blog.csdn.net/linyt/article/details/3995435</a></li>
+<li><a href="http://blog.csdn.net/do2jiang/article/details/5146911" target="_blank" rel="external">http://blog.csdn.net/do2jiang/article/details/5146911</a></li>
+<li><a href="http://blog.sina.com.cn/s/blog_4a5eb9980102v2e1.html" target="_blank" rel="external">http://blog.sina.com.cn/s/blog_4a5eb9980102v2e1.html</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/linux/" rel="tag"># linux</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/09/16/android-surface-simple-introduce/" rel="next" title="Android Surface 系统简单学习">
+                <i class="fa fa-chevron-left"></i> Android Surface 系统简单学习
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/10/25/improve-the-code-quality/" rel="prev" title="改善代码质量 ">
+                改善代码质量  <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#centos-4-4-中编译linux-2-6-18"><span class="nav-number">1.</span> <span class="nav-text">centos 4.4 中编译linux 2.6.18</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-编译步骤："><span class="nav-number">1.0.1.</span> <span class="nav-text">2. 编译步骤：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-下载内核源码"><span class="nav-number">1.0.1.0.1.</span> <span class="nav-text">1. 下载内核源码</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-检查并安装gcc"><span class="nav-number">1.0.1.0.2.</span> <span class="nav-text">2. 检查并安装gcc</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-解压，并把它放到-usr-src-目录下"><span class="nav-number">1.0.1.0.3.</span> <span class="nav-text">3. 解压，并把它放到/usr/src/目录下</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-在-usr-src-建立一个软链接到linux-2-6-18目录"><span class="nav-number">1.0.1.0.4.</span> <span class="nav-text">4. 在/usr/src/建立一个软链接到linux-2.6.18目录</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-清理源代码（如果是之前已生成一些中间文件可运行此命令，否则不必了）"><span class="nav-number">1.0.1.0.5.</span> <span class="nav-text">5. 清理源代码（如果是之前已生成一些中间文件可运行此命令，否则不必了）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#6-生成config文件"><span class="nav-number">1.0.1.0.6.</span> <span class="nav-text">6. 生成config文件</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#7-编译"><span class="nav-number">1.0.1.0.7.</span> <span class="nav-text">7. 编译</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#8-安装模块"><span class="nav-number">1.0.1.0.8.</span> <span class="nav-text">8. 安装模块</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#9-安装内核"><span class="nav-number">1.0.1.0.9.</span> <span class="nav-text">9. 安装内核</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#10-重启无法进入"><span class="nav-number">1.0.1.0.10.</span> <span class="nav-text">10. 重启无法进入</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-总结与思考"><span class="nav-number">1.0.2.</span> <span class="nav-text">3. 总结与思考</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

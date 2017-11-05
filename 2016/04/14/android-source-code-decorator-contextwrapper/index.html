@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,设计模式,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="如果说Android源码中哪个地方装饰模式应用的最明显的话，那肯定是非ContextWrapper莫属了，ContextWrapper是一个透明的经典的装饰模式。本文将通过装饰器模式分析Context源码结构。本文基于的Android源码是(android 5.0.0)。首先先介绍一下装饰模式。 装饰模式意图装饰模式动态地给对象添加额外的职责，就添加功能来说，它比子类的方式更加灵活。 UML图 简">
+<meta name="keywords" content="Android,设计模式,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android源码装饰模式---ContextWrapper">
+<meta property="og:url" content="http://yoursite.com/2016/04/14/android-source-code-decorator-contextwrapper/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="如果说Android源码中哪个地方装饰模式应用的最明显的话，那肯定是非ContextWrapper莫属了，ContextWrapper是一个透明的经典的装饰模式。本文将通过装饰器模式分析Context源码结构。本文基于的Android源码是(android 5.0.0)。首先先介绍一下装饰模式。 装饰模式意图装饰模式动态地给对象添加额外的职责，就添加功能来说，它比子类的方式更加灵活。 UML图 简">
+<meta property="og:image" content="http://xxxzhi.github.io/images/decorator.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/context-decorator.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android源码装饰模式---ContextWrapper">
+<meta name="twitter:description" content="如果说Android源码中哪个地方装饰模式应用的最明显的话，那肯定是非ContextWrapper莫属了，ContextWrapper是一个透明的经典的装饰模式。本文将通过装饰器模式分析Context源码结构。本文基于的Android源码是(android 5.0.0)。首先先介绍一下装饰模式。 装饰模式意图装饰模式动态地给对象添加额外的职责，就添加功能来说，它比子类的方式更加灵活。 UML图 简">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/decorator.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/04/14/android-source-code-decorator-contextwrapper/"/>
+
+
+
+
+
+  <title>Android源码装饰模式---ContextWrapper | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/14/android-source-code-decorator-contextwrapper/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android源码装饰模式---ContextWrapper</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-14T00:00:00+08:00">
+                2016-04-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>如果说Android源码中哪个地方装饰模式应用的最明显的话，那肯定是非ContextWrapper莫属了，ContextWrapper是一个透明的经典的装饰模式。本文将通过装饰器模式分析Context源码结构。本文基于的Android源码是(android 5.0.0)。首先先介绍一下装饰模式。</p>
+<h3 id="装饰模式"><a href="#装饰模式" class="headerlink" title="装饰模式"></a>装饰模式</h3><h4 id="意图"><a href="#意图" class="headerlink" title="意图"></a>意图</h4><p>装饰模式动态地给对象添加额外的职责，就添加功能来说，它比子类的方式更加灵活。</p>
+<h4 id="UML图"><a href="#UML图" class="headerlink" title="UML图"></a>UML图</h4><p><img src="http://xxxzhi.github.io/images/decorator.png" alt="decorator"></p>
+<h4 id="简单代码"><a href="#简单代码" class="headerlink" title="简单代码"></a>简单代码</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Component</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operate1</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="comment">//do operate1</span></div><div class="line">        System.out.println(<span class="string">"operate1"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ComponentDecorator</span> <span class="keyword">extends</span> <span class="title">Component</span></span>&#123;</div><div class="line">    <span class="keyword">private</span> Component mComponent;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ComponentDecorator</span><span class="params">(Component component)</span></span>&#123;</div><div class="line">        mComponent = component;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operate1</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="comment">// 添加相关的职责</span></div><div class="line">        System.out.println(<span class="string">"print before"</span>);</div><div class="line">        mComponent.operate1();</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ComponentChild</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operate1</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="comment">//do operate1</span></div><div class="line">        System.out.println(<span class="string">"child operate1"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String [] args)</span></span>&#123;</div><div class="line">    ComponentChild component = <span class="keyword">new</span> ComponentChild();</div><div class="line">    ComponentDecorator decorator = <span class="keyword">new</span> ComponnentDecorator(component);</div><div class="line">    decorator.operate1();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p> 上面的代码就简单实现了装饰模式，通过把被装饰的对象作为装饰器的成员变量，当调用装饰器的操作的时候，装饰器还是会调用被装饰对象的操作，但是装饰器可以给对应的操作添加相关功能。装饰器透明的实现就是跟被装饰对象的接口一致，不添加新的接口，但是现在更多的实现方式是半透明的。装饰模式与子类实现方式比，它能够装饰被装饰对象的各种子类，甚至可以装饰装饰器对象（装饰器之间互相装饰），这样比子类化添加功能更加灵活。如果用子类的方式，将会导致非常多的子类。</p>
+<h3 id="ContextWrapper"><a href="#ContextWrapper" class="headerlink" title="ContextWrapper"></a>ContextWrapper</h3><p>下面介绍一下Android源码中装饰器的使用:ContextWrapper（装饰器有个别名Wrapper）。先看UML图。</p>
+<p><img src="http://xxxzhi.github.io/images/context-decorator.png" alt="此处输入图片的描述"></p>
+<h4 id="Context"><a href="#Context" class="headerlink" title="Context"></a>Context</h4><p>Context是一个全局应用环境接口，具体的实现由Android系统完成。它能访问应用资源，并且能够启动Activity，Service，接收broadcast。</p>
+<p>它是一个抽象类，里面包含了各种方法的声明，应该将它作为一个接口类来看待。</p>
+<h4 id="ContextWrapper-1"><a href="#ContextWrapper-1" class="headerlink" title="ContextWrapper"></a>ContextWrapper</h4><p>这是一个Context的包装器，里面包含了一个mBase，ContextWrapper就是包装了mBase。而</p>
+<h4 id="ContextThemeWrapper-Activity-Application-Service-ReceiverRestrictedContext"><a href="#ContextThemeWrapper-Activity-Application-Service-ReceiverRestrictedContext" class="headerlink" title="ContextThemeWrapper, Activity, Application, Service, ReceiverRestrictedContext"></a>ContextThemeWrapper, Activity, Application, Service, ReceiverRestrictedContext</h4><p>ContextThemeWrapper这个是包含主题的装饰器，而Activity是它的子类。Application, Service, ReceiverRestrictedContext都是ContextWrapper的子类。每一个应用都会有一个Application。Android源码中已经有的Application有EmailApplication,LauncherApplication, Browser等等。</p>
+<h4 id="ContextImpl"><a href="#ContextImpl" class="headerlink" title="ContextImpl"></a>ContextImpl</h4><p>这个是真正实现Context的类，Context是为应用环境类，它包含了跟环境相关的各种操作：getResource(资源管理，包含了getAssets,layout, string,drawable等等)， getPackageManager(包管理器）， getContentResolver(用于获取内容模型，比如访问ContentProvider)， startActivity(启动Activity)， <em>*</em>Service(包含一系列Service相关操作，start,bind,unbind,stop)， registerBroadcast/unregisterBroadcast/sendBroadcast（Broadcast相关）</p>
+<p>这里简单介绍一下这几个关键方法的实现方式</p>
+<h5 id="getResource"><a href="#getResource" class="headerlink" title="getResource"></a>getResource</h5><p>这是获取资源的接口，得到Resource对象。ContextImpl里面有个mResource成员变量，android里面由mResource去读取资源。mResource由ResourceManager生成。现在很多Android资源动态加载是直接通过下面这种方式实现的。</p>
+<pre><code>AssetManager assets = AssetManager.class.newInstance();
+try{
+    Method method = AssetManager.class.getMethod(&quot;addAssetPath&quot;,String.class);
+    method.invoke(assets,dexPath); //dexPath 表示动态dex包路径
+}catch(Exception e){
+    e.printStackTrace
+}
+r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfiguration());
+</code></pre><p>不过assets的addAssetPath是一个隐藏函数，需要通过反射去调用。</p>
+<p>其实Android的资源框架大致就是如下过程：</p>
+<ul>
+<li>根据layout，values，drawable等生成对应的ID，保存在R.id文件下面，而Android自带的资源在com.android.R.id里面。assets不会赋予id。</li>
+<li>Android用不同的资源目录后缀来适配不同的语言环境，屏幕大小，比如说drawable-en-w360。Android有一个对应的<a href="http://developer.android.com/guide/topics/resources/providing-resources.html#AlternativeResources" target="_blank" rel="external">表</a>，按照顺序匹配，对于drawable，本着不超过对应手机的参数的最大值来匹配。Android在打包的时候会将根据这些参数建立一个索引。</li>
+<li>打包到resources.arsc文件中</li>
+</ul>
+<p>运行的时候应用读取过程</p>
+<ul>
+<li>先去掉跟手机环境完全不匹配的资源目录，比如现在是中文环境，则去掉en目录</li>
+<li>assets由AssetsManager来访问。其他对应的资源根据MMC表的顺序，按照索引表一个一个的维度来匹配，筛选，直到找到对应的资源。如果没有找到则抛出异常。</li>
+</ul>
+<p>上述过程如果想要详细了解可参见<a href="http://blog.csdn.net/luoshengyang/article/details/8738877" target="_blank" rel="external">罗升阳的博客</a></p>
+<h5 id="getPackageManager"><a href="#getPackageManager" class="headerlink" title="getPackageManager"></a>getPackageManager</h5><p>返回包管理器，包管理器可以管理安装在系统中的应用程序包相关的各种信息。可以添加权限，可以查看对应包名的包信息，指定组件的组件信息，安装应用包等等。Android里面不同的应用程序报名绝对不同相同，包就对应了应用程序。所以从这里去理解PackageManager，他就是管理涉及到包管理（应用级相关的信息处理）的管理器。</p>
+<h5 id="getContentResolver"><a href="#getContentResolver" class="headerlink" title="getContentResolver"></a>getContentResolver</h5><p>返回一个ContentResolver，ContentResolver是用于获取Content模型的，像ContentProvider就是通过ContentResolver来访问。</p>
+<h5 id="Activity操作"><a href="#Activity操作" class="headerlink" title="Activity操作"></a>Activity操作</h5><p>Context包含了Activity的启动操作，Activity的启动过程简单来说就是经过下面几个步骤：</p>
+<ol>
+<li>mMainThread.instrumentation.execStartActivity<br>mMainThread是ActivityThread类型，它是管理着应用程序主线程的执行，像调度Activity,Broadcast等，instrumentation是一个Instrumentation类型，他是Android测试框架，在这里是为了监控Activity的活动,里面会有一个ActivityMonitor去监控被调用的Activity，用ActivityMonitor也可以等待一个指定的Activity启动。也可以阻止一个Activity的启动。<br>　　通过这种方式启动Activity主要就是为了监控Activity的启动活动，在测试中将会大有用处。启动完后，也可以检查启动后的返回组件信息。</li>
+<li><p>在execStartActivity的函数中，进行完监控后，就是通过ActivityManagerNative来启动指定的Activity。</p>
+<p> int result = ActivityManagerNative.getDefault()</p>
+<pre><code>.startActivity(whoThread, who.getBasePackageName(), intent,
+        intent.resolveTypeIfNeeded(who.getContentResolver()),
+        token, target != null ? target.mEmbeddedID : null,
+        requestCode, 0, null, options);
+</code></pre><p> 看到Native其实就可以想到它是通过一种IPC机制来访问的了，具体是ActivityManagerProxy通过Binder进行IPC。</p>
+</li>
+<li><p>由Binder机制来访问ActivityManagerService，ActivityManagerService是进行Activity,Service, Broadcast管理的核心服务。</p>
+</li>
+<li>由ActivityManagerService.startActivity 会经过mStackSupervisor 以及 ActivityStack 进行相关处理</li>
+<li>然后经过ApplicationThread, 最后到主线程的Handler(H)启动Activity</li>
+</ol>
+<h5 id="Service"><a href="#Service" class="headerlink" title="Service"></a>Service</h5><p>Service除了包含startService,stopService,bindService,unbindService。Service最终也是在ActivityManagerService中管理，但是Service不同的，在ActivityManagerService里面管理的是是ActiveServices。但是最终控制Service的流程还是会到达Handler中</p>
+<h5 id="BroadCastReceiver"><a href="#BroadCastReceiver" class="headerlink" title="BroadCastReceiver"></a>BroadCastReceiver</h5><p>Context中有sendBroadcast, registerReceiver, unregisterReceiver。对应的都会通过ActivityManagerNative调用ActivityManagerService的相关函数。broadcastIntent是处理sendBroadcast的,　ActivityManagerService中也有registerReceiver, unregisterReceiver。ActivityManagerService里面保存有一个Broadcast的ReceiverList，注册的时候将Receiver保存起来，发送广播的时候，根据保存的IntentFilter来找到对应Receiver，另外BroadCastReceiver还有sticky,是注册的时候如果符合已有的sticky广播，则立刻发送给Receiver。</p>
+<p>　<br>对于Activity，Service启动流程，可以去参考罗升阳的博客，他的博客是基于早期的Android版本的，其实很多地方还是有很多变化了。所以如果想了解最新的源码，建议参考博客，自己去阅读源码。下面讨论一下Context这部分用装饰模式的优势</p>
+<h3 id="ContextWrapper装饰模式的好处"><a href="#ContextWrapper装饰模式的好处" class="headerlink" title="ContextWrapper装饰模式的好处"></a>ContextWrapper装饰模式的好处</h3><p>其实看了Context的源码结构，知道他是使用了装饰模式，但是为什么这个部分使用装饰模式呢？在这里装饰模式能够很好地添加职责，比如遇到Receiver的时候，ReceiverRestrictedContext就能够限制Receiver调用startService，让应用程序的Receiver不能够启动Service。通过实现装饰器，能够提供各种各样的装饰，并且也为Android应用程序组件提供了应用环境。</p>
+<h5 id="与继承的方式添加功能比较"><a href="#与继承的方式添加功能比较" class="headerlink" title="与继承的方式添加功能比较"></a>与继承的方式添加功能比较</h5><p>我们似乎可以考虑用继承去实现Context结构，但是如果用继承的方式给Context添加功能，则将Application, ThemeContext,Service等等直接集成自ContextImpl，假如我们需要一种新的Context实现方式，则会变得非常麻烦，新的ContextImpl实现了后，Application又得去继承新的ContextImpl，一方面麻烦，另外一方面导致子类树集成非常庞大。现在用装饰模式，直接将ContextWrapper装饰的对象替换掉就可以了。</p>
+<h5 id="策略模式"><a href="#策略模式" class="headerlink" title="策略模式"></a>策略模式</h5><p>我们的Context是需要不断在外面添加新的职责装饰的，而策略模式是将系统的内部替换掉，假如说我们需要的是多种Context的实现，则可以采用策略模式。Context是Android应用环境，在Android中，Android的应用环境是确定了的，它在对不同的应用程序，Android的应用环境是不会变化的。</p>
+<p>不过话说回来，装饰模式可以添加不同的实现，Android里面也有MockContext，但那是用来测试的，这个地方也可以看作是用了策略的思想，但正常运行的时候是主要是侧重于不同的装饰。这其实也是装饰的好处。</p>
+<hr>
+<blockquote>
+<p>纵然伤心，也不要愁眉不展，因为你不知是谁会爱上你的笑容    –泰戈尔《飞鸟集》</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/设计模式/" rel="tag"># 设计模式</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/31/http-tcp-keep-alive/" rel="next" title="Http keep-alive 与Tcp keep-alive">
+                <i class="fa fa-chevron-left"></i> Http keep-alive 与Tcp keep-alive
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/19/android-sourcecode-abstractfactory-ipolicy/" rel="prev" title="Android源码中的抽象工厂---IPolicy">
+                Android源码中的抽象工厂---IPolicy <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#装饰模式"><span class="nav-number">1.</span> <span class="nav-text">装饰模式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#意图"><span class="nav-number">1.1.</span> <span class="nav-text">意图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#UML图"><span class="nav-number">1.2.</span> <span class="nav-text">UML图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#简单代码"><span class="nav-number">1.3.</span> <span class="nav-text">简单代码</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ContextWrapper"><span class="nav-number">2.</span> <span class="nav-text">ContextWrapper</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Context"><span class="nav-number">2.1.</span> <span class="nav-text">Context</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ContextWrapper-1"><span class="nav-number">2.2.</span> <span class="nav-text">ContextWrapper</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ContextThemeWrapper-Activity-Application-Service-ReceiverRestrictedContext"><span class="nav-number">2.3.</span> <span class="nav-text">ContextThemeWrapper, Activity, Application, Service, ReceiverRestrictedContext</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ContextImpl"><span class="nav-number">2.4.</span> <span class="nav-text">ContextImpl</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#getResource"><span class="nav-number">2.4.1.</span> <span class="nav-text">getResource</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#getPackageManager"><span class="nav-number">2.4.2.</span> <span class="nav-text">getPackageManager</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#getContentResolver"><span class="nav-number">2.4.3.</span> <span class="nav-text">getContentResolver</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Activity操作"><span class="nav-number">2.4.4.</span> <span class="nav-text">Activity操作</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#Service"><span class="nav-number">2.4.5.</span> <span class="nav-text">Service</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#BroadCastReceiver"><span class="nav-number">2.4.6.</span> <span class="nav-text">BroadCastReceiver</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ContextWrapper装饰模式的好处"><span class="nav-number">3.</span> <span class="nav-text">ContextWrapper装饰模式的好处</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#与继承的方式添加功能比较"><span class="nav-number">3.0.1.</span> <span class="nav-text">与继承的方式添加功能比较</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#策略模式"><span class="nav-number">3.0.2.</span> <span class="nav-text">策略模式</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

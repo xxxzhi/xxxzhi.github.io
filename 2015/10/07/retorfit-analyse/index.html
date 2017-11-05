@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,源码解析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1. 功能介绍1.1 RetrofitRetrofit是Github上面squre组织开发的一个类型安全的Http客户端，它可以在Java和Android上面使用。Retrofit将描述请求的接口转换为对象，然后再由该对象去请求后台。Retrofit将请求对象化了。目前已经发布了2.0beta版本。 1.2 特点Retrofit主要有以下功能特点  将Http请求对象化，函数化。让接口的函数代表具">
+<meta name="keywords" content="Android,源码解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Retrofit源码解析">
+<meta property="og:url" content="http://yoursite.com/2015/10/07/retorfit-analyse/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1. 功能介绍1.1 RetrofitRetrofit是Github上面squre组织开发的一个类型安全的Http客户端，它可以在Java和Android上面使用。Retrofit将描述请求的接口转换为对象，然后再由该对象去请求后台。Retrofit将请求对象化了。目前已经发布了2.0beta版本。 1.2 特点Retrofit主要有以下功能特点  将Http请求对象化，函数化。让接口的函数代表具">
+<meta property="og:image" content="http://xxxzhi.github.io/images/retorfit-model.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/flow-draw.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/retrofit-uml.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/call-adapter-uml.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Retrofit源码解析">
+<meta name="twitter:description" content="1. 功能介绍1.1 RetrofitRetrofit是Github上面squre组织开发的一个类型安全的Http客户端，它可以在Java和Android上面使用。Retrofit将描述请求的接口转换为对象，然后再由该对象去请求后台。Retrofit将请求对象化了。目前已经发布了2.0beta版本。 1.2 特点Retrofit主要有以下功能特点  将Http请求对象化，函数化。让接口的函数代表具">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/retorfit-model.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/10/07/retorfit-analyse/"/>
+
+
+
+
+
+  <title>Retrofit源码解析 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/10/07/retorfit-analyse/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Retrofit源码解析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-07T00:00:00+08:00">
+                2015-10-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-功能介绍"><a href="#1-功能介绍" class="headerlink" title="1. 功能介绍"></a>1. 功能介绍</h3><h4 id="1-1-Retrofit"><a href="#1-1-Retrofit" class="headerlink" title="1.1 Retrofit"></a>1.1 Retrofit</h4><p>Retrofit是Github上面squre组织开发的一个类型安全的Http客户端，它可以在Java和Android上面使用。Retrofit将描述请求的接口转换为对象，然后再由该对象去请求后台。Retrofit将请求对象化了。目前已经发布了2.0beta版本。</p>
+<h4 id="1-2-特点"><a href="#1-2-特点" class="headerlink" title="1.2 特点"></a>1.2 特点</h4><p>Retrofit主要有以下功能特点</p>
+<ol>
+<li>将Http请求对象化，函数化。让接口的函数代表具体请求。</li>
+<li>利用注解的方式标记参数，将HTTP的请求方法，请求头，请求参数，请求体等等都用注解的方式标记，使用起来非常方便。</li>
+<li>支持Multipart，以及文件上传（file upload）。</li>
+<li>直接将Http的Response转换成对象。用户可以根据Response的具体内容，更换转换器，或者自己新建转化器。</li>
+<li>Retrofit默认使用OkHttp开源库请求后台，用户也可以使用自定义的具体请求方式。方便扩展。</li>
+<li>自带提供了异步处理Http请求的方式。</li>
+</ol>
+<h4 id="1-3简单Demo"><a href="#1-3简单Demo" class="headerlink" title="1.3简单Demo"></a>1.3简单Demo</h4><p>这是一个简单的例子，访问<a href="https://httpbin.org/" target="_blank" rel="external">httpbin</a>网站。也可以看完整的<a href="https://github.com/android-cn/android-open-project-demo/tree/master/Retrofit-demo" target="_blank" rel="external">Retrofit Demo</a><br>首先声明一个java接口</p>
+<pre><code>public interface HttpbinService {
+    @GET(&quot;/get?arg1=hello&quot;)
+    Call&lt;HttpbinRequest&gt; testGet();
+}
+</code></pre><p>使用方式</p>
+<pre><code>Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(&quot;https://httpbin.org&quot;)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
+
+HttpbinService httpbinService = retrofit.create(HttpbinService.class);
+</code></pre><p>使用httpbinService获取一个Call，用来请求HTTP服务器。</p>
+<pre><code>Call&lt;HttpbinRequest&gt; call = httpbinService.testGet();
+</code></pre><p>因为接口返回的应该是一个Call，用来请求后台HTPP服务器，所以我们在声明接口的似乎，返回参数应该是Call&lt;?&gt;。由于httpbin返回的是一个json格式的数据，我们想要返回直接的自定义的模型数据，但是retrofit默认只会返回ResponseBody，所以我们需要自己添加一个GsonConverter第三方库。在build.graddle中的dependencies添加：</p>
+<pre><code>compile &apos;com.squareup.retrofit:converter-gson:2.0.0-beta2&apos;
+</code></pre><h3 id="2-总体设计"><a href="#2-总体设计" class="headerlink" title="2. 总体设计"></a>2. 总体设计</h3><p>Retrofit可以分为注解解析（Request生成），请求执行，请求回调（异步处理），响应体转化几个部分。其中请求执行与请求回调可以算作一个部分，并且请求回调也可以没有，Call有直接执行的接口execute。</p>
+<p><img src="http://xxxzhi.github.io/images/retorfit-model.png" alt="Retrofit总体结构"></p>
+<ol>
+<li>首先由解析部分（这部分也是Request生成部分），利用注解（Annotation）解析接口文件，将接口方法解析好，每个方法生成一个Request。</li>
+<li>然后利用Call部分执行Request。Retrofit使用的是okHttp来请求，程序中将Retrofit Request转化为OKHttp开源库的Request，转由OkHttpClient执行。</li>
+<li>在Request执行完后，得到Response，使用Converter转化Response为用户需要的对象。比如将json格式的数据，利用gson转化为具体的Object（也就是接口函数中的返回Call的模版参数的具体类型对象）</li>
+<li>利用回调将第三步得到的对象，将对象传回给UI线程，更新UI。</li>
+</ol>
+<p>这里面第三部与第四步是可以合在一起的，但是目前Retrofit提供的默认代码中，会通过Call，加入Callback，用户可以在Callback中处理结果。</p>
+<p>注解（Annotation）是Retrofit预先定义的注解，包括Http的各个部分，比如POST、GET、Query、QueryMap、Field等等。</p>
+<h3 id="3-流程图"><a href="#3-流程图" class="headerlink" title="3. 流程图"></a>3. 流程图</h3><p><img src="http://xxxzhi.github.io/images/flow-draw.png" alt="Retrofit使用流程图"></p>
+<p>其中生成Call的部分可以看下面关于这个适配器的类图。</p>
+<h3 id="4-详细设计"><a href="#4-详细设计" class="headerlink" title="4. 详细设计"></a>4. 详细设计</h3><h4 id="4-1-类图"><a href="#4-1-类图" class="headerlink" title="4.1 类图"></a>4.1 类图</h4><p>首先是整个项目的类图<br><img src="http://xxxzhi.github.io/images/retrofit-uml.png" alt="Retrofit UML图"></p>
+<p>对于Retrofit项目中CallAdapter用着适配器模式也挺巧的，通过适配器将Callback回调接口运行在UI线程。下面时有关CallAdapter，Call，Callback的类图，其中也是连续用了两次代理模式。</p>
+<p><img src="http://xxxzhi.github.io/images/call-adapter-uml.png" alt="CallAdapter uml图"></p>
+<p>ExecutorCallback代理的是用户自定义的Callback。通过这种方式让OkHttpCall去执行Call，让ExecutorCallback将用户自定义的Callback运行在指定线程上。</p>
+<h4 id="4-2-类功能详细介绍"><a href="#4-2-类功能详细介绍" class="headerlink" title="4.2 类功能详细介绍"></a>4.2 类功能详细介绍</h4><p>在Retrofit开源库中，Retrofit类是用户最基础的访问入口。然后Converter部分是由用户自己扩展的，而Paraser部分的相关类RequestBuilder，RequestFactory等则主要是负责解析接口并且生成Request，而Call，CallAdapter等主要是负责底层的Http请求，以及请求后线程转换。</p>
+<h5 id="4-2-1-Retrofit"><a href="#4-2-1-Retrofit" class="headerlink" title="4.2.1 Retrofit"></a>4.2.1 Retrofit</h5><p>Retrofit类是包含了一个构造器Retrofit.Builder，由Builder指定Retrofit的相关参数，创建一个新的Retrofit。Retrofit中包含了很多重要的成员变量，而这些成员变量都是可以自设置的。</p>
+<p>Retrofit包含以下成员变量：</p>
+<ul>
+<li>baseUrl: Http请求的基础url，类型是BaseUrl，包含了url函数返回HttpUrl（OkHttp的类），由Retrofit.Builder.baseUrl设置。</li>
+<li>client：OkHttp库的OkHttpClient类型。由Builder的client函数设置，默认为<code>OkHttpClient()</code>。</li>
+<li>methodHandlerCache：Map类型，MethodHandler的缓存，从接口中解析出来，放在这个map里面。</li>
+<li>converterFactories：List类型，包含了很多converter的创建工厂，用户可以通过Builder的addConverterFactory来添加。默认添加了BuiltInConverters。</li>
+<li>callbackExecutor：回调函数的执行器，也就是回调函数执行的线程，Android中默认为MainThreadExecutor。</li>
+<li>adapterFactories：List类型，包含了CallAdapter.Factory，用户可以通过Builder的addCallAdapterFactory来添加。Android中默认添加了ExecutorCallAdapterFactory。使用callbackExecutor作为Executor。</li>
+<li>validateEagerly：这个是设置的在创建动态代理对象之前，是否提前解析接口Method，创建MethodHandler并添加到Cache中。</li>
+</ul>
+<p>Retrofit重要方法:</p>
+<ul>
+<li>create(final Class<t> service):T<br>这个是一个public模版方法，用户可以通过这个方法，传入接口Class（T），获得接口Class Http请求的动态代理对象。这是该开源库的主入口，这个函数先验证接口以及其方法，然后创建一个匿名InvocationHandler，在匿名InvocationHandler的invoke中首先去掉Object以及Platform默认的方法，然后调用loadMethodHandler解析对应的方法（接口方法），创建MethodHandler加入到methodHandlerCache中，得到MethodHandler，最后调用MethodHandler的invoke方法得到返回结果（接口方法的返回类型）。动态代理请见<a href="http://a.codekk.com/detail/Android/Caij/%E5%85%AC%E5%85%B1%E6%8A%80%E6%9C%AF%E7%82%B9%E4%B9%8B%20Java%20%E5%8A%A8%E6%80%81%E4%BB%A3%E7%90%86" target="_blank" rel="external">Java动态代理</a></t></li>
+<li>loadMethodHandler(Method method):MethodHandler&lt;?&gt;<br>解析对应的方法（接口方法），创建MethodHandler加入到methodHandlerCache中，返回得到MethodHandler。</li>
+<li>nextCallAdapter(CallAdapter.Factory skipPast, Type returnType,<pre><code>Annotation[] annotations):CallAdapter&lt;?&gt;
+</code></pre>该方法主要是从callAdapterFactories中获取新的CallAdapter，它会跳过skipPast，以及skipPast之前的Factory，然后找到与returnType和annotations都匹配的CallAdapterFactory。如果不匹配CallAdapterFactory的get会返回null，所以搜索Factories的时候，直到搜索到返回非null就找到对应的了。</li>
+</ul>
+<p>如果没有找到对应的CallAdapterFactories，得到CallAdapter，则该方法会抛出一个IllegalArgumentException异常，异常里面的message会是”Could not locate call adapter for “，如果遇到这个异常，则去判断对应的方法的返回类型是不是与CallAdapterFactory不匹配。</p>
+<ul>
+<li>requestConverter(Type type, Annotation[] annotations):Converter<t, requestbody=""><br>也是模版方法，该方法返回Converter。利用converterFactories创建一个与RequestBody对应的Converter对象。<br>如果没有找到对应的ConverterFactory，得到Converter，则该方法会抛出一个IllegalArgumentException异常，异常里面的message会是”Could not locate RequestBody converter for  “。同样，如果遇到这个异常，则去判断对应的方法的返回类型是不是与ConverterFactory不匹配。</t,></li>
+<li>responseConverter(Type type, Annotation[] annotations): Converter<responsebody, t=""><br>与requestConverter类似，不过该方法对应的是Response。</responsebody,></li>
+</ul>
+<h5 id="4-2-2-MethodHandler"><a href="#4-2-2-MethodHandler" class="headerlink" title="4.2.2 MethodHandler"></a>4.2.2 MethodHandler</h5><p>MethodHandler是retrofit中连接了解析部分，执行部分，转换部分的一个关键的中间类。不过MethodHandler的代码量很少。它可以说是连接各个部分的桥梁，也是接口方法的描述类。它有包含了retrofit，requestFactory，callAdapter，responseConverter成员变量。主要方法如下</p>
+<ul>
+<li>create(Retrofit retrofit, Method method):MethodHandler&lt;?&gt;<br>这是个静态方法。MethodHandler的创建方法，在这个方法里面通过创建CallAdapter，responseConverter，requestFactory，最后创建MethodHandler。</li>
+<li>createCallAdapter(Method method, Retrofit retrofit): CallAdapter&lt;?&gt;<br>这是个静态方法。通过retrofit的newCallAdapter创建CallAdapter</li>
+<li>createResponseConverter(Method method,Retrofit retrofit, Type responseType):Converter<responsebody, ?=""><br>这是个静态方法。通过retrofit的responseConverter方法得到responseConverter</responsebody,></li>
+<li>invoke(Object… args):Object<br>通过callAdapter的adapter将OkHttpCall转换成需要返回的Call<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Object invoke(Object... args) &#123;</div><div class="line">  return callAdapter.adapt(new OkHttpCall&lt;&gt;(retrofit, requestFactory, responseConverter, args));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h5 id="4-2-3-Converter-与Converter-Factory"><a href="#4-2-3-Converter-与Converter-Factory" class="headerlink" title="4.2.3 Converter 与Converter.Factory"></a>4.2.3 Converter 与Converter.Factory</h5><p>这两个类别都是在Converter文件下。Converter是接口，Factory抽象类，很简短。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public interface Converter&lt;F, T&gt; &#123;</div><div class="line">  T convert(F value) throws IOException;</div><div class="line"></div><div class="line">  abstract class Factory &#123;</div><div class="line">    // 返回将ResponseBody转化为Type具体的对象的Converter</div><div class="line">    public Converter&lt;ResponseBody, ?&gt; fromResponseBody(Type type, Annotation[] annotations) &#123;</div><div class="line">      return null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    //返回将函数Body参数转化为RequestBody的Converter</div><div class="line">    public Converter&lt;?, RequestBody&gt; toRequestBody(Type type, Annotation[] annotations) &#123;</div><div class="line">      return null;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>Factory主要是负责生成两种Converter。Retrofit实现了一个简单的BuiltInConverters。</p>
+<h5 id="4-2-4-Call"><a href="#4-2-4-Call" class="headerlink" title="4.2.4 Call"></a>4.2.4 Call</h5><p>这是Retrofit的框架基础接口。它是Retrofit的发送请求给服务器并且返回响应体的调用。每个Call都有自己的HTTP请求和相匹配的响应。<br>它有如下四个接口：</p>
+<ul>
+<li>execute 同步执行请求<br><code>Response&lt;T&gt; execute() throws IOException;</code></li>
+<li>enquene 异步执行请求，并且使用Callback作为请求结束后的回调。<br><code>void enqueue(Callback&lt;T&gt; callback);</code></li>
+<li>cancel 取消请求<br><code>void cancel();</code></li>
+<li>clone 复制请求，如果需要很多相同的Call，可以通过clone复制。<br><code>Call&lt;T&gt; clone();</code></li>
+</ul>
+<h5 id="4-2-5-CallAdapter"><a href="#4-2-5-CallAdapter" class="headerlink" title="4.2.5 CallAdapter"></a>4.2.5 CallAdapter</h5><p>这是Retrofit的框架基础接口。CallAdapter是将一个Call适配给另外一个Call的适配器接口。它有以下两个接口：</p>
+<ul>
+<li>responseType 返回请求后，转化的参数Type类型。<br><code>Type responseType();</code></li>
+<li>adapt 适配，将一个Call转换成另外一个Call。<br><code>&lt;R&gt; T adapt(Call&lt;R&gt; call);</code></li>
+</ul>
+<h5 id="4-2-6-Callback"><a href="#4-2-6-Callback" class="headerlink" title="4.2.6 Callback"></a>4.2.6 Callback</h5><p>请求结构的回调接口。在Call的enquene接口中使用 有如下两个方法</p>
+<ul>
+<li>onResponse 返回响应体<br><code>void onResponse(Response&lt;T&gt; response, Retrofit retrofit);</code></li>
+<li>onFailure 请求失败的时候，比如网络或者一些难以预料的异常。<br><code>void onFailure(Throwable t);</code></li>
+</ul>
+<h5 id="4-2-7-OkHttpCall"><a href="#4-2-7-OkHttpCall" class="headerlink" title="4.2.7 OkHttpCall"></a>4.2.7 OkHttpCall</h5><p>实现了Call接口，但同样是模版类。首先介绍一下OkHttpCall的主要函数：</p>
+<ul>
+<li>createRawCall</li>
+</ul>
+<p><code>private com.squareup.okhttp.Call createRawCall()</code><br>根据由requestFactory根据args创建一个Request，然后利用这个Request创建一个okhttp.Call。</p>
+<ul>
+<li>parseResponse<br><code>private Response&lt;T&gt; parseResponse(com.squareup.okhttp.Response rawResponse) throws IOException</code></li>
+</ul>
+<p>解析okhttp.Response，</p>
+<ol>
+<li>首先将body读取出来作为rawBody，然后用OkHttpCall.NoContentResponseBody作为新的Body，创建新的rawResponse。</li>
+<li>判断Response.code()，如果不在200范围内，读取rawBody出来，返回一个错误的retrofit的Response。如果code为204或205（没有返回内容），则返回一个body为空的retrofit的Response。</li>
+<li>如果code正常，则用OkHttpCall.ExceptionCatchingRequestBody包装一下rawBody，  然后使用responseConverter将包装后的catchingBody转化为具体的返回类型数据。</li>
+</ol>
+<p>OkHttpCall是将Request放入到okhttp的Call里面执行，执行完成后，又将okhttp的Call返回的Response转化为retrofit的Response，在此同时将Body里面的内容，通过converter转化为对应的对象。这个OkHttpCall</p>
+<h5 id="4-2-8-Response"><a href="#4-2-8-Response" class="headerlink" title="4.2.8 Response"></a>4.2.8 Response</h5><p>这个类是包含了具体返回对象的响应体。里面包含了模版参数T类型的body对象，以及okhttp的Response。</p>
+<h5 id="4-2-9-注解类"><a href="#4-2-9-注解类" class="headerlink" title="4.2.9 注解类"></a>4.2.9 注解类</h5><p>在Retrofit里面创建了Body注解，Filed注解（Field，FieldMap），请求方法注解（DELETE，GET，PATCH，POST，PUT），请求头注解（HEAD，Header，Headers），multipart注解（Part，Multipart，PartMap），接口加码（FormUrlEncoded），Url，Streaming，查询（Query，QueryMap），参数路径（Path），HTTP</p>
+<h5 id="4-2-10-RequestBuilderAction"><a href="#4-2-10-RequestBuilderAction" class="headerlink" title="4.2.10 RequestBuilderAction"></a>4.2.10 RequestBuilderAction</h5><p>这是一个抽象类，只有一个未实现的perform方法。</p>
+<p><code>abstract void perform(RequestBuilder builder, Object value);</code></p>
+<p>但是在RequestBuilderAction类里面有很多RequestBuilderAction的子类，分别对应注解类。Url，Header，Path，Query，QueryMap，Field，FieldMap，Part，PartMap，Body都是在RequestBuilderAction的内部类，并且继承了RequestBuilderAction。RequestBuilder就是将对应注解的值给RequestBuilder。</p>
+<h5 id="4-2-11-RequestBuilder"><a href="#4-2-11-RequestBuilder" class="headerlink" title="4.2.11 RequestBuilder"></a>4.2.11 RequestBuilder</h5><p>这是一个okhttp.Request的创建类。负责设置HTTP请求的相关信息，创建Request。它主要有以下方法：</p>
+<ul>
+<li>RequestBuilder</li>
+<li>setRelativeUrl</li>
+<li>addHeader</li>
+<li>addPathParam</li>
+<li>canonicalize static 方法</li>
+<li>canonicalize</li>
+<li>addQueryParam</li>
+<li>addFormField</li>
+<li>addPart</li>
+<li>setBody</li>
+<li>build</li>
+</ul>
+<p>它的构造方法如下：<br><code>RequestBuilder(String method, HttpUrl baseUrl, String relativeUrl, Headers headers, MediaType contentType, boolean hasBody, boolean isFormEncoded, boolean isMultipart)</code></p>
+<p>RequestBuilder就是创建请求。</p>
+<h5 id="4-2-12-RequestFactory"><a href="#4-2-12-RequestFactory" class="headerlink" title="4.2.12 RequestFactory"></a>4.2.12 RequestFactory</h5><p>RequestFactory是创建Request，他有个create方法，</p>
+<p><code>Request create(Object... args) {</code></p>
+<p>参数是接口函数对应的参数值，cerate是创建RequestBuilder，遍历RequestFactory的成员变量requestBuilderActions，设置好RequestBuilder，最后创建Request返回。</p>
+<h5 id="4-2-13-RequestFactoryParser"><a href="#4-2-13-RequestFactoryParser" class="headerlink" title="4.2.13 RequestFactoryParser"></a>4.2.13 RequestFactoryParser</h5><p>这个类主要是接口函数Method的每个注解。入口函数是parse。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">static RequestFactory parse(Method method, Type responseType, Retrofit retrofit) &#123;</div><div class="line">  RequestFactoryParser parser = new RequestFactoryParser(method);</div><div class="line">  parser.parseMethodAnnotations(responseType);</div><div class="line">  parser.parseParameters(retrofit);</div><div class="line">  return parser.toRequestFactory(retrofit.baseUrl());</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>先解析方法注解（应用到方法上的注解），比如说FormUrlEncoded，Headers。得到对应的值。</p>
+<p>然后再解析方法参数注解（应用到方法参数上的注解），在解析方法参数注解的时候，会生成一个requestBuilderActions数组，对应到每个参数。每个Action都对应了每个函数参数的处理。等到具体函数调用的时候，跟函数具体的参数值对应。也就是RequestFactory与Builder的工作了，这部分是等到运行的时候才能够确定的。</p>
+<h5 id="4-2-14-BuiltInConverters，OkHttpResponseBodyConverter，VoidConverter，OkHttpRequestBodyConverter"><a href="#4-2-14-BuiltInConverters，OkHttpResponseBodyConverter，VoidConverter，OkHttpRequestBodyConverter" class="headerlink" title="4.2.14 BuiltInConverters，OkHttpResponseBodyConverter，VoidConverter，OkHttpRequestBodyConverter"></a>4.2.14 BuiltInConverters，OkHttpResponseBodyConverter，VoidConverter，OkHttpRequestBodyConverter</h5><p>BuiltInConverters 继承自Converter.Factory，返回的responseConverter是OkHttpResponseBodyConverter或VoidConverter，也就是接口方法返回的职能是OkHttp的ResponseBody，或者Void。<br>返回的requestConverter是OkHttpRequestBodyConverter，接口方法的参数中如果使用Body，那Body也只能是OkHttp的RequestBody。</p>
+<p>VoidConverter： 将OkHttp的ResponseBody转化为Void。<br>OkHttpResponseBodyConverter：将OkHttp的ResponseBody转化为OkHttp的ResponseBody。如果是Streaming标记的接口的话，利用Utils.readBodyToBytesIfNecessary缓冲整个body。<br>OkHttpRequestBodyConverter：将OkHttp的RequestBody转化为OkHttp的RequestBody。</p>
+<h5 id="4-2-15-PlatForm-Android-MainThreadExecutor"><a href="#4-2-15-PlatForm-Android-MainThreadExecutor" class="headerlink" title="4.2.15 PlatForm.Android.MainThreadExecutor"></a>4.2.15 PlatForm.Android.MainThreadExecutor</h5><p>一个Executor，通过android Handler将Runnable执行在UI线程中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">static class MainThreadExecutor implements Executor &#123;</div><div class="line">  private final Handler handler = new Handler(Looper.getMainLooper());</div><div class="line"></div><div class="line">  @Override public void execute(Runnable r) &#123;</div><div class="line">    handler.post(r);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h5 id="4-2-16-Utils"><a href="#4-2-16-Utils" class="headerlink" title="4.2.16 Utils"></a>4.2.16 Utils</h5><p>这是Retrofit中的一个工具类，里面包含了很多范型的检查、操作。另外以及一些基本的工具性的功能。下面是它里面的函数：</p>
+<ul>
+<li><p>checkNotNull<br><code>&lt;T&gt; T checkNotNull(T object, String message)</code><br>检查非空，如果是null，则抛出NullPointerException，内容提示为message。</p>
+</li>
+<li><p>closeQuietly<br><code>static void closeQuietly(Closeable closeable)</code><br>静默地关闭Closeable对象。不会抛出异常</p>
+</li>
+<li><p>isAnnotationPresent<br><code>static boolean isAnnotationPresent(Annotation[] annotations,Class&lt;? extends Annotation&gt; cls)</code><br>判断cls是否是annotations里面的一个实例。如果在则返回true。</p>
+</li>
+<li><p>readBodyToBytesIfNecessary<br><code>static ResponseBody readBodyToBytesIfNecessary(final ResponseBody body) throws IOException</code><br>如果body非null的话，把整个body读取出来（读取到buffer），返回再返回一个ResponseBody。</p>
+</li>
+<li><p>validateServiceInterface<br><code>static &lt;T&gt; void validateServiceInterface(Class&lt;T&gt; service)</code><br>验证接口是否有效，这个接口就是用户自定义的接口。如果不是接口，或者里面没有任何函数，则抛出IllegalArgumentException异常。</p>
+</li>
+<li><p>getSingleParameterUpperBound<br><code>public static Type getSingleParameterUpperBound(ParameterizedType type)</code><br>该函数获取type的单个模版参数的上届。如果type有多个类型，函数会抛出异常，如果模版参数不是WildcardType，则直接返回模版参数类型</p>
+</li>
+<li><p>hasUnresolvableType<br><code>public static boolean hasUnresolvableType(Type type)</code><br>判断是否有不能分解的类型，比如有TypeVariable，WildcardType等</p>
+</li>
+<li><p>getRawType<br><code>public static Class&lt;?&gt; getRawType(Type type)</code><br>这个方法是从Gson里面截取的，获取type的实际类型。</p>
+</li>
+<li><p>methodError<br><code>static RuntimeException methodError(Method method, String message, Object... args)</code><br><code>static RuntimeException methodError(Throwable cause, Method method, String message,Object... args)</code><br>两个重载函数，抛出方法错误异常</p>
+</li>
+<li><p>getCallResponseType<br><code>static Type getCallResponseType(Type returnType)</code><br>获取返回Call的返回类型，必须是模版参数类型，并且Call的模版参数不能是retrofit.Response.class。返回getSingleParameterUpperBound(returnType)</p>
+</li>
+</ul>
+<h4 id="4-3-扩展"><a href="#4-3-扩展" class="headerlink" title="4.3 扩展"></a>4.3 扩展</h4><p>Retrofit是很适合扩展的，里面设计的Call，以及Converter就是为了方便扩展使用。</p>
+<h5 id="4-3-1-Converter"><a href="#4-3-1-Converter" class="headerlink" title="4.3.1 Converter"></a>4.3.1 Converter</h5><p>Retrofit提供的默认的Converter只会返回ResponseBody，如果我们想要返回具体的Object，我们可以使用另外的第三方包，并且在创建Retrofit的时候添加对应的ConverterFactory。这里有6个序列化第三方库:</p>
+<ul>
+<li>Gson: com.squareup.retrofit:converter-gson</li>
+<li>Jackson: com.squareup.retrofit:converter-jackson</li>
+<li>Moshi: com.squareup.retrofit:converter-moshi</li>
+<li>Protobuf: com.squareup.retrofit:converter-protobuf</li>
+<li>Wire: com.squareup.retrofit:converter-wire</li>
+<li>Simple XML: com.squareup.retrofit:converter-simplexml</li>
+</ul>
+<h5 id="4-3-2-Rxjava"><a href="#4-3-2-Rxjava" class="headerlink" title="4.3.2 Rxjava"></a>4.3.2 Rxjava</h5><p>retrofit也可以与<a href="https://github.com/ReactiveX/RxJava" target="_blank" rel="external">Rxjava</a>联合起来使用，之前的版本使用范例可以参考<a href="http://randomdotnext.com/retrofit-rxjava/" target="_blank" rel="external">http://randomdotnext.com/retrofit-rxjava/</a></p>
+<ul>
+<li>adapter-Rxjava: com.squareup.retrofit:adapter-rxjava</li>
+</ul>
+<p>正在开发中，主要是通过扩展CallAdapter，将之前Call，转换为rxjava需要的Observable&lt;?&gt;。</p>
+<h3 id="5-杂谈"><a href="#5-杂谈" class="headerlink" title="5 杂谈"></a>5 杂谈</h3><p>  Retrofit整体框架的代码并不多，主要是围绕着converter，CallAdapter设计的整个框架。花了两天时间耐耐心心地把代码也是挺有收获。Retrofit用到的基本技术是动态代理，Java注解，Java范型。另外如果对设计模式很熟悉的话，读起来感觉就会很简单。整个架构设计的非常好。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/源码解析/" rel="tag"># 源码解析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/09/10/jvm-class-format/" rel="next" title="java虚拟机Class格式与指令">
+                <i class="fa fa-chevron-left"></i> java虚拟机Class格式与指令
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/10/16/java-dynamic-proxy/" rel="prev" title="Java动态代理">
+                Java动态代理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-功能介绍"><span class="nav-number">1.</span> <span class="nav-text">1. 功能介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-1-Retrofit"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 Retrofit</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-2-特点"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 特点</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-3简单Demo"><span class="nav-number">1.3.</span> <span class="nav-text">1.3简单Demo</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-总体设计"><span class="nav-number">2.</span> <span class="nav-text">2. 总体设计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-流程图"><span class="nav-number">3.</span> <span class="nav-text">3. 流程图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-详细设计"><span class="nav-number">4.</span> <span class="nav-text">4. 详细设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-1-类图"><span class="nav-number">4.1.</span> <span class="nav-text">4.1 类图</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-类功能详细介绍"><span class="nav-number">4.2.</span> <span class="nav-text">4.2 类功能详细介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-1-Retrofit"><span class="nav-number">4.2.1.</span> <span class="nav-text">4.2.1 Retrofit</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-2-MethodHandler"><span class="nav-number">4.2.2.</span> <span class="nav-text">4.2.2 MethodHandler</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-3-Converter-与Converter-Factory"><span class="nav-number">4.2.3.</span> <span class="nav-text">4.2.3 Converter 与Converter.Factory</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-4-Call"><span class="nav-number">4.2.4.</span> <span class="nav-text">4.2.4 Call</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-5-CallAdapter"><span class="nav-number">4.2.5.</span> <span class="nav-text">4.2.5 CallAdapter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-6-Callback"><span class="nav-number">4.2.6.</span> <span class="nav-text">4.2.6 Callback</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-7-OkHttpCall"><span class="nav-number">4.2.7.</span> <span class="nav-text">4.2.7 OkHttpCall</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-8-Response"><span class="nav-number">4.2.8.</span> <span class="nav-text">4.2.8 Response</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-9-注解类"><span class="nav-number">4.2.9.</span> <span class="nav-text">4.2.9 注解类</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-10-RequestBuilderAction"><span class="nav-number">4.2.10.</span> <span class="nav-text">4.2.10 RequestBuilderAction</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-11-RequestBuilder"><span class="nav-number">4.2.11.</span> <span class="nav-text">4.2.11 RequestBuilder</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-12-RequestFactory"><span class="nav-number">4.2.12.</span> <span class="nav-text">4.2.12 RequestFactory</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-13-RequestFactoryParser"><span class="nav-number">4.2.13.</span> <span class="nav-text">4.2.13 RequestFactoryParser</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-14-BuiltInConverters，OkHttpResponseBodyConverter，VoidConverter，OkHttpRequestBodyConverter"><span class="nav-number">4.2.14.</span> <span class="nav-text">4.2.14 BuiltInConverters，OkHttpResponseBodyConverter，VoidConverter，OkHttpRequestBodyConverter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-15-PlatForm-Android-MainThreadExecutor"><span class="nav-number">4.2.15.</span> <span class="nav-text">4.2.15 PlatForm.Android.MainThreadExecutor</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-2-16-Utils"><span class="nav-number">4.2.16.</span> <span class="nav-text">4.2.16 Utils</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-3-扩展"><span class="nav-number">4.3.</span> <span class="nav-text">4.3 扩展</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#4-3-1-Converter"><span class="nav-number">4.3.1.</span> <span class="nav-text">4.3.1 Converter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-3-2-Rxjava"><span class="nav-number">4.3.2.</span> <span class="nav-text">4.3.2 Rxjava</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-杂谈"><span class="nav-number">5.</span> <span class="nav-text">5 杂谈</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

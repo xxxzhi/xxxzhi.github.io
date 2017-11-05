@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近借助着邓凡平的这篇文章深入理解Android（三）：Xposed详解去阅读了一下Xposed的Hook源码，在这里总结一下Xposed使用的一些东西。 Xposed实现原理简述Xposed实际上是将Android的zygote给替换了，Xposed自己搞了一个zygote，在这个zygote中加载安装的modules,将这些modules hook到指定的方法当中。最核心的功能就是findAn">
+<meta name="keywords" content="Android,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Xposed源码阅读小结">
+<meta property="og:url" content="http://yoursite.com/2016/05/20/xposed-source-read-summary/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="最近借助着邓凡平的这篇文章深入理解Android（三）：Xposed详解去阅读了一下Xposed的Hook源码，在这里总结一下Xposed使用的一些东西。 Xposed实现原理简述Xposed实际上是将Android的zygote给替换了，Xposed自己搞了一个zygote，在这个zygote中加载安装的modules,将这些modules hook到指定的方法当中。最核心的功能就是findAn">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Xposed源码阅读小结">
+<meta name="twitter:description" content="最近借助着邓凡平的这篇文章深入理解Android（三）：Xposed详解去阅读了一下Xposed的Hook源码，在这里总结一下Xposed使用的一些东西。 Xposed实现原理简述Xposed实际上是将Android的zygote给替换了，Xposed自己搞了一个zygote，在这个zygote中加载安装的modules,将这些modules hook到指定的方法当中。最核心的功能就是findAn">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/05/20/xposed-source-read-summary/"/>
+
+
+
+
+
+  <title>Xposed源码阅读小结 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/20/xposed-source-read-summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Xposed源码阅读小结</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-20T00:00:00+08:00">
+                2016-05-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近借助着邓凡平的这篇文章<a href="http://www.infoq.com/cn/articles/android-in-depth-xposed" target="_blank" rel="external">深入理解Android（三）：Xposed详解</a>去阅读了一下Xposed的Hook源码，在这里总结一下Xposed使用的一些东西。</p>
+<h2 id="Xposed实现原理简述"><a href="#Xposed实现原理简述" class="headerlink" title="Xposed实现原理简述"></a>Xposed实现原理简述</h2><p>Xposed实际上是将Android的zygote给替换了，Xposed自己搞了一个zygote，在这个zygote中加载安装的modules,将这些modules hook到指定的方法当中。最核心的功能就是findAndHookMethod这个函数，它找到对应的Method，将XC_Method_Hook(想要添加的Hook信息)与其匹配起来，将Method的访问标志改为native，并且将它的nativeFunc赋值为hookedMethodCallback，使得Java层调用的Method时候，虚拟机会调用native层hookedMethodCallback方法，而hookedMethodCallback方法先调用XC_Method_Hook接口的before方法，然后再调用原来的Method方法，之后再调用after方法，最后返回结果。整个Hook的流程就是这样的，里面每个细节都需要很多知识。下面分别介绍Xposed用到的东西。</p>
+<h2 id="Xposed用到的知识"><a href="#Xposed用到的知识" class="headerlink" title="Xposed用到的知识"></a>Xposed用到的知识</h2><h3 id="zygote"><a href="#zygote" class="headerlink" title="zygote"></a>zygote</h3><p>首先自然就是zygote了，zygote是Android中所有应用程序的父进程，所以应用程序进程都要经过zygote，zygote通过fork创建一个新的应用程序进程。如果替换掉zygote，那么创建新的进程的时候，zygote的很多东西还是可以影响到新的应用程序进程。</p>
+<h3 id="JNI"><a href="#JNI" class="headerlink" title="JNI"></a>JNI</h3><p>对于这部分，我本来就接触较多，不过zygote中大部分都是使用动态注册JNI函数，env-&gt;RegisterNatives</p>
+<h3 id="dvm方法"><a href="#dvm方法" class="headerlink" title="dvm方法"></a>dvm方法</h3><p>Dalvik虚拟机提供了很多的dvm开头的方法，在xposed/zygote里面使用了很多，它是Dalvik虚拟机提供的方法。</p>
+<h3 id="PathClassLoader"><a href="#PathClassLoader" class="headerlink" title="PathClassLoader"></a>PathClassLoader</h3><p>用于加载已经安装了的APK的Class。DexClassLoader是能够加载未安装的apk的dex文件。</p>
+<h3 id="修改method-访问标志"><a href="#修改method-访问标志" class="headerlink" title="修改method 访问标志"></a>修改method 访问标志</h3><p>在native层，虚拟机提供了方法修改Method的访问标志：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">SET_METHOD_FLAG(method,ACC_NATIVE)</div></pre></td></tr></table></figure></p>
+<p>通过该方法将Method修改为native方法，这样当运行Java层对应的方法的时候，虚拟机会调用nativeFunc。这样就提供了一种hook的契机。</p>
+<h3 id="Dalvik-native-interface"><a href="#Dalvik-native-interface" class="headerlink" title="Dalvik native interface"></a>Dalvik native interface</h3><p>Dalvik提供了两种internative interface。</p>
+<p>一种是供应用程序使用的，使用javah生成，或者直接使用env-&gt;RegisterNatives注册，这种方式是我们经常在jni开放中使用的，每个参数都会相互对应。</p>
+<p>另外一种是类似于这种接口：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">void hookedMethodCallback(const u4* args, JValue* pResult, const Method* method, ::Thread* self)</div></pre></td></tr></table></figure></p>
+<p>将这个函数与Java层的native函数对应，参数和返回参数都放在args中，method是对应的Java层方法在native层的对象。这种native interface的方式只能够在Dalvik虚拟机内部使用。一个这样的函数声明，可以对应Java层中任何native方法，这样就可以很方便地将这种函数与Java层的native方法对应了，只要一个方法就够了。</p>
+<p>在xposed中，findMethodAndHook的过程中就将对应的Method的nativeFunc赋值为&amp;hookedMethodCallback。这样在执行Java层方法的时候，Dalvik虚拟机就会运行hookedMethodCallback方法了。下面这段代码是修改访问标志和nativeFunc的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">SET_METHOD_FLAG(method, ACC_NATIVE);</div><div class="line">method-&gt;nativeFunc = &amp;hookedMethodCallback;</div><div class="line">method-&gt;insns = (const u2*) hookInfo;  //这里是把Hook方法也加入到method当中了。这样在hookedMethodCallback中也可以执行添加的hook方法。</div><div class="line">method-&gt;registersSize = method-&gt;insSize;</div><div class="line">method-&gt;outsSize = 0;</div></pre></td></tr></table></figure></p>
+<h2 id="阅读中的疑惑"><a href="#阅读中的疑惑" class="headerlink" title="阅读中的疑惑"></a>阅读中的疑惑</h2><h3 id="如何Hook"><a href="#如何Hook" class="headerlink" title="如何Hook"></a>如何Hook</h3><p>上面已经介绍了</p>
+<h3 id="如何Hook到APK里面的函数的"><a href="#如何Hook到APK里面的函数的" class="headerlink" title="如何Hook到APK里面的函数的"></a>如何Hook到APK里面的函数的</h3><p>一开始一直在想Xposed是怎么Hook APK里面的方法，因为他需要影响到不同的进程，我一直觉得是在启动对应的应用程序的时候再去做的工作，但是发现实际上不是的。它是一开始就Hook了对应的方法，在zygote进程中。为什么在之后还是能够使用呢？因为应用程序都是zygote子进程，在fork的时候，父进程load的Class还是会在子进程当中，fork的时候复制了一份。</p>
+<p>还有一些正在学习，比如说Dalvik虚拟机的实现。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>看源码的时候，一开始了解整个源码的流程，然后在脑子里想它具体是怎么实现的，遇到不知道怎么弄的时候，再去重新看源码，不断思考为什么，这样的过程能够学到很多东西，也能够更好地理解源码。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/19/feature-source-code/" rel="next" title="FutureTask源码分析">
+                <i class="fa fa-chevron-left"></i> FutureTask源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/24/android-bitmap-sourcecode-analysis/" rel="prev" title="Android6.0 Bitmap存储以及Parcel传输源码分析">
+                Android6.0 Bitmap存储以及Parcel传输源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Xposed实现原理简述"><span class="nav-number">1.</span> <span class="nav-text">Xposed实现原理简述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Xposed用到的知识"><span class="nav-number">2.</span> <span class="nav-text">Xposed用到的知识</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#zygote"><span class="nav-number">2.1.</span> <span class="nav-text">zygote</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JNI"><span class="nav-number">2.2.</span> <span class="nav-text">JNI</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dvm方法"><span class="nav-number">2.3.</span> <span class="nav-text">dvm方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#PathClassLoader"><span class="nav-number">2.4.</span> <span class="nav-text">PathClassLoader</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#修改method-访问标志"><span class="nav-number">2.5.</span> <span class="nav-text">修改method 访问标志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dalvik-native-interface"><span class="nav-number">2.6.</span> <span class="nav-text">Dalvik native interface</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#阅读中的疑惑"><span class="nav-number">3.</span> <span class="nav-text">阅读中的疑惑</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#如何Hook"><span class="nav-number">3.1.</span> <span class="nav-text">如何Hook</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何Hook到APK里面的函数的"><span class="nav-number">3.2.</span> <span class="nav-text">如何Hook到APK里面的函数的</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

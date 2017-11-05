@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="读书笔记,系统," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="从一开始学习C++或者java就是用IDE去开发，在IDE中基本只需要编写代码，然后按个编译运行按钮就可以了。所以在刚学的时候根本就没有理解好整个编译链接的过程。 昨晚大致看了该书的第二部分，静态链接。其实静态链接与动态链接的本质不同就在与一个是在生成可执行文件的时候就已经将文件链接起来，一个可以动态地装载卸载。 我们使用的IDE build程序，实际上包含了很多个步骤：  预编译 编译 汇编">
+<meta name="keywords" content="读书笔记,系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="静态链接">
+<meta property="og:url" content="http://yoursite.com/2015/04/02/static-link/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="从一开始学习C++或者java就是用IDE去开发，在IDE中基本只需要编写代码，然后按个编译运行按钮就可以了。所以在刚学的时候根本就没有理解好整个编译链接的过程。 昨晚大致看了该书的第二部分，静态链接。其实静态链接与动态链接的本质不同就在与一个是在生成可执行文件的时候就已经将文件链接起来，一个可以动态地装载卸载。 我们使用的IDE build程序，实际上包含了很多个步骤：  预编译 编译 汇编">
+<meta property="og:image" content="http://i1383.photobucket.com/albums/ah295/houzhi/hekingdomofspain-008_zpsnwioi1fy.jpg">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="静态链接">
+<meta name="twitter:description" content="从一开始学习C++或者java就是用IDE去开发，在IDE中基本只需要编写代码，然后按个编译运行按钮就可以了。所以在刚学的时候根本就没有理解好整个编译链接的过程。 昨晚大致看了该书的第二部分，静态链接。其实静态链接与动态链接的本质不同就在与一个是在生成可执行文件的时候就已经将文件链接起来，一个可以动态地装载卸载。 我们使用的IDE build程序，实际上包含了很多个步骤：  预编译 编译 汇编">
+<meta name="twitter:image" content="http://i1383.photobucket.com/albums/ah295/houzhi/hekingdomofspain-008_zpsnwioi1fy.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/04/02/static-link/"/>
+
+
+
+
+
+  <title>静态链接 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/04/02/static-link/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">静态链接</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-04-02T00:00:00+08:00">
+                2015-04-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p><img src="http://i1383.photobucket.com/albums/ah295/houzhi/hekingdomofspain-008_zpsnwioi1fy.jpg" alt="enter image description here"></p>
+<p>从一开始学习C++或者java就是用IDE去开发，在IDE中基本只需要编写代码，然后按个编译运行按钮就可以了。所以在刚学的时候根本就没有理解好整个编译链接的过程。</p>
+<p>昨晚大致看了该书的第二部分，静态链接。其实静态链接与动态链接的本质不同就在与一个是在生成可执行文件的时候就已经将文件链接起来，一个可以动态地装载卸载。</p>
+<p>我们使用的IDE build程序，实际上包含了很多个步骤：</p>
+<ul>
+<li>预编译</li>
+<li>编译</li>
+<li>汇编</li>
+<li>链接</li>
+</ul>
+<h3 id="预编译"><a href="#预编译" class="headerlink" title="预编译"></a>预编译</h3><p>预编译的命令如下：</p>
+<pre><code>gcc -E hello.c -o hello.i
+</code></pre><p>或者是</p>
+<pre><code>cpp hello.c &gt; hello.i        
+</code></pre><p>预编译主要就是处理以<strong><em>#</em></strong>开头的预编译指令，比如#include ，#program 等等<br>在预编译中会将宏展开，在预编译的结果中是没有宏的，并且包含的头文件也被嵌入到.i文件中，如果我们想要判断宏定义以及头文件包含是否正确，我们可以使用预编译来判断。</p>
+<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>编译就是将预编译得到的文件进行我们经常说的词法分析、语法分析、语义分析以及优化后生成相应地汇编代码文件，这个过程就是平常说的程序构建最核心的部分，也是最复杂的部分。<br>使用如下命令即可完成汇编：</p>
+<pre><code>gcc -S hello.c -o hello.s
+</code></pre><h3 id="汇编"><a href="#汇编" class="headerlink" title="汇编"></a>汇编</h3><p>汇编器就是将汇编代码汇编成机器可执行的指令，每一条汇编语句几乎对应着一条机器指令。我们可以用汇编器as来完成汇编</p>
+<pre><code>as hello.s -o hello.o
+</code></pre><p>或者</p>
+<pre><code>gcc -c hello.s -o hello.o
+</code></pre><h3 id="链接"><a href="#链接" class="headerlink" title="链接"></a>链接</h3><p>如果写过一点点c/c++小工程的都知道，那些程序源文件都是有很多个的，这样编译后是会有很多个目标文件的。而链接就是将各个输出目标文件连起来，组成一个可执行文件。</p>
+<h2 id="目标文件"><a href="#目标文件" class="headerlink" title="目标文件"></a>目标文件</h2><p>在编译后，我们会得到一些文件，这些文件介于源文件与可执行文件之间，这个叫目标文件。目标文件从结构上来讲，它已经是编译后的可执行文件，只是还没有经过链接。</p>
+<p>另外不光是可执行文件按照可执行文件的格式存储，动态链接库跟静态链接库都是可以按照可执行文件格式存储的，它们在Windows下按照PE-COFF格式存储，在linux下面按照ELF格式存储。</p>
+<p>而目标文件格式将文件的内容主要分成数据段，代码段，堆栈段，BBS段等。另外有一个链接密切相关表，符号表，它是链接器的接口。各个文件有相互引用，而链接器必须将这些文件链接在一起，所以每个文件都会有一个符号表，记录文件中使用的符号，比如函数符号。</p>
+<p>链接器在对目标文件进行链接的时候，必须对文件中得有些部位进行重定位，而这个就需要重定位表了。</p>
+<h2 id="静态链接"><a href="#静态链接" class="headerlink" title="静态链接"></a>静态链接</h2><p>静态链接其实就是将编译汇编后的文件，链接成一个可执行文件。在此过程中，它首先将各个目标文件合并，由于每个目标文件都有数据段，代码段等，链接器将这些段合并在一起，让每个文件的相同段相邻。一旦段的位置确定，链接器就可以进行符号解析和重定向，链接器会对每个对其他文件有引用的都进行解析，对每个段中徐重定位指令和数据进行“修补”，让他们都指向正确地位置。</p>
+<hr>
+<p>参考</p>
+<ol>
+<li>《程序员的自我修养-链接、装载与库》</li>
+</ol>
+<hr>
+<p>静心看点书</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/读书笔记/" rel="tag"># 读书笔记</a>
+          
+            <a href="/tags/系统/" rel="tag"># 系统</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/02/26/servlet-implements-simple/" rel="next" title="Servlet实现实例">
+                <i class="fa fa-chevron-left"></i> Servlet实现实例
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/20/android-listview-item-focus/" rel="prev" title="Andrid item中有focus子View">
+                Andrid item中有focus子View <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#预编译"><span class="nav-number">1.</span> <span class="nav-text">预编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编译"><span class="nav-number">2.</span> <span class="nav-text">编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#汇编"><span class="nav-number">3.</span> <span class="nav-text">汇编</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#链接"><span class="nav-number">4.</span> <span class="nav-text">链接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#目标文件"><span class="nav-number"></span> <span class="nav-text">目标文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#静态链接"><span class="nav-number"></span> <span class="nav-text">静态链接</span></a></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

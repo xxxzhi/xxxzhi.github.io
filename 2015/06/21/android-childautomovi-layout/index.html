@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,开源项目," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="项目地址：https://github.com/xxxzhi/ChildAutoMovi-Layout 之前看到一个屏幕上有点不断闪动的，并且移动的界面。当时久萌生一种想法，能不能做一个这样的选择界面呢？ 实现起来其实比较简单，写了一下之后，感觉完全可以做一个可以很好地重用，并且方便扩展移动规则的View。趁着平时时间，就干脆实现了它，并且粗略写了几种移动规则。 ChildAutoMoviLay">
+<meta name="keywords" content="Android,开源项目">
+<meta property="og:type" content="article">
+<meta property="og:title" content="子View按规则自动移动Layout">
+<meta property="og:url" content="http://yoursite.com/2015/06/21/android-childautomovi-layout/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="项目地址：https://github.com/xxxzhi/ChildAutoMovi-Layout 之前看到一个屏幕上有点不断闪动的，并且移动的界面。当时久萌生一种想法，能不能做一个这样的选择界面呢？ 实现起来其实比较简单，写了一下之后，感觉完全可以做一个可以很好地重用，并且方便扩展移动规则的View。趁着平时时间，就干脆实现了它，并且粗略写了几种移动规则。 ChildAutoMoviLay">
+<meta property="og:image" content="https://raw.githubusercontent.com/xxxzhi/ChildAutoMovi-Layout/master/movi.gif">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="子View按规则自动移动Layout">
+<meta name="twitter:description" content="项目地址：https://github.com/xxxzhi/ChildAutoMovi-Layout 之前看到一个屏幕上有点不断闪动的，并且移动的界面。当时久萌生一种想法，能不能做一个这样的选择界面呢？ 实现起来其实比较简单，写了一下之后，感觉完全可以做一个可以很好地重用，并且方便扩展移动规则的View。趁着平时时间，就干脆实现了它，并且粗略写了几种移动规则。 ChildAutoMoviLay">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/xxxzhi/ChildAutoMovi-Layout/master/movi.gif">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/06/21/android-childautomovi-layout/"/>
+
+
+
+
+
+  <title>子View按规则自动移动Layout | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/06/21/android-childautomovi-layout/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">子View按规则自动移动Layout</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-06-21T00:00:00+08:00">
+                2015-06-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="https://raw.githubusercontent.com/xxxzhi/ChildAutoMovi-Layout/master/movi.gif" alt="Alt Text"></p>
+<p>项目地址：<a href="https://github.com/xxxzhi/ChildAutoMovi-Layout" target="_blank" rel="external">https://github.com/xxxzhi/ChildAutoMovi-Layout</a></p>
+<p>之前看到一个屏幕上有点不断闪动的，并且移动的界面。当时久萌生一种想法，能不能做一个这样的选择界面呢？</p>
+<p>实现起来其实比较简单，写了一下之后，感觉完全可以做一个可以很好地重用，并且方便扩展移动规则的View。趁着平时时间，就干脆实现了它，并且粗略写了几种移动规则。</p>
+<h2 id="ChildAutoMoviLayout实现"><a href="#ChildAutoMoviLayout实现" class="headerlink" title="ChildAutoMoviLayout实现"></a>ChildAutoMoviLayout实现</h2><h3 id="父类"><a href="#父类" class="headerlink" title="父类"></a>父类</h3><p>考虑到平时使用起来比较方便使用的是RelativeLayout，所以用ChildAutoMoviLayout作为RelativeLayout的子类。这样用户在使用这个Layout的时候，<br>可以更加方便地扩展。比如使用Margins。</p>
+<h3 id="添加子View方式"><a href="#添加子View方式" class="headerlink" title="添加子View方式"></a>添加子View方式</h3><p>另外，因为每个子View可以要求为一致，因为自动移动，基本上是一些差不多形式的View移动。所以我使用Android AbsListView的Adapter作为ChildAutoMoviLayout<br>的Adapter。ChildAutoMoviLayout通过读取Adapter来给它自己添加子View 。ChildAutoMoviLayout不通过addView来添加View。这样用户只要实现一个<br>Adapter就可以了。甚至可以直接把ListView的Adapter拿来使用。</p>
+<h3 id="移动规则"><a href="#移动规则" class="headerlink" title="移动规则"></a>移动规则</h3><p>移动规则，我设计一个接口，用户只要实现那个接口，并且给ChildAutoMoviLayout就可以了。setMoviInterface。移动规则采用两个方法</p>
+<pre><code>/**    
+     * 移动    
+     * @param view    
+     * @param height 移动高度    
+     * @param width 移动宽度    
+     */    
+void move(View view,int width,int height);    
+
+
+/**    
+     * 初始化位置    
+     * @param view    
+     * @param height 移动高度    
+     * @param width 移动宽度    
+     */    
+void init(View view,int width,int height);    
+</code></pre><h3 id="动画实现"><a href="#动画实现" class="headerlink" title="动画实现"></a>动画实现</h3><p>我使用的是TimeTask作为一个定时器，然后利用定时器，每隔20毫秒移动一下图中的标签（子类视图）</p>
+<pre><code>timer.scheduleAtFixedRate(timerTask, 1000, 20);
+</code></pre><h2 id="使用介绍"><a href="#使用介绍" class="headerlink" title="使用介绍"></a>使用介绍</h2><h3 id="xml使用："><a href="#xml使用：" class="headerlink" title="xml使用："></a>xml使用：</h3><pre><code>&lt;com.houzhi.childautomovi.view.ChildAutoMoviLayout    
+android:id=&quot;@+id/tagView&quot;    
+android:layout_below=&quot;@+id/tag_container&quot;    
+android:layout_width=&quot;match_parent&quot;    
+android:layout_height=&quot;match_parent&quot;&gt;    
+&lt;/com.houzhi.childautomovi.view.ChildAutoMoviLayout&gt;    
+</code></pre><h3 id="java代码使用示例："><a href="#java代码使用示例：" class="headerlink" title="java代码使用示例："></a>java代码使用示例：</h3><ol>
+<li><p>从xml中解析出</p>
+<pre><code>//从xml中解析出
+ChildAutoMoviLayout tagRandomView = (ChildAutoMoviLayout) findViewById(R.id.tagView);    
+final LinearLayout linear = (LinearLayout) findViewById(R.id.tag_container);    
+</code></pre></li>
+<li><p>设置Adapter和移动策略</p>
+</li>
+</ol>
+<pre><code>final TagAdapter adapter = new TagAdapter();    
+tagRandomView.setAdapter(adapter, new BubbleLineUpMoving());    
+</code></pre><ol>
+<li>监听标签（子View）的移动</li>
+</ol>
+<pre><code>tagRandomView.setOnTagClickListener(new ChildAutoMoviLayout.TagClickListener() {    
+                @Override    
+                public void onTagClickListener(View view, int position, long id) {    
+                        //TODO click things    
+
+                }    
+        });    
+</code></pre><ol>
+<li>开始动画</li>
+</ol>
+<pre><code>tagRandomView.startMoving();    
+</code></pre><p>项目地址：<a href="https://github.com/xxxzhi/ChildAutoMovi-Layout" target="_blank" rel="external">https://github.com/xxxzhi/ChildAutoMovi-Layout</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/开源项目/" rel="tag"># 开源项目</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/06/02/java-Runtime-exec-delay/" rel="next" title="Runtime.exec使用错误导致延迟">
+                <i class="fa fa-chevron-left"></i> Runtime.exec使用错误导致延迟
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/09/10/jvm-memory-manager/" rel="prev" title="JVM内存管理">
+                JVM内存管理 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ChildAutoMoviLayout实现"><span class="nav-number">1.</span> <span class="nav-text">ChildAutoMoviLayout实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#父类"><span class="nav-number">1.1.</span> <span class="nav-text">父类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#添加子View方式"><span class="nav-number">1.2.</span> <span class="nav-text">添加子View方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#移动规则"><span class="nav-number">1.3.</span> <span class="nav-text">移动规则</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动画实现"><span class="nav-number">1.4.</span> <span class="nav-text">动画实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用介绍"><span class="nav-number">2.</span> <span class="nav-text">使用介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#xml使用："><span class="nav-number">2.1.</span> <span class="nav-text">xml使用：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#java代码使用示例："><span class="nav-number">2.2.</span> <span class="nav-text">java代码使用示例：</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

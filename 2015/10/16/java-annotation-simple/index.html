@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="国庆假期前后，基本是看一下开源的项目，发现不少优秀的开源项目都用了注解和动态代理相关的知识，所以顺带有好好地研读了一下注解和动态代理，加深了对注解和动态代理的认识。博客都差不多接近要断了，前一段七七八八地看了各种东西，一直都没有写东西，懒惰了很多。整的现在很多东西都没有做好，突然觉得不仅仅是专业学习，其他的各种东西也应该有点追求。力求生活精致。 Java从JDK5开始引入了注解（Annotati">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java注解简述">
+<meta property="og:url" content="http://yoursite.com/2015/10/16/java-annotation-simple/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="国庆假期前后，基本是看一下开源的项目，发现不少优秀的开源项目都用了注解和动态代理相关的知识，所以顺带有好好地研读了一下注解和动态代理，加深了对注解和动态代理的认识。博客都差不多接近要断了，前一段七七八八地看了各种东西，一直都没有写东西，懒惰了很多。整的现在很多东西都没有做好，突然觉得不仅仅是专业学习，其他的各种东西也应该有点追求。力求生活精致。 Java从JDK5开始引入了注解（Annotati">
+<meta property="og:image" content="http://xxxzhi.github.io/images/beautiful6.jpg">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java注解简述">
+<meta name="twitter:description" content="国庆假期前后，基本是看一下开源的项目，发现不少优秀的开源项目都用了注解和动态代理相关的知识，所以顺带有好好地研读了一下注解和动态代理，加深了对注解和动态代理的认识。博客都差不多接近要断了，前一段七七八八地看了各种东西，一直都没有写东西，懒惰了很多。整的现在很多东西都没有做好，突然觉得不仅仅是专业学习，其他的各种东西也应该有点追求。力求生活精致。 Java从JDK5开始引入了注解（Annotati">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/beautiful6.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/10/16/java-annotation-simple/"/>
+
+
+
+
+
+  <title>Java注解简述 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/10/16/java-annotation-simple/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java注解简述</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-10-16T00:00:00+08:00">
+                2015-10-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="http://xxxzhi.github.io/images/beautiful6.jpg" alt="enter image description here"></p>
+<p>国庆假期前后，基本是看一下开源的项目，发现不少优秀的开源项目都用了注解和动态代理相关的知识，所以顺带有好好地研读了一下注解和动态代理，加深了对注解和动态代理的认识。博客都差不多接近要断了，前一段七七八八地看了各种东西，一直都没有写东西，懒惰了很多。整的现在很多东西都没有做好，突然觉得不仅仅是专业学习，其他的各种东西也应该有点追求。力求生活精致。</p>
+<p>Java从JDK5开始引入了注解（Annotation），也称元数据，它可以用于创建文档，代码依赖性跟踪，甚至编译时的基本检查。注解基本格式是<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">    @Override</div><div class="line">    public String toString()&#123;</div><div class="line">        return &quot;annotation string&quot;;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">Java注解可以应用到包，类，方法，字段，局部变量上面。另外Java可以通过反射去读取注解的内容。</div><div class="line"></div><div class="line">## Java内置注解</div><div class="line">Java内置了三个注解，定义在java.lang包里面：</div><div class="line">- Override：重载检查</div><div class="line">- Deprecated: 使用过时的代码的提示</div><div class="line">- SuppressWarnings:提醒，像uncheck，serial等</div><div class="line"></div><div class="line">这些个也都是我们经常使用的注解，特别是```Override```，在继承的时候加上注解，能够对继承进行检查。像本文第一段代码就是使用了Override。下面这段就是Override的源码：</div></pre></td></tr></table></figure></p>
+<pre><code>package java.lang;
+import java.lang.annotation.*;
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.SOURCE)
+public @interface Override {
+}
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">## 自定义注解</div><div class="line">Java出了内置了注解，也同样是允许自定义注解的。自定义注解也跟Override的实现完全一样。比如说我们想要实现一个Hello注解，只需要使用如下代码：</div></pre></td></tr></table></figure>
+<pre><code>package java.lang;
+import java.lang.annotation.*;
+
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Hello {
+    String haha() default &quot;ha&quot;;
+    String haha1() default &quot;ha1&quot;;
+}
+</code></pre><p>```</p>
+<p>这样就可以像使用Override一样使用Hello注解了。其中<code>@interface</code>是声明一个注解，自动继承了java.lang.annotation.Annotation接口，编译器程序会完成其他部分，在定义注解时，不能继承其他注解或接口。<code>@Retention</code>是用来设置作用范围，默认时RetentionPolicy.CLASS，它也是一种保留范围，CLASS保留在class文件中，但VM运行时不保存，RUNTIME保留在class，运行时可以反射读取注解的值。</p>
+<p><code>@Target</code>是用来指定适用的元素种类。如果不添加的话，任何元素都能够使用。注解里面的方法是注解的变量，可以设置默认值，类型基本变量都可以。</p>
+<h2 id="读取注解的值"><a href="#读取注解的值" class="headerlink" title="读取注解的值"></a>读取注解的值</h2><p>注解的值可以在运行的时候读取出来，只要<code>@Retention</code>设置为RUNTIME就能够被读取出来了。不过读取出来的具体方法就需要去了解下了。</p>
+<p>比如我们使用之前定义的Hello注解</p>
+<pre><code>@Hello
+class TestHello{
+    @Hello(haha=&quot;haha&quot;)
+    public void sayHello(){}
+
+    @Hello(haha=&quot;hahastr&quot;)
+    public void hello;
+}
+</code></pre><h3 id="类注解"><a href="#类注解" class="headerlink" title="类注解"></a>类注解</h3><pre><code>Class&lt;TestHello&gt; cl = TestHello.class
+Hello h = cl.getAnnotation(Hello.class);
+System.out.println(h.haha()+&quot;,&quot;+h.haha1());
+</code></pre><h3 id="函数注解"><a href="#函数注解" class="headerlink" title="函数注解"></a>函数注解</h3><pre><code>Class&lt;TestHello&gt; cl = TestHello.class
+Method method = cl.getMethod(&quot;sayHello&quot;,new Class[0]);
+Hello h = (Hello)method.getAnnotation(Hello.class);
+</code></pre><p>字段，构造函数的使用方式都是一样的。程序可以在运行的时候读取注解</p>
+<h2 id="处理注解的工具APT"><a href="#处理注解的工具APT" class="headerlink" title="处理注解的工具APT"></a>处理注解的工具APT</h2><p>APT（Annotation Processing Tool）就是jdk在1.5提供的帮助注解处理过程的工具。它的作用是在编译源文件之前，通过一个自定义的注释处理器去解释并处理源文件的注释，并且由注释处理器生成一些新的源文件，字节码文件，或其他文本文件。APT也会对新的源文件进行处理，知道没有新的源文件产生。</p>
+<h2 id="使用了注解的一些工具"><a href="#使用了注解的一些工具" class="headerlink" title="使用了注解的一些工具"></a>使用了注解的一些工具</h2><p>现在很多开源第三方Android项目都是使用了注解，</p>
+<p>像依赖注入库<a href="http://square.github.io/dagger/" target="_blank" rel="external">Dagger</a>就是使用了很多注解去实现注入，并且利用注解处理工具在编译时生成辅助类，在运行时完成注入。</p>
+<p>另外又比如<a href="http://jakewharton.github.io/butterknife/" target="_blank" rel="external">ButterKnife</a>，也是一种依靠注入的开源库，不过ButterKnife是Android中通过id自动绑定java中的View变量与layout中描述的View的一个开源库。</p>
+<p>以及我前面看过的<a href="http://square.github.io/retrofit/" target="_blank" rel="external">Retrofit</a>，那是一个将Http访问简化成与ORM一样的开源库。很多第三方库都使用注解来方便开发者使用，但是其中的原理还是应该了解一下。</p>
+<p>Spring中用到的注解就更多了，以及很多ORM都是用注解方便开发。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/10/16/java-dynamic-proxy/" rel="next" title="Java动态代理">
+                <i class="fa fa-chevron-left"></i> Java动态代理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/10/21/java-f-bounded/" rel="prev" title="Java F-bounded">
+                Java F-bounded <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#读取注解的值"><span class="nav-number">1.</span> <span class="nav-text">读取注解的值</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#类注解"><span class="nav-number">1.1.</span> <span class="nav-text">类注解</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#函数注解"><span class="nav-number">1.2.</span> <span class="nav-text">函数注解</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理注解的工具APT"><span class="nav-number">2.</span> <span class="nav-text">处理注解的工具APT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用了注解的一些工具"><span class="nav-number">3.</span> <span class="nav-text">使用了注解的一些工具</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

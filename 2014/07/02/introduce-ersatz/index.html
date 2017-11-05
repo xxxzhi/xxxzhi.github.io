@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="机器学习," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="简介ersatz是一个深度学习的实验室，它提供了用GPU快速计算的深度学习的结构。Ersatz也是一个它实验室整个产品的名称。它提供了直接的网络接口跟一些简单的API，Ersatz让建立复杂的学习变得简单。网站主页是http://ersatzlabs.com/ 数据格式Ersatz总共有三种数据表示格式：timeseries格式，images格式，general csv格式。三种数据格式dem">
+<meta name="keywords" content="机器学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ersatz简介">
+<meta property="og:url" content="http://yoursite.com/2014/07/02/introduce-ersatz/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="简介ersatz是一个深度学习的实验室，它提供了用GPU快速计算的深度学习的结构。Ersatz也是一个它实验室整个产品的名称。它提供了直接的网络接口跟一些简单的API，Ersatz让建立复杂的学习变得简单。网站主页是http://ersatzlabs.com/ 数据格式Ersatz总共有三种数据表示格式：timeseries格式，images格式，general csv格式。三种数据格式dem">
+<meta property="og:image" content="http://yoursite.com/images/2014-07-02-introduce-ersatz-2.png">
+<meta property="og:image" content="http://yoursite.com/images/2014-07-02-introduce-ersatz-1.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ersatz简介">
+<meta name="twitter:description" content="简介ersatz是一个深度学习的实验室，它提供了用GPU快速计算的深度学习的结构。Ersatz也是一个它实验室整个产品的名称。它提供了直接的网络接口跟一些简单的API，Ersatz让建立复杂的学习变得简单。网站主页是http://ersatzlabs.com/ 数据格式Ersatz总共有三种数据表示格式：timeseries格式，images格式，general csv格式。三种数据格式dem">
+<meta name="twitter:image" content="http://yoursite.com/images/2014-07-02-introduce-ersatz-2.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/07/02/introduce-ersatz/"/>
+
+
+
+
+
+  <title>ersatz简介 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/07/02/introduce-ersatz/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ersatz简介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-07-02T00:00:00+08:00">
+                2014-07-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p><img src="/images/2014-07-02-introduce-ersatz-2.png" alt="images-2"></p>
+<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><p>ersatz是一个深度学习的实验室，它提供了用GPU快速计算的深度学习的结构。Ersatz也是一个它实验室整个产品的名称。它提供了直接的网络接口跟一些简单的API，Ersatz让建立复杂的学习变得简单。网站主页是<a href="http://ersatzlabs.com/" target="_blank" rel="external">http://ersatzlabs.com/</a></p>
+<h4 id="数据格式"><a href="#数据格式" class="headerlink" title="数据格式"></a>数据格式</h4><p>Ersatz总共有三种数据表示格式：<strong>timeseries</strong>格式，<strong>images</strong>格式，<strong>general csv</strong>格式。三种数据格式demo如下：</p>
+<h5 id="timeseries"><a href="#timeseries" class="headerlink" title="timeseries"></a>timeseries</h5><pre><code>1,2,3|0,1;4,5,6|1,0;      
+1,3,2|1,0;1,2,4|0,1;1,2,5|1,0;     
+1,3,4|0,1;1,4,5|1,0;
+</code></pre><p>用逗号分隔特征，’|’分开输入输出，’;’分隔开时间，每一行表示一个样例。</p>
+<h5 id="images"><a href="#images" class="headerlink" title="images"></a>images</h5><p>Ersatz支持的图片格式有.jpeg, .jpg, .png, .bmp。可以用一个zip压缩包，压缩起来整个目录格式如下：</p>
+<pre><code>some_dataset.zip
+
+some_class/this_class_case.jpg
+some_class/this_another_case.jpg
+some_class/and_so_on.jpg
+another_class/1.jpg
+another_class/2.jpg
+another_class/3.jpg
+...
+</code></pre><h5 id="general-csv"><a href="#general-csv" class="headerlink" title="general csv"></a>general csv</h5><pre><code>0,0,0,1,0,0,0,0,1,10
+0,.6,0,1,0,0,0,0,.8,6
+0,0,0,0,0,1,0,0,0,4
+0,0,0,.5,0,.8,0,0,0,6
+</code></pre><p>数据格式的详细描述在<a href="http://www.ersatzlabs.com/documentation/dataformat/" target="_blank" rel="external">http://www.ersatzlabs.com/documentation/dataformat/</a></p>
+<p>####数据预处理<br>数据预处理总共包括三个部分：</p>
+<ol>
+<li>检查数据格式是否个Erastz匹配</li>
+<li>上传数据</li>
+<li>创建数据集</li>
+</ol>
+<p>整个步骤的图文目录在<a href="http://www.ersatzlabs.com/documentation/dataprep/" target="_blank" rel="external">http://www.ersatzlabs.com/documentation/dataprep/</a></p>
+<p>####Ensemble<br>Ensemble是Erastz中一个重要的概念。按照<a href="http://www.ersatzlabs.com/documentation/creatingEns/" target="_blank" rel="external">官网上面</a>说的,Ensemble其实就是多个模型的群组。因为很多时候，你在训练的时候，可能不仅仅训练一个模型，可能有多个模型。这个概念使用可能在其他地方比较少见。</p>
+<p>其实这个东西，还跟price有关，跟钱有关的。我现在使用过程中，它是这样算的：一分钟$0.41。这个跟你一般的使用无关，主要是计算你训练，预测花费的时间。我估计是是花费它GPU的时间</p>
+<p>在这里，Ensemble是实验的一个基本单元。</p>
+<p>####参数设置<br>Ersatz有提供默认的参数，所以这个其实在刚刚使用的时候完全可以使用Ersatz利用贝叶斯算法计算得到的默认的参数。</p>
+<p>####训练模型</p>
+<p>训练的页面如下</p>
+<p><img src="/images/2014-07-02-introduce-ersatz-1.png" alt="image"></p>
+<p>在这里我们可以及时查看训练的状态，训练迭代的准确度。在这里，有设置参数，查看生成的图表，查看混合矩阵，查看精确度矩阵。具体可见<a href="http://ersatzlabs.com/documentation/trainingModel/" target="_blank" rel="external">http://ersatzlabs.com/documentation/trainingModel/</a>的介绍。基本上直接按start进行训练就好。</p>
+<p>####预测</p>
+<p>预测有三种类型：</p>
+<ol>
+<li>直接从浏览器中输入数据，这种方式只是支持csv数据类型。</li>
+<li>利用上传过的数据集。</li>
+<li>查看之前的预测。</li>
+</ol>
+<p>具体介绍请看。<br><a href="http://ersatzlabs.com/documentation/makingPred/" target="_blank" rel="external">http://ersatzlabs.com/documentation/makingPred/</a></p>
+<p>####API<br><a href="http://ersatzlabs.com/documentation/api/" target="_blank" rel="external">http://ersatzlabs.com/documentation/api/</a></p>
+<p>现在API支持的操作有：</p>
+<h6 id="数据"><a href="#数据" class="headerlink" title="数据"></a>数据</h6><ol>
+<li>上传文件</li>
+<li>上传字符串数据（csv数据类型）</li>
+<li>查看文件状态</li>
+</ol>
+<h6 id="训练"><a href="#训练" class="headerlink" title="训练"></a>训练</h6><ol>
+<li>创建数据集</li>
+<li>训练数据</li>
+<li>创建集合</li>
+<li>创建模型</li>
+<li>训练模型</li>
+<li>生成KEY</li>
+<li>指定MRNN，CNN</li>
+</ol>
+<h6 id="预测"><a href="#预测" class="headerlink" title="预测"></a>预测</h6><ol>
+<li>利用MRNN，CNN预测</li>
+</ol>
+<hr>
+<p>多情自古伤离别，更那堪，冷落清秋节！今宵酒醒何处，杨柳岸，晓风残月。  —柳永</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/机器学习/" rel="tag"># 机器学习</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/06/22/summarize-and-think/" rel="next" title="最近的总结">
+                <i class="fa fa-chevron-left"></i> 最近的总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/07/15/deep-learning-record/" rel="prev" title="深度学习学习">
+                深度学习学习 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据格式"><span class="nav-number">2.</span> <span class="nav-text">数据格式</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#timeseries"><span class="nav-number">2.1.</span> <span class="nav-text">timeseries</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#images"><span class="nav-number">2.2.</span> <span class="nav-text">images</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#general-csv"><span class="nav-number">2.3.</span> <span class="nav-text">general csv</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#数据"><span class="nav-number">2.3.1.</span> <span class="nav-text">数据</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#训练"><span class="nav-number">2.3.2.</span> <span class="nav-text">训练</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#预测"><span class="nav-number">2.3.3.</span> <span class="nav-text">预测</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

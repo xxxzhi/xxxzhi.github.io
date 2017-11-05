@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="很久之前就看到有网友遇到用Parcel传Bitmap的时候，会遇到因为图片太大而报错，都在讨论传输Bitmap的时候的大小限制，但是实际上应该只有在4.0之前会有限制，4.0之后图片传输的方式有变化，它采用了Blob来传输，最终会使用ashmem来传递占用内存大的数据。下面分别介绍4.0前后Parcel对图片传输的异同。 Parcel写入读取先简单介绍一下Parcel的写入读取模式，Parcel是">
+<meta name="keywords" content="Android,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android4.0之后Parcel传输Bitmap源码分析">
+<meta property="og:url" content="http://yoursite.com/2016/05/29/android-parcel-bitmap-2/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="很久之前就看到有网友遇到用Parcel传Bitmap的时候，会遇到因为图片太大而报错，都在讨论传输Bitmap的时候的大小限制，但是实际上应该只有在4.0之前会有限制，4.0之后图片传输的方式有变化，它采用了Blob来传输，最终会使用ashmem来传递占用内存大的数据。下面分别介绍4.0前后Parcel对图片传输的异同。 Parcel写入读取先简单介绍一下Parcel的写入读取模式，Parcel是">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android4.0之后Parcel传输Bitmap源码分析">
+<meta name="twitter:description" content="很久之前就看到有网友遇到用Parcel传Bitmap的时候，会遇到因为图片太大而报错，都在讨论传输Bitmap的时候的大小限制，但是实际上应该只有在4.0之前会有限制，4.0之后图片传输的方式有变化，它采用了Blob来传输，最终会使用ashmem来传递占用内存大的数据。下面分别介绍4.0前后Parcel对图片传输的异同。 Parcel写入读取先简单介绍一下Parcel的写入读取模式，Parcel是">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/05/29/android-parcel-bitmap-2/"/>
+
+
+
+
+
+  <title>Android4.0之后Parcel传输Bitmap源码分析 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/29/android-parcel-bitmap-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android4.0之后Parcel传输Bitmap源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-29T00:00:00+08:00">
+                2016-05-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>很久之前就看到有网友遇到用Parcel传Bitmap的时候，会遇到因为图片太大而报错，都在讨论传输Bitmap的时候的大小限制，但是实际上应该只有在4.0之前会有限制，4.0之后图片传输的方式有变化，它采用了Blob来传输，最终会使用ashmem来传递占用内存大的数据。下面分别介绍4.0前后Parcel对图片传输的异同。</p>
+<h2 id="Parcel写入读取"><a href="#Parcel写入读取" class="headerlink" title="Parcel写入读取"></a>Parcel写入读取</h2><p>先简单介绍一下Parcel的写入读取模式，Parcel是Android中跨进程数据传递的中介，跨进程数据使用Parcel传递效率会比Serializable。Parcel提供了很多接口，比如writeInt,writeFloat,writeString，readInt,readFloat,readString等等，用这些接口可以读取写入数据.而实际上，Parcel里面有一个mData变量:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">void* mData;</div></pre></td></tr></table></figure>
+<p>这个变量是一个指针类型，那些写入的接口都是将数据写入到这个指针变量指向的区域，读取也是从mData中读，写入和读取的数据相互对应。然后再将这个mData传入到Binder，或者是从Binder中读取出来。</p>
+<h2 id="2-3源码"><a href="#2-3源码" class="headerlink" title="2.3源码"></a>2.3源码</h2><p>在2.3中，Android Parcel传输图片是有大小限制的，实际上的限制应该是Binder对传输的数据大小的限制。Bitmap会对应的native层Parcel传输函数是Bitmap_writeToParcel，先看源码是怎么传输的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">static jboolean Bitmap_writeToParcel(JNIEnv* env, jobject,</div><div class="line">                                     const SkBitmap* bitmap,</div><div class="line">                                     jboolean isMutable, jint density,</div><div class="line">                                     jobject parcel) &#123;</div><div class="line">    if (parcel == NULL) &#123;</div><div class="line">        SkDebugf(&quot;------- writeToParcel null parcel\n&quot;);</div><div class="line">        return false;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    android::Parcel* p = android::parcelForJavaObject(env, parcel);</div><div class="line"></div><div class="line">    p-&gt;writeInt32(isMutable);</div><div class="line">    p-&gt;writeInt32(bitmap-&gt;config());</div><div class="line">    p-&gt;writeInt32(bitmap-&gt;width());</div><div class="line">    p-&gt;writeInt32(bitmap-&gt;height());</div><div class="line">    p-&gt;writeInt32(bitmap-&gt;rowBytes());</div><div class="line">    p-&gt;writeInt32(density);　//这些都是写入到Parcel的mData</div><div class="line"></div><div class="line">    if (bitmap-&gt;getConfig() == SkBitmap::kIndex8_Config) &#123;</div><div class="line">        SkColorTable* ctable = bitmap-&gt;getColorTable();</div><div class="line">        if (ctable != NULL) &#123;</div><div class="line">            int count = ctable-&gt;count();</div><div class="line">            p-&gt;writeInt32(count);</div><div class="line">            memcpy(p-&gt;writeInplace(count * sizeof(SkPMColor)),</div><div class="line">                   ctable-&gt;lockColors(), count * sizeof(SkPMColor));</div><div class="line">            ctable-&gt;unlockColors(false);</div><div class="line">        &#125; else &#123;</div><div class="line">            p-&gt;writeInt32(0);   // indicate no ctable</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    size_t size = bitmap-&gt;getSize();</div><div class="line">    bitmap-&gt;lockPixels();</div><div class="line">    memcpy(p-&gt;writeInplace(size), bitmap-&gt;getPixels(), size); //这个地方传输像素数据</div><div class="line">    bitmap-&gt;unlockPixels();</div><div class="line">    return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>而Parcel的writeInplace方法很简单，就是根据传进去的位置，然后返回一个地址，这个地址是Parcel数据的地址，相当于当前应该写入的位置。得到地址后，再用memcpy把像素拷贝到Parcel中(mData)。这样相当于直接把数据拷贝到Parcel中。而Parcel传输数据如果大于当前的容量，会通过growData来增大容量，这个最大不要溢出整数的最大值，或者有存储空间可以分配，相当于正常情况下在Parcel没有限制数据大小：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">void* Parcel::writeInplace(size_t len)</div><div class="line">&#123;</div><div class="line">    const size_t padded = PAD_SIZE(len);</div><div class="line"></div><div class="line">    // sanity check for integer overflow</div><div class="line">    if (mDataPos+padded &lt; mDataPos) &#123; //不能超过整数大小</div><div class="line">        return NULL;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if ((mDataPos+padded) &lt;= mDataCapacity) &#123;</div><div class="line">restart_write:  //不断增大容量</div><div class="line">        //printf(&quot;Writing %ld bytes, padded to %ld\n&quot;, len, padded);</div><div class="line">        uint8_t* const data = mData+mDataPos;</div><div class="line"></div><div class="line">         // Need to pad at end?</div><div class="line">        if (padded != len) &#123;</div><div class="line"></div><div class="line">            //printf(&quot;Applying pad mask: %p to %p\n&quot;, (void*)mask[padded-len],</div><div class="line">            //    *reinterpret_cast&lt;void**&gt;(data+padded-4));</div><div class="line">             *reinterpret_cast&lt;uint32_t*&gt;(data+padded-4) &amp;= mask[padded-len];</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        finishWrite(padded);</div><div class="line">        return data;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    status_t err = growData(padded);</div><div class="line">    if (err == NO_ERROR) goto restart_write;</div><div class="line">    return NULL;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这样方式传输，会把像素数组全部传输到Binder驱动中，而导致如果图片太大出现一些<figure class="highlight plain"><figcaption><span>BINDER TRANSACTION```。大小的限制在Binder。</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">## 4.0源码</div><div class="line">在4.0的源码中，Android的Parcel传输Bitmap的时候，会采用Blob来传输，Blob是用来传递占用内存很大的对象的，这是在native层的接口，如果4.0在Java层使用Parcel传递未提供的接口的数据的话，可以考虑用writeByteArray，在5.0中Java层增加了Blob接口。</div><div class="line"></div><div class="line"></div><div class="line">先看Bitmap_writeTOParcel源码:</div></pre></td></tr></table></figure></p>
+<p>static jboolean Bitmap_writeToParcel(JNIEnv<em> env, jobject,<br>                                     const SkBitmap</em> bitmap,<br>                                     jboolean isMutable, jint density,<br>                                     jobject parcel) {<br>    if (parcel == NULL) {<br>        SkDebugf(“——- writeToParcel null parcel\n”);<br>        return false;<br>    }</p>
+<pre><code>android::Parcel* p = android::parcelForJavaObject(env, parcel);
+
+...前面部分是传输图片相关的一些特性，比如宽度，高度，颜色等等，与2.3一致
+
+size_t size = bitmap-&gt;getSize();
+//这里开始用blob传输
+android::Parcel::WritableBlob blob;
+android::status_t status = p-&gt;writeBlob(size, &amp;blob);
+if (status) {
+    doThrowRE(env, &quot;Could not write bitmap to parcel blob.&quot;);
+    return false;
+}
+
+bitmap-&gt;lockPixels();
+const void* pSrc =  bitmap-&gt;getPixels(); //把像素copy到blob的指针，也就是blob里面
+if (pSrc == NULL) {
+    memset(blob.data(), 0, size);
+} else {
+    memcpy(blob.data(), pSrc, size);
+}
+bitmap-&gt;unlockPixels();
+
+blob.release();
+return true;
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">而Parcel的writeBlob用来写入Blob，它会根据数据量的大小来判断是否应该使用ashmem来传输。其源码如下:</div></pre></td></tr></table></figure></p>
+<p>status_t Parcel::writeBlob(size_t len, WritableBlob* outBlob)<br>{<br>    status_t status;</p>
+<pre><code>if (!mAllowFds || len &lt;= IN_PLACE_BLOB_LIMIT) { //IN_PLACE_BLOB_LIMIT 为40 * 1024
+//如果不允许fd共享内存文件传输，或者长度小于IN_PLACE_BLOB_LIMIT，则按照原来的方式传输
+    LOGV(&quot;writeBlob: write in place&quot;);
+    status = writeInt32(0); //未使用asm
+    if (status) return status;
+
+    void* ptr = writeInplace(len);
+    if (!ptr) return NO_MEMORY;
+
+    outBlob-&gt;init(false /*mapped*/, ptr, len); // Blob对应的地址为ptr，其实也是Parcel的地址
+    return NO_ERROR;
+}
+// 下面的就是通过ashmem（匿名共享内存）来传递数据，
+LOGV(&quot;writeBlob: write to ashmem&quot;);
+int fd = ashmem_create_region(&quot;Parcel Blob&quot;, len);
+if (fd &lt; 0) return NO_MEMORY;
+
+int result = ashmem_set_prot_region(fd, PROT_READ | PROT_WRITE);
+if (result &lt; 0) {
+    status = result;
+} else {
+    void* ptr = ::mmap(NULL, len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (ptr == MAP_FAILED) {
+        status = -errno;
+    } else {
+        result = ashmem_set_prot_region(fd, PROT_READ);
+        if (result &lt; 0) {
+            status = result;
+        } else {
+            status = writeInt32(1); //标记使用了asm传输
+            if (!status) {
+                status = writeFileDescriptor(fd, true /*takeOwnership*/); //传递fd
+                if (!status) {
+                    outBlob-&gt;init(true /*mapped*/, ptr, len); //如果成功，Blob将会对应asm中的内存位置。
+                    return NO_ERROR;
+                }
+            }
+        }
+    }
+    ::munmap(ptr, len);
+}
+::close(fd);
+return status;
+</code></pre><p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">Parcel在4.0后增加Blob数据接口，用来传输占用内存大的数据，Blob传输具体的流程就是：如果数据量不超过IN_PLACE_BLOB_LIMIT或者不允许fd传输，则采用普通的方式，也就是直接将数据拷贝到Parcel里面；如果上面的条件不符合，则会采用asm来传输，也就是创建一个asm区域，然后把fd传入Parcel，把Blob对应的指针位置指向asm区域(通过mmap映射内存，最后直接将数据拷贝到这里面）。</div><div class="line">另外需要说的writeBlob只是给Blob赋值了一个指针位置，这个指针或者是Parcel的mData中的某个位置，或者asm区域里面的指针(mmap得到)，调用writeBlob的不用关心具体是哪个位置。</div><div class="line"></div><div class="line">如果是普通方式传输，先写入一个0，如果是asm方式先写入一个1，读取的时候根据这个标志来判断是不是asm方式，具体可以看我代码的注释，下面是readBlob源码:</div></pre></td></tr></table></figure>
+<p>status_t Parcel::readBlob(size_t len, ReadableBlob* outBlob) const<br>{<br>    int32_t useAshmem;<br>    status_t status = readInt32(&amp;useAshmem); //useAshmem是标志位，如果为0表示不使用ashmem传输<br>    if (status) return status;</p>
+<pre><code>if (!useAshmem) {
+    LOGV(&quot;readBlob: read in place&quot;);
+    const void* ptr = readInplace(len);
+    if (!ptr) return BAD_VALUE;
+
+    outBlob-&gt;init(false /*mapped*/, const_cast&lt;void*&gt;(ptr), len);
+    return NO_ERROR;
+}
+
+LOGV(&quot;readBlob: read from ashmem&quot;);
+int fd = readFileDescriptor();
+if (fd == int(BAD_TYPE)) return BAD_VALUE;
+
+void* ptr = ::mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
+if (!ptr) return NO_MEMORY;
+
+outBlob-&gt;init(true /*mapped*/, ptr, len);
+return NO_ERROR;
+</code></pre><p>}<br>```</p>
+<p>也就是在4.0之后，如果允许fd传递的话，大数据量会通过ashmem来传递，而数据小的直接通过拷贝的方式，这样对于图片的大小限制也就小了很多。</p>
+<h2 id="总结思考"><a href="#总结思考" class="headerlink" title="总结思考"></a>总结思考</h2><p>关于遇到Intent传递图片因为大小限制而报错<code>FAILED BINDER TRANSACTION</code>，应该是4.0之前的机器的。4.0之后正常情况下应该不会出错。</p>
+<p>其实我在传递图片的时候，都是先保存在sdcard，然后再将图片的路径传递到另外的进程或不同的Activity，我觉得直接传递图片会导致占用内存太大。但是为什么Android内部还是提供了这样一个接口呢？</p>
+<p>认真阅读了4.0之后的源码后，我发现从原理上面来看直接传递图片的效率和速度会更高，因为保存在sdcard会经过两次io（起码一次），而直接通过Parcel传递图片，那么直接在内存中操作，速度会高很多。另外我担心的内存占用太大其实多虑了。在4.0之后，如果图片小的话（40kb以内），不会太大影响，如果超过40kb，则会使用asm来传，不会占用到Java的堆内存，而且占用的内存传输完毕后就会释放了。即使是4.0之前，如果图片预计比较小，直接通过Parcel传递应该会好很多（也就是Activity之间直接把Bitmap放入Intent）。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/24/android-bitmap-sourcecode-analysis/" rel="next" title="Android6.0 Bitmap存储以及Parcel传输源码分析">
+                <i class="fa fa-chevron-left"></i> Android6.0 Bitmap存储以及Parcel传输源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/02/android-sourcecode-adapter-activity/" rel="prev" title="Android源码适配器模式---Activity类结构">
+                Android源码适配器模式---Activity类结构 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Parcel写入读取"><span class="nav-number">1.</span> <span class="nav-text">Parcel写入读取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3源码"><span class="nav-number">2.</span> <span class="nav-text">2.3源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结思考"><span class="nav-number">3.</span> <span class="nav-text">总结思考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

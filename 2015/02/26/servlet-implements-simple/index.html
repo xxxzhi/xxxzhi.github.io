@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="杂技,服务器," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Servlet简单实现之前在图书馆看了一下《深入剖析Tomcat》前两章，对于Servlet的一种简单的实现方式复述一下。 Java Servlet是用java编写的服务器程序。狭义上就是指java程序接口。在Servlet.jar就有Servlet接口，ServletRequest接口，以及ServletResponse接口。这些接口跟平时写Tomcat的是有类似的，平时用的比较多的都是Ht">
+<meta name="keywords" content="杂技,服务器">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Servlet实现实例">
+<meta property="og:url" content="http://yoursite.com/2015/02/26/servlet-implements-simple/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Servlet简单实现之前在图书馆看了一下《深入剖析Tomcat》前两章，对于Servlet的一种简单的实现方式复述一下。 Java Servlet是用java编写的服务器程序。狭义上就是指java程序接口。在Servlet.jar就有Servlet接口，ServletRequest接口，以及ServletResponse接口。这些接口跟平时写Tomcat的是有类似的，平时用的比较多的都是Ht">
+<meta property="og:image" content="https://xxxzhi.github.io/images/europe_city.jpg">
+<meta property="og:image" content="https://xxxzhi.github.io/images/servlet.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Servlet实现实例">
+<meta name="twitter:description" content="Servlet简单实现之前在图书馆看了一下《深入剖析Tomcat》前两章，对于Servlet的一种简单的实现方式复述一下。 Java Servlet是用java编写的服务器程序。狭义上就是指java程序接口。在Servlet.jar就有Servlet接口，ServletRequest接口，以及ServletResponse接口。这些接口跟平时写Tomcat的是有类似的，平时用的比较多的都是Ht">
+<meta name="twitter:image" content="https://xxxzhi.github.io/images/europe_city.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/02/26/servlet-implements-simple/"/>
+
+
+
+
+
+  <title>Servlet实现实例 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/02/26/servlet-implements-simple/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Servlet实现实例</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-02-26T00:00:00+08:00">
+                2015-02-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p><img src="https://xxxzhi.github.io/images/europe_city.jpg" alt="此处输入图片的描述"></p>
+<h3 id="Servlet简单实现"><a href="#Servlet简单实现" class="headerlink" title="Servlet简单实现"></a>Servlet简单实现</h3><p>之前在图书馆看了一下《深入剖析Tomcat》前两章，对于Servlet的一种简单的实现方式复述一下。</p>
+<p>Java Servlet是用java编写的服务器程序。狭义上就是指java程序接口。在Servlet.jar就有Servlet接口，ServletRequest接口，以及ServletResponse接口。这些接口跟平时写Tomcat的是有类似的，平时用的比较多的都是HttpServlet，HttpResponse,HttpRequest。</p>
+<p>首先先介绍一下Servlet接口</p>
+<pre><code>public void init(ServletConfig config ) throws ServletException
+public void service(ServletRequest request,ServletResponse response) throws ServletException, java.io.IOException
+public void destroy()
+public ServletConfig getServletConfig()
+public java.lang.String getServletInfo()
+</code></pre><p>上面几个接口中，init、service、destory是属于Servlet的生命周期接口。在Servlet第一次实例化的时候，init函数会被调用（之调用一次），service是每次会被调用，相当于每次服务都会被调用。destroy是在servlet会被容器移除的后被调用。在所有线程中运行完Service方法或者超时运行后执行。</p>
+<p>可以用Socket实现一种简单的Servlet服务器。下面给出一个简单的Servlet服务器应用UML图：</p>
+<p><img src="https://xxxzhi.github.io/images/servlet.png" alt="此处输入图片的描述"></p>
+<p>如图所示，ServletServer作为服务器类，接收外部发过来的请求，用socket实现，其核心代码可以简略实现如下：</p>
+<pre><code>ServerSocket server = null ;
+server = new ServerSocket(port,1,InetAddress.getByName(&quot;127.0.0.1&quot;) //第二个参数表示接受等待请求的队列长度，超过长度将会失败
+Socket socket = server.accept();
+InputStream input = socket.getInputStream();
+OutputStream output = socket.getOutputStream();
+
+Request request = new Request(input);
+Response response = new Response(output);
+
+Processer processer ;
+processer.process(request,response);
+</code></pre><p>利用Processer来处理请求，在processer中可以分开处理静态页面（如html，图片等等），处理动态请求，如servlet请求，/servlet前缀。把动态网站请求交给指定的servlet处理。比如把/servlet/hello交给HelloServlet处理。</p>
+<pre><code>HelloServlet helloservlet = HelloServlet.class.newInstance();
+helloservlet.init();
+
+helloservlet.service(request,response);
+</code></pre><p>当然在调用service函数之前，还得检查HelloServlet实例是否已经存在了。如果第一次实例化，还得init，上面的代码只是非常简单的伪代码的。</p>
+<p>另外Request跟Response分别实现输入输出地解析和封装，这样一来，一个简单到极致的servlet服务器就实现了。<br>实际上面，还是有很多东西需要考虑的，像下面这些很容易想得到的：</p>
+<ul>
+<li>url跟servlet的对应，这个就可以单独作为一个部分来处理。</li>
+<li>servlet实例的保存，以及移除。保持servlet的生命周期的正确性。</li>
+<li>request，response对输入输出流的封装。</li>
+</ul>
+<h3 id="Tomcat结构"><a href="#Tomcat结构" class="headerlink" title="Tomcat结构"></a>Tomcat结构</h3><p>实现上面的那些功能也是一个很简单的服务器，是一个简单到连个http都没支持的服务器。像tomcat那种服务器，功能就复杂地多了，但是也可以像这么个小例子一样去简单化理解。<br>Tomcat服务器包括两个主要的模块：连接器，容器。<br>如果从上到下，Tomcat大概可以如下面组成：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Server-&gt;Service:</div><div class="line">Service-&gt;Engine:</div><div class="line">Engine-&gt;Host:</div><div class="line">Host-&gt;Context:</div></pre></td></tr></table></figure>
+<p>这个在Tomcat的Server.xml文件中可以看出。类似于层层包含的关系。</p>
+<h3 id="架构思考"><a href="#架构思考" class="headerlink" title="架构思考"></a>架构思考</h3><p>上面就是一个简单的服务器，简单的仅供理解的服务器。但是麻雀虽小五脏俱全，该有的基本都有了。完全可以在那个小小的部分的基础上扩展成一个完整地，能够实用的服务器。</p>
+<p>如果把上面的小服务器，看做是一个架构的设计，其实也是一个非常好的例子的。扩展Servlet接口来实现不同的功能接口，也可以扩展Servlet，得到HttpServlet来支持Http功能，而实际上的服务器也确实是那么干的。</p>
+<p>我们在开发服务器应用程序的时候，通过request获取请求参数，也是通过扩展得来得。</p>
+<p>其实这个例子是我从书上看过来的，但是也是有一些小得变得，我的更加简单了。架构是一件很美妙的东西，如果架构设计的好，很多负载的问题能够变得简单。</p>
+<hr>
+<p>耐心，计划，完成</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/杂技/" rel="tag"># 杂技</a>
+          
+            <a href="/tags/服务器/" rel="tag"># 服务器</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/01/27/apache-proxy-intranet-through/" rel="next" title="利用apache负载均衡热备份给内网穿透接口备份">
+                <i class="fa fa-chevron-left"></i> 利用apache负载均衡热备份给内网穿透接口备份
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/04/02/static-link/" rel="prev" title="静态链接">
+                静态链接 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Servlet简单实现"><span class="nav-number">1.</span> <span class="nav-text">Servlet简单实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Tomcat结构"><span class="nav-number">2.</span> <span class="nav-text">Tomcat结构</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#架构思考"><span class="nav-number">3.</span> <span class="nav-text">架构思考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

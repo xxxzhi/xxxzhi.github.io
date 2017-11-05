@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="算法,机器学习,数据预处理," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="问题描述之前因为测试跌倒，需要数据训练，但是采集到的数据比例相差极大，非摔倒的容易采集，但是摔倒的数据比较麻烦。还要采集很多假摔的数据，这样导致最后摔倒，非摔倒，假摔的比例严重出现问题，最终影响训练效果。所以我需要将数据按照比例，从原始数据中提取数据来训练。并且我还得保证能够训练的数据量最大。尽量少删除数据。 解决方法我想到的方法就是从利用n选m 的随机数的方式。时间是O(n)。但是有个前提条件是">
+<meta name="keywords" content="算法,机器学习,数据预处理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="按照比例将大数据按照类型比例，随机提取测试数据">
+<meta property="og:url" content="http://yoursite.com/2014/01/17/random-adjust-data-set-by-percent/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="问题描述之前因为测试跌倒，需要数据训练，但是采集到的数据比例相差极大，非摔倒的容易采集，但是摔倒的数据比较麻烦。还要采集很多假摔的数据，这样导致最后摔倒，非摔倒，假摔的比例严重出现问题，最终影响训练效果。所以我需要将数据按照比例，从原始数据中提取数据来训练。并且我还得保证能够训练的数据量最大。尽量少删除数据。 解决方法我想到的方法就是从利用n选m 的随机数的方式。时间是O(n)。但是有个前提条件是">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="按照比例将大数据按照类型比例，随机提取测试数据">
+<meta name="twitter:description" content="问题描述之前因为测试跌倒，需要数据训练，但是采集到的数据比例相差极大，非摔倒的容易采集，但是摔倒的数据比较麻烦。还要采集很多假摔的数据，这样导致最后摔倒，非摔倒，假摔的比例严重出现问题，最终影响训练效果。所以我需要将数据按照比例，从原始数据中提取数据来训练。并且我还得保证能够训练的数据量最大。尽量少删除数据。 解决方法我想到的方法就是从利用n选m 的随机数的方式。时间是O(n)。但是有个前提条件是">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/01/17/random-adjust-data-set-by-percent/"/>
+
+
+
+
+
+  <title>按照比例将大数据按照类型比例，随机提取测试数据 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/01/17/random-adjust-data-set-by-percent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">按照比例将大数据按照类型比例，随机提取测试数据</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-01-17T00:00:00+08:00">
+                2014-01-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">in</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/算法/" itemprop="url" rel="index">
+                    <span itemprop="name">算法</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h3><p>之前因为测试跌倒，需要数据训练，但是采集到的数据比例相差极大，非摔倒的容易采集，但是摔倒的数据比较麻烦。还要采集很多假摔的数据，这样导致最后摔倒，非摔倒，假摔的比例严重出现问题，最终影响训练效果。所以我需要将数据按照比例，从原始数据中提取数据来训练。并且我还得保证能够训练的数据量最大。尽量少删除数据。</p>
+<h3 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h3><p>我想到的方法就是从利用n选m 的随机数的方式。时间是O(n)。但是有个前提条件是知道数据集的大小,每个类别的数量大小。另外首先利用比例计算出每个类别最后的数量。</p>
+<p>先说一下计算移除数据的方式。</p>
+<pre><code>s1. 利用选择标志的方式，选出按照比例最小的类别，用smallest_index记录。初始化smallest_index=0.percent 表示最后的比例。from[] 表示原始的数据中每个类别的数据量
+s2. 遍历i =[0 , size) size 表示总共的类别数 ，如果 i 的数据量 / smallest_index 的数据量 &lt; percent[i] /percent[smallest_index] 说明i 是比smallest_index 比例更小的类别。用smallest_index = i ;
+s3. 利用smallest_index 遍历 i = [0,size). 计算remove[] 的数量：
+remove[i] = from[i] - (from[smallest_index] * percent[i] / percent[smallest_index]).
+</code></pre><p>然后根据移除的数据量，来得到按照比例的训练集。<br>    s1. 从文件中读取一条记录record，<br>    s2. if(record.is_empty) 转到s6.<br>    s3. 根据record的类型，转化为int 型的数据 i .<br>    s4. 判断remove[i] &gt; 0 &amp;&amp; rand() % sourcetemp[i] &lt; remove[i] 为真，则remove[i]–. 否则将record写入输出文件中。<br>    s5. sourcetemp[i]– . 返回s1.<br>    s6. 退出</p>
+<p>源代码如下：</p>
+<pre><code>/**
+ * 将from 的数据 按照percent 的比例缩放。 去除其中数据
+ */
+void adjustNumsByPercentage(int&amp; from[],int&amp; remove[] ,const float percent[],int size ){
+    int smallest_index = 0 ;
+    for(int i = 0 ; i != size ; ++ i){
+        if(from[i] / from[smallest_index] &lt; percent[i] / percent[smallest_index] ){
+            smallest_index = i ;
+        }
+    }
+    for(int i = 0 ; i != size ; ++ i){
+        remove[i] = from[i] - ( from[smallest_index] * percent[i] / percent[smallest_index]) ;
+    }
+
+}
+</code></pre><p>分类写入的代码：</p>
+<pre><code>void RandomAdjustDataSet::adjust(){
+    DataRecord record = reader-&gt;ReadRecordFromFile() ;
+    int removetemp [3];
+    int sourcetemp [3];
+    memcpy(removetemp,remove_nums,3 * sizeof(int));
+    memcpy(sourcetemp,source_nums,3 * sizeof(int));
+
+    srand(time(0));
+    while(!record.is_empty){
+        int i = 1;
+        if(record.activity == &quot;1&quot;){
+            i = 1;
+        }else if(record.activity == &quot;2&quot;){
+            i = 2;
+        }else{
+            i = 3;
+        }
+
+        if(removetemp[i-1] &gt;0 &amp;&amp; rand() % sourcetemp[i-1] &lt; removetemp[i-1] ){
+            removetemp[i-1]  -- ;
+            //去除
+        }else{
+            //
+            WriteIntoFile(out,record);
+        }
+        sourcetemp[i-1] --;
+        record = reader-&gt;ReadRecordFromFile();
+    }
+
+    out.close();
+}
+</code></pre><p>当然利用取出的方式，计算每个类别取出的数量，是一样的。</p>
+<h3 id="疑问"><a href="#疑问" class="headerlink" title="疑问"></a>疑问</h3><p>1.不知道有没有更好的方式解决这个问题？</p>
+<p>2.如果不知道原始数据中，每个类别的数量，最佳算法的运行时间是怎样的？</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/算法/" rel="tag"># 算法</a>
+          
+            <a href="/tags/机器学习/" rel="tag"># 机器学习</a>
+          
+            <a href="/tags/数据预处理/" rel="tag"># 数据预处理</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2013/12/19/some-random-algorithms/" rel="next" title="关于基本的随机选择算法（n选m）的分析与思考">
+                <i class="fa fa-chevron-left"></i> 关于基本的随机选择算法（n选m）的分析与思考
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/02/19/start-develop-ios-1/" rel="prev" title="学习ios笔记（一）">
+                学习ios笔记（一） <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#问题描述"><span class="nav-number">1.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#解决方法"><span class="nav-number">2.</span> <span class="nav-text">解决方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#疑问"><span class="nav-number">3.</span> <span class="nav-text">疑问</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

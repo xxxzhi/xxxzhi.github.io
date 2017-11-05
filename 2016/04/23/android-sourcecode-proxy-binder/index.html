@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,设计模式,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Binder是Android的进程间通信核心，如果看过Android源码，你会发现源码中Android的各种核心服务都是通过Binder机制进行相互通信的。在Binder的client部分就是通过代理模式来访问Server端的。这里想通过代理模式来详细介绍Java层Binder。文中会简单介绍代理模式，详细介绍Binder机制。 代理模式意图对其他对象提供一种代理以控制对这个对象的访问。 UML图">
+<meta name="keywords" content="Android,设计模式,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android源码代理模式---Binder">
+<meta property="og:url" content="http://yoursite.com/2016/04/23/android-sourcecode-proxy-binder/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Binder是Android的进程间通信核心，如果看过Android源码，你会发现源码中Android的各种核心服务都是通过Binder机制进行相互通信的。在Binder的client部分就是通过代理模式来访问Server端的。这里想通过代理模式来详细介绍Java层Binder。文中会简单介绍代理模式，详细介绍Binder机制。 代理模式意图对其他对象提供一种代理以控制对这个对象的访问。 UML图">
+<meta property="og:image" content="http://xxxzhi.github.io/images/proxy.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/binder.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/service-connect.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android源码代理模式---Binder">
+<meta name="twitter:description" content="Binder是Android的进程间通信核心，如果看过Android源码，你会发现源码中Android的各种核心服务都是通过Binder机制进行相互通信的。在Binder的client部分就是通过代理模式来访问Server端的。这里想通过代理模式来详细介绍Java层Binder。文中会简单介绍代理模式，详细介绍Binder机制。 代理模式意图对其他对象提供一种代理以控制对这个对象的访问。 UML图">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/proxy.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/04/23/android-sourcecode-proxy-binder/"/>
+
+
+
+
+
+  <title>Android源码代理模式---Binder | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/23/android-sourcecode-proxy-binder/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android源码代理模式---Binder</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-23T00:00:00+08:00">
+                2016-04-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Binder是Android的进程间通信核心，如果看过Android源码，你会发现源码中Android的各种核心服务都是通过Binder机制进行相互通信的。在Binder的client部分就是通过代理模式来访问Server端的。这里想通过代理模式来详细介绍Java层Binder。文中会简单介绍代理模式，详细介绍Binder机制。</p>
+<h2 id="代理模式"><a href="#代理模式" class="headerlink" title="代理模式"></a>代理模式</h2><h3 id="意图"><a href="#意图" class="headerlink" title="意图"></a>意图</h3><p>对其他对象提供一种代理以控制对这个对象的访问。</p>
+<h3 id="UML图"><a href="#UML图" class="headerlink" title="UML图"></a>UML图</h3><p><img src="http://xxxzhi.github.io/images/proxy.png" alt="此处输入图片的描述"></p>
+<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Subject</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">operate</span><span class="params">()</span></span>;</div><div class="line">&#125;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">RealSubject</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operate</span><span class="params">()</span></span>&#123;</div><div class="line">        System.out.println(<span class="string">"real operate"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Proxy</span></span>&#123;</div><div class="line">    <span class="keyword">private</span> Subject realSubject;</div><div class="line">    Proxy(Subject subject)&#123;</div><div class="line">        realSubject = subject;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">operate</span><span class="params">()</span></span>&#123;</div><div class="line">        realSubject.operate();</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</div><div class="line">    RealSubject real = <span class="keyword">new</span> RealSubject();</div><div class="line">    Proxy proxy = <span class="keyword">new</span> Proxy(real);</div><div class="line">    proxy.operate(); <span class="comment">//实际上交给了realsubject去操作了。</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="关于代理模式"><a href="#关于代理模式" class="headerlink" title="关于代理模式"></a>关于代理模式</h3><p>上面的代码跟UML图只是一个例子，并不能完全描述代理模式的。代理模式强调的是一种代理，上面的例子中其实直接用RealSubject就可以了，完全没必要用Proxy。另外代理与被代理对象并不要求有共同的父类/接口。代理模式有几种常见的情况：</p>
+<ul>
+<li>远程代理(Remote Proxy): 如果某个对象无法实例化，不在同一个地址空间，需要通过编码来进行通信。比如需要访问网络服务器上面的一个对象操作。比如我们接下来需要介绍的Binder。</li>
+<li>虚代理(Virtual Proxy): 在需要的时候创建大对象，比如超大图片，我们可以使用一个虚代理代理图像，在真正需要的时候再去将图像完全加载出来，在这之前只需要在代理里面保存图像的大小，让它有个占位就好了。</li>
+<li>保护代理(Protect Proxy): 需要对对象的某些操作进行隐藏，那么就可以使用代理对它的接口进行隐藏。</li>
+<li>智能指引(Smart Reference):　当需要对对象的引用进行计数的时候，可以使用智能指引的代理模式。</li>
+</ul>
+<h2 id="Binder"><a href="#Binder" class="headerlink" title="Binder"></a>Binder</h2><p>Binder是一个接口形式的IPC。在这里以我们在应用程序开发过程中使用的.aidl文件声明生成的接口为例。使用aidl需要说明的是Android官方文档上面强调过:</p>
+<blockquote>
+<p>使用aidl的必要条件是你的Service想要被其他客户端从不同的应用程序为了IPC而调用，并且想要在你的Service中处理多线程。如果你不需要并行来自不同的应用程序的IPC,那么你只需要使用实现Binder就好了，如果你不需要处理多线程的并行，那么你使用Messenger就好了。</p>
+</blockquote>
+<p>这里只是为了说明Binder，名称为ITestService.aidl:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">package com.houzhi.testproject;</div><div class="line"></div><div class="line">interface ITestService&#123;</div><div class="line">    String getContent();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在编译运行前，Android ide(eclipse/android studio) 会自动生成相关的类，ITestService.Stub, ITestService.Proxy, 而我们通过调用bindService就可以得到Binder的代理。</p>
+<pre><code>Intent service; //只是为了表明类型
+ServiceConnection connection = new ServiceConnection(){
+    public void onServiceConnected(ComponetName name, IBinder service){
+        ITestService testService = ITestService.stub.asInterface(service);
+        //testService就是我们得到的代理
+    }
+    public void onServiceDisConnected(ComponentName name){
+
+    }
+}
+context.bindService(service,connection);
+</code></pre><p>整个自动生成的类以及Binder, IInterface的UML图如下：<br><img src="http://xxxzhi.github.io/images/binder.png" alt="binder"></p>
+<p><code>ITestService.stub.asInterface(service)</code>的内部就是创建了一个Proxy对象，其实现代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">public static com.houzhi.testproject.IMyAidlInterface asInterface(android.os.IBinder obj)     &#123;</div><div class="line">    if ((obj == null)) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line">    android.os.IInterface iin = obj.queryLocalInterface(DESCRIPTOR);</div><div class="line">    if (((iin != null) &amp;&amp; (iin instanceof com.houzhi.testproject.IMyAidlInterface))) &#123;</div><div class="line">        return ((com.houzhi.testproject.IMyAidlInterface) iin);</div><div class="line">    &#125;</div><div class="line">    return new com.houzhi.testproject.IMyAidlInterface.Stub.Proxy(obj);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>上面的代码需要说明的是obj的queryLocalInterface会返回null, 因为obj其实是一个BinderProxy类型，而BinderProxy类中，并没有给DESCRIPTOR添加对应的IInterface。在源码中具体的实现在native层，native通过jni的方式利用mObject（相当于对应的对象id,BinderProxy的成员变量）创建了一个BinderProxy。将这个BinderProxy返回给客户端。</p>
+<p>从UML图就已经看出Binder是一个非常典型的代理模式，是一种远程代理，实际上Proxy代理的是另外一个进程中的Stub对象。内部是将接口函数标记为对应的ID，然后根据这个ID来标识目前调用的是哪一个函数。由DESCRIPTOR来作为Token分隔不同的接口调用，另外通过Parcel来写入函数参数和接受函数返回值（Stub端对应接受参数和写入结果）。aidl可接受的类型也是普通类型(int,double…),以及Map,List,String,<br>CharSequence,Parcel,和Binder类型。对应的处理也是不一样的，不过终归可以使用基本的方式搞定。</p>
+<p>下面是Stub与Proxy关于接口函数实现的具体代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line">public static abstract class Stub extends android.os.Binder implements com.houzhi.testproject.ITestService &#123;</div><div class="line">        private static final java.lang.String DESCRIPTOR = &quot;com.houzhi.testproject.ITestService&quot;;</div><div class="line">        //省略了部分代码</div><div class="line">        @Override</div><div class="line">        public boolean onTransact(int code, android.os.Parcel data, android.os.Parcel reply, int flags) throws android.os.RemoteException &#123;</div><div class="line">            switch (code) &#123;</div><div class="line">                case INTERFACE_TRANSACTION: &#123;</div><div class="line">                    reply.writeString(DESCRIPTOR);</div><div class="line">                    return true;</div><div class="line">                &#125;</div><div class="line">                case TRANSACTION_getContent: &#123;</div><div class="line">                    data.enforceInterface(DESCRIPTOR);</div><div class="line">                    java.lang.String _result = this.getContent();</div><div class="line">                    reply.writeNoException();</div><div class="line">                    reply.writeString(_result);</div><div class="line">                    return true;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            return super.onTransact(code, data, reply, flags);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        private static class Proxy implements com.houzhi.testproject.ITestService &#123;</div><div class="line">            private android.os.IBinder mRemote;</div><div class="line"></div><div class="line">            Proxy(android.os.IBinder remote) &#123;</div><div class="line">                mRemote = remote;</div><div class="line">            &#125;</div><div class="line">            //省略了部分代码</div><div class="line">            @Override</div><div class="line">            public java.lang.String getContent() throws android.os.RemoteException &#123;</div><div class="line">                android.os.Parcel _data = android.os.Parcel.obtain();</div><div class="line">                android.os.Parcel _reply = android.os.Parcel.obtain();</div><div class="line">                java.lang.String _result;</div><div class="line">                try &#123;</div><div class="line">                    _data.writeInterfaceToken(DESCRIPTOR);</div><div class="line">                    mRemote.transact(Stub.TRANSACTION_getContent, _data, _reply, 0);</div><div class="line">                    _reply.readException();</div><div class="line">                    _result = _reply.readString();</div><div class="line">                &#125; finally &#123;</div><div class="line">                    _reply.recycle();</div><div class="line">                    _data.recycle();</div><div class="line">                &#125;</div><div class="line">                return _result;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        static final int TRANSACTION_getContent = (android.os.IBinder.FIRST_CALL_TRANSACTION + 0);</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<h3 id="Binder底层实现简述"><a href="#Binder底层实现简述" class="headerlink" title="Binder底层实现简述"></a>Binder底层实现简述</h3><p>看完上一节其实就能想到怎么去实现Binder了，将接口调用请求转换成数据流的形式，通过int类型的id标识具体是哪一个函数，用token来划分每一次函数调用请求，按照函数参数顺序和类型一个一个地写入和读取参数。而在底层通过一个进程通信（Pipe，共享内存）把这些消息发到服务端/客户端，这样就可以大致实现了。实际上最底层使用的是Binder驱动，服务端通过IPCThreadState开启一个线程(IPCThreadState::self()-&gt;startThreadPool())，并且将线程放入到线程池中（IPCThreadState::self()-&gt;joinThreadPool()），等待接收来自客户端的请求(talkWithDriver())。而客户端通过BinderProxy(内部保存了本地BpBinder的指针）的transact,最后访问Binder(talkWithDriver())。内部使用访问驱动函数都是ioctl。</p>
+<h3 id="ServiceManager"><a href="#ServiceManager" class="headerlink" title="ServiceManager"></a>ServiceManager</h3><p>上面大致介绍了服务端，客户端与Binder驱动通信流程。但是大家有没有想过，在客户端需要请求服务端的时候，我怎么知道我究竟想要请求哪一个服务端呢？ServiceManager。ServiceManager是保存了所有的Service的fd(驱动文件号)。通过请求ServiceManager的<code>getService(String name)</code>就可以获取对应的服务。而ServiceManager也是一个服务，它的fd是0,是服务中心管理器。客户端指定name，通过Binder请求ServiceManager，然后得到客户端想要的服务BinderProxy，然后就可以请求服务端了。当然创建服务的时候，首先需要通过ServiceManager.addService将服务添加到ServiceManager中。</p>
+<h3 id="Binder连接的几大模块"><a href="#Binder连接的几大模块" class="headerlink" title="Binder连接的几大模块"></a>Binder连接的几大模块</h3><p>Android中应用层常用的几个重要的模块都是由Binder联系起来的，ActivityManagerService，WindowManagerService，InputManagerService。下面是他们之间的关系图：<br><img src="http://xxxzhi.github.io/images/service-connect.png" alt="binder connect"></p>
+<p>另外还有很多服务，比如说Wifi，NetworkPolicy，Power等等。他们都是在SystemServiceRegistry中注册的，这个注册本来在ContextImpl中，现在移到了一个单独的类SystemServiceRegistry。</p>
+<h2 id="代理模式在Binder中的应用分析"><a href="#代理模式在Binder中的应用分析" class="headerlink" title="代理模式在Binder中的应用分析"></a>代理模式在Binder中的应用分析</h2><p>代理模式在这里使用的基本上是天衣无缝了，我觉得这是代理模式的经典使用。我们在客户端无法直接访问服务端（因为跨进程，地址空间都不一致），通过代理模式，能够让我们在客户端感觉像是直接访问服务端一样。</p>
+<hr>
+<blockquote>
+<p>如果错过了太阳时你流了眼泪，那你也要错过群星了</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/设计模式/" rel="tag"># 设计模式</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/19/android-sourcecode-abstractfactory-ipolicy/" rel="next" title="Android源码中的抽象工厂---IPolicy">
+                <i class="fa fa-chevron-left"></i> Android源码中的抽象工厂---IPolicy
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/26/android-nice-blog/" rel="prev" title="平时看的优质技术博客与网站">
+                平时看的优质技术博客与网站 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#代理模式"><span class="nav-number">1.</span> <span class="nav-text">代理模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#意图"><span class="nav-number">1.1.</span> <span class="nav-text">意图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UML图"><span class="nav-number">1.2.</span> <span class="nav-text">UML图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码示例"><span class="nav-number">1.3.</span> <span class="nav-text">代码示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于代理模式"><span class="nav-number">1.4.</span> <span class="nav-text">关于代理模式</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Binder"><span class="nav-number">2.</span> <span class="nav-text">Binder</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Binder底层实现简述"><span class="nav-number">2.1.</span> <span class="nav-text">Binder底层实现简述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ServiceManager"><span class="nav-number">2.2.</span> <span class="nav-text">ServiceManager</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Binder连接的几大模块"><span class="nav-number">2.3.</span> <span class="nav-text">Binder连接的几大模块</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代理模式在Binder中的应用分析"><span class="nav-number">3.</span> <span class="nav-text">代理模式在Binder中的应用分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

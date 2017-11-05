@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="android," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="android 滑动删除的实现">
+<meta name="keywords" content="android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="android 滑动监听删除">
+<meta property="og:url" content="http://yoursite.com/2014/03/22/android-slidelistener/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="android 滑动删除的实现">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="android 滑动监听删除">
+<meta name="twitter:description" content="android 滑动删除的实现">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/03/22/android-slidelistener/"/>
+
+
+
+
+
+  <title>android 滑动监听删除 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/03/22/android-slidelistener/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">android 滑动监听删除</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-03-22T00:00:00+08:00">
+                2014-03-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">in</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/android/" itemprop="url" rel="index">
+                    <span itemprop="name">android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  android 滑动删除的实现
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>=========<br>之前看到QQ邮箱，以及天天动听的页面滑动退出效果，总是在思考他们是怎么弄的，最主要是怎么弄，才能够比较方便。我相信弄起来很多棒法，但是最佳的办法。而且还不能影响页面的其他方面的操作，应该怎么去实现。能不能直接使用一个包的形式做。</p>
+<p>###利用Fragment<br>我慢慢地带着疑问去思考了，最开始考虑到Activity受控制方面可能不如Fragment，毕竟Activity是一个应用的组件。而Fragment，完全可以当成一个View来看待，只不过这个View有着自己的生命周期。所以考虑用Fragment去实现。自然就想到构建一个抽象的BaseSlideFragment 类。然后用子类来实现这个类。将onCreateView 重新包装一遍，BaseSlideFragment自己使用一个ViewGroup，将子类生成的View 作为这个ViewGroup的子类，然后将Fragment最顶层的类监听滑动事件。</p>
+<pre><code>/**
+ *
+ */
+package com.houzhi.slidefinish.fragment;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+
+/**
+ * @author houzhi
+ *    可监听滑动删除 fragment
+ *    使用该fragment 的Activity 必须实现SlideFragmentFinishListener 接口
+ *
+ *
+ */
+public abstract class BaseSlideFinishFragment extends Fragment {
+
+    /**
+     *
+     * @author houzhi
+     *
+     */
+    public static interface SlideFragmentFinishListener{
+        public void onSlideFragmentFinish(Fragment fragment);
+    }
+
+    //监听 fragment 接口
+    protected SlideFragmentFinishListener mOnFragmentWantFinishListener;
+
+    protected Activity activity ;
+
+    /**
+     * 屏幕信息
+     */
+    protected DisplayMetrics outMetrics = new DisplayMetrics();
+
+    @Override
+    public void onAttach(Activity activity) {
+        if(activity instanceof SlideFragmentFinishListener){
+            mOnFragmentWantFinishListener = (SlideFragmentFinishListener)activity;
+        }else{
+            throw new RuntimeException(&quot;the Activity which use SlideFinishFragment&quot; +
+                    &quot; must implements OnFragmentWantFinishLIstener!&quot;);
+        }
+        this.activity = activity ;
+
+        activity.getWindowManager().getDefaultDisplay().getMetrics(outMetrics);
+
+        super.onAttach(activity);
+    }
+
+
+
+
+    protected FrameLayout.LayoutParams saveParams = null;
+    /**
+     * the onCreateView will callback this method
+     * @param inflater
+     * @param container
+     * @param savedInstanceState
+     * @return
+     */
+    abstract protected View onCreateContentView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState);
+}
+</code></pre><p>由于上下滑动跟水平滑动的方式不一样，所以我又重新加了一层SlideHorizonalFinishFragment SlideVerticalFinishFragment。代码就不贴上了，感觉后面的实现方式更加好。结构上，对于Fragment感觉这样设计很好。</p>
+<p>在BaseSlideFinishFragment 的子类中实现onCreateView，并且将onCreateContentView得到的View 添加到实现监听滑动时间的ViewGroup的中。将该ViewGroup作为作为Fragment 的View。这样就很方便代码的重用了。</p>
+<h3 id="事件监听模型"><a href="#事件监听模型" class="headerlink" title="事件监听模型"></a>事件监听模型</h3><p>现在就是该考虑如何实现监听，并且不影响到子View的使用了。最开始我本来想直接用FrameLayout 作为一个最顶层的ViewGroup 然后设置FrameLayout的onToucheListener。但是实现后，就感觉效果不佳。当子View消费了触摸事件（MotionEvent）后， MotionEvent 压根不会传给FrameLayout的onTouchListener当中。</p>
+<p>然后我就又重新根据android事件模型思考了一遍，也去重新温习了android事件派发等相关知识。</p>
+<h4 id="有些概念如果换个方向去理解可能就很容易了。"><a href="#有些概念如果换个方向去理解可能就很容易了。" class="headerlink" title="有些概念如果换个方向去理解可能就很容易了。"></a>有些概念如果换个方向去理解可能就很容易了。</h4><ol>
+<li>首先一次触摸事件，不要理解成从按下到松开手指。而是分成ACTION_DOWN ,ACTION_MOVE, ACTION_UP 等等。一次触摸，包括一次ACTION_DOWN ,一次ACTION_UP ，和很多次ACTION_MOVE。</li>
+<li>View树 就相当于一颗树，父节点为ViewGroup以及派生类。子节点为一个View。 事件派发从树的根节点开始，到达子节点（当然不一定会到达，中间可以截断），so，这样思考起来，任何一个触摸事件一定会经过父View，父View首先对其有处理的决定权。（不要被平时子View实现了onTouch后，父View的onTouch无效误导，而以为子View对事件处理更有优先权）。有了这个，这种实现方式就能够确定这种实现方式一定能够成功。</li>
+<li>一次事件过程，就是从按下的那一刻到松开的那一刻。</li>
+</ol>
+<h4 id="事件派发具体的过程"><a href="#事件派发具体的过程" class="headerlink" title="事件派发具体的过程"></a>事件派发具体的过程</h4><p>一个MotionEvent 首先是经过Activity的，然后由Activity再派发给Activity中的View。然后再一层一层地传下去。传下去后，每一次都会有一个处理的，觉得是否继续往下派发，并且有个处理的反馈。反馈是从下往上的，其实就是在onTouch 等中 返回的boolean,父层根据子层反馈的boolean 来决定下一个MotionEvent（注：这里的下一个MotionEvent，是一次事件过程中的下一次MotionEvent）是否继续往下派发，还是自己直接处理掉，直接反馈给上一层。</p>
+<p>然后根据上面的过程。描述一下ViewGroup中的几个函数的意义。</p>
+<ul>
+<li>dispatchTouchEvent： 派发MotionEvent给子View。如果返回为true ，则将事件给onTouchEvent，如果为false，则将事件给 onIterceptTouchEvent 来决定是否终端事件的派发。</li>
+<li>onInterceptTouchEvent  ：终止事件派发的函数。如果返回true 则事件不会继续往下传，将事件给onTouchEvent处理。如果false 则继续往下传</li>
+<li>onTouchEvent ： View自己处理事件的函数。如果子View的ontouch 返回true 则表示此次事件已经消费。父view 的ontouchEvent将不会运行。如果为false ，将会奖事件传到父view 的ontouch。如果一直返回false，则事件就会消失。下次事件也不会传递下来了。</li>
+</ul>
+<p>上面的参考[1]</p>
+<h3 id="SlideFrameLayout"><a href="#SlideFrameLayout" class="headerlink" title="SlideFrameLayout"></a>SlideFrameLayout</h3><p>依据上面的知识，就可以实现一个SlideFrameLayout，来判断是否滑动。我们滑动分成四个方向，每次如果超出一定范围后，就调用监听滑动（SlideFinishListener）通知已经滑动到底了。具体代码如下：</p>
+<pre><code>public class SlideFrameLayout extends FrameLayout {
+
+    public SlideFrameLayout(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+        init();
+    }
+
+    public SlideFrameLayout(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        init();
+    }
+
+    public SlideFrameLayout(Context context) {
+        super(context);
+        init();
+    }
+
+    public static enum SlideDirection {
+        LEFT, RIGHT, HORIZONAL, TOP, BOTTOM, VERTICAL,NO
+    };
+
+    /**
+     * listen to the slide
+     *
+     * @author houzhi
+     *
+     */
+    public static interface SlideListener {
+        /**
+         *
+         */
+        public void onSlideFinish();
+    }
+
+    private SlideListener mSlideListener;
+
+    protected FrameLayout.LayoutParams saveParams = null;
+
+    public SlideListener getSlideListener() {
+        return mSlideListener;
+    }
+
+    public void setSlideListener(SlideListener mSlideListener) {
+        this.mSlideListener = mSlideListener;
+    }
+
+    private void init() {  //为了防止设置params.margin 无效
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT);
+        params.gravity = Gravity.TOP | Gravity.LEFT;
+        setLayoutParams(params);
+    }
+
+    private boolean slideHorizonalFinish(View v, MotionEvent event) {
+
+        float moveDis = 0;
+
+        switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+
+            break;
+        case MotionEvent.ACTION_MOVE:
+            if (!isMoveFragment) {
+                // doesn&apos;t move
+                break;
+            }
+            moveDis = event.getRawX() - beginX;
+
+            switch (direction) {
+            case RIGHT:
+                if (moveDis &lt;= 0)
+                    moveDis = 0;
+                break;
+            case LEFT:
+                if (moveDis &gt;= 0)
+                    moveDis = 0;
+                break;
+            case HORIZONAL:
+                break;
+            default:
+                break;
+            }
+
+
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) v
+                    .getLayoutParams();
+
+            params.leftMargin = (int) moveDis;
+            params.rightMargin = (int) -moveDis;
+            params.gravity = Gravity.LEFT | Gravity.TOP;
+            Log.i(&quot;&quot;, &quot;touch ACTION_MOVE---&quot; + moveDis + &quot;--&quot; + event.getRawX());
+            v.setLayoutParams(params);
+            return true;
+        case MotionEvent.ACTION_UP:
+            if (!isMoveFragment)
+                break;
+
+            moveDis = event.getRawX() - beginX;
+            switch (direction) {
+            case RIGHT:
+                if (moveDis &lt;= 0)
+                    moveDis = 0;
+                break;
+            case LEFT:
+                if (moveDis &gt;= 0)
+                    moveDis = 0;
+                break;
+            case HORIZONAL:
+                break;
+            default:
+                break;
+            }
+
+            boolean disappear = false;
+            float from = 0,
+            to = -moveDis;
+            if (Math.abs(moveDis) &gt; v.getWidth() / 2) {
+                // 移动超出 消失此Fragment
+                to = v.getWidth() * (Math.abs(moveDis) / moveDis);
+                disappear = true;
+            }
+            long duration = 500;
+            Log.i(&quot;&quot;, &quot;touch dis---&quot; + disappear + &quot;=---=&quot; + (moveDis) + &quot;---&quot;
+                    + v.getWidth());
+            startEndHorizonalAnimation(v, duration, from, to, disappear);
+            return true;
+        }
+        return false;
+
+    }
+
+    private SlideDirection direction = SlideDirection.RIGHT;
+
+    public SlideDirection getDirection() {
+        return direction;
+    }
+
+    public void setDirection(SlideDirection direction) {
+        this.direction = direction;
+    }
+
+    private boolean slideVerticalFinish(View v, MotionEvent event) {
+
+        float moveDis = 0;
+
+        switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            break;
+        case MotionEvent.ACTION_MOVE:
+            if (!isMoveFragment) {
+                // not move
+                break;
+            }
+            moveDis = event.getRawY() - beginY;
+
+            //judge whether  distance of moving over or not
+            switch (direction) {
+            case BOTTOM:
+                if (moveDis &lt;= 0)
+                    moveDis = 0;
+                break;
+            case TOP:
+                if (moveDis &gt;= 0)
+                    moveDis = 0;
+                break;
+            case VERTICAL:
+                break;
+            default:
+                break;
+            }
+
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) v
+                    .getLayoutParams();
+
+            params.topMargin = (int) moveDis;
+            params.bottomMargin = (int) -moveDis;
+            params.gravity = Gravity.LEFT | Gravity.TOP;
+            Log.i(&quot;&quot;, &quot;touch ACTION_MOVE---&quot; + moveDis + &quot;--&quot; + event.getRawY());
+            v.setLayoutParams(params);
+            return true;
+        case MotionEvent.ACTION_UP:
+            if (!isMoveFragment)
+                break;
+
+            moveDis = event.getRawY() - beginY;
+            //judge whether  distance of moving over or not
+            switch (direction) {
+            case BOTTOM:
+                if (moveDis &lt;= 0)
+                    moveDis = 0;
+                break;
+            case TOP:
+                if (moveDis &gt;= 0)
+                    moveDis = 0;
+                break;
+            case VERTICAL:
+                break;
+            default:
+                break;
+            }
+
+            boolean disappear = false;
+            float from = 0,
+            to = -moveDis;
+            if (Math.abs(moveDis) &gt; v.getHeight() / 2) {
+                // 移动超出 消失此Fragment
+                to = v.getHeight() * (Math.abs(moveDis) / moveDis);
+                disappear = true;
+            }
+            long duration = 500;
+            Log.i(&quot;&quot;, &quot;touch dis---&quot; + disappear + &quot;=---=&quot; + (moveDis) + &quot;---&quot;
+                    + v.getWidth());
+            startEndVerticalAnimation(v, duration, from, to, disappear);
+            return true;
+        }
+
+        return false;
+
+    }
+
+    // move horizonal animation
+    private void startEndHorizonalAnimation(final View view, long duration,
+            float from, float to, final boolean disappear) {
+        AnimationSet animationSet = new AnimationSet(true);
+
+        if (disappear) {
+            AlphaAnimation alphaAnimation = new AlphaAnimation(1, 0);
+            animationSet.addAnimation(alphaAnimation);
+        }
+        TranslateAnimation translateAnimation = new TranslateAnimation(from,
+                to, 0, 0);
+        animationSet.addAnimation(translateAnimation);
+        animationSet.setDuration(duration);
+        animationSet.setFillAfter(true);
+        animationSet.setFillEnabled(true);
+        animationSet.setAnimationListener(new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+                if (disappear) {
+                    if (mSlideListener != null) {
+                        mSlideListener.onSlideFinish();
+                    }
+                } else {
+                    // 恢复 一定要清除动画，否则动画效果仍然在，params 效果 跟Animation 效果同时作用着
+                    view.clearAnimation();
+                    view.setLayoutParams(saveParams);
+
+                }
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation arg0) {}
+
+            @Override
+            public void onAnimationStart(Animation arg0) {}
+        });
+
+        view.startAnimation(animationSet);
+
+    }
+
+    // move vertical animation
+    private void startEndVerticalAnimation(final View view, long duration,
+            float from, float to, final boolean disappear) {
+        AnimationSet animationSet = new AnimationSet(true);
+
+        if (disappear) {
+            AlphaAnimation alphaAnimation = new AlphaAnimation(1, 0);
+            animationSet.addAnimation(alphaAnimation);
+        }
+        TranslateAnimation translateAnimation = new TranslateAnimation(0, 0,
+                from, to);
+        animationSet.addAnimation(translateAnimation);
+        animationSet.setDuration(duration);
+        animationSet.setFillAfter(true);
+        animationSet.setFillEnabled(true);
+        animationSet.setAnimationListener(new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+                if (disappear) {
+                    if (mSlideListener != null) {
+                        mSlideListener.onSlideFinish();
+                    }
+                } else {
+                    // 恢复 一定要清除动画，否则动画效果仍然在，params 效果 跟Animation 效果同时作用着
+                    view.clearAnimation();
+                    view.setLayoutParams(saveParams);
+
+                }
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation arg0) {}
+
+            @Override
+            public void onAnimationStart(Animation arg0) {}
+        });
+
+        view.startAnimation(animationSet);
+
+    }
+
+
+    float beginX = 0, beginY = 0;
+
+    boolean isMoveFragment = false;
+    boolean isFirstMoveEvent = false;
+
+    private boolean judgeVertical(View v, MotionEvent event) {
+
+        switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            beginY = event.getRawY();
+            beginX = event.getRawX();
+            isFirstMoveEvent = true;
+            isMoveFragment = false;
+            Log.i(&quot;&quot;, &quot;touch ACTION_DOWN beginX---&quot; + beginY);
+
+            saveParams = new FrameLayout.LayoutParams(
+                    (ViewGroup.MarginLayoutParams) v.getLayoutParams());
+            return false;
+        case MotionEvent.ACTION_MOVE:
+
+
+            if (isFirstMoveEvent) {
+                isFirstMoveEvent = false;
+                isMoveFragment = true ;
+                float moveDis = event.getRawY() - beginY;
+                float moveDisH = Math.abs(event.getRawX() - beginX) ;
+                if(moveDisH &gt; 0){
+                    //  move horizonal
+                    isMoveFragment = false;
+                    break;
+                }
+
+                switch (direction) {
+                case BOTTOM:
+                    if (moveDis &lt;= 0)
+                        isMoveFragment = false;
+                    break;
+                case TOP:
+                    if (moveDis &gt;= 0)
+                        isMoveFragment = false;
+                    break;
+                case VERTICAL:
+                    if (moveDis == 0)
+                        isMoveFragment = false;
+                    break;
+                default:
+                    break;
+                }
+            }
+
+            if (!isMoveFragment) {
+                //
+                break;
+            }
+
+            return true;
+        case MotionEvent.ACTION_UP:
+            if (!isMoveFragment)
+                break;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean judgeHorizonal(View v, MotionEvent event) {
+
+        switch (event.getAction()) {
+        case MotionEvent.ACTION_DOWN:
+            beginX = event.getRawX();
+            beginY = event.getRawY();
+            isFirstMoveEvent = true;
+            isMoveFragment = false;
+            Log.i(&quot;&quot;, &quot;touch ACTION_DOWN beginX---&quot; + beginX);
+
+            saveParams = new FrameLayout.LayoutParams(
+                    (ViewGroup.MarginLayoutParams) v.getLayoutParams());
+            return false;
+        case MotionEvent.ACTION_MOVE:
+
+            if (isFirstMoveEvent) {
+                float moveDis = event.getRawX() - beginX;
+                float  moveDisV =Math.abs( event.getRawY() - beginY );
+                isFirstMoveEvent = false;
+                isMoveFragment = true ;
+                if(moveDisV &gt; 0){
+                    // if has move vertical
+                    isMoveFragment = false;
+                    break;
+                }
+                switch (direction) {
+                case RIGHT:
+                    if (moveDis &lt;= 0 )
+                        isMoveFragment = false;
+                    break;
+                case LEFT:
+                    if (moveDis &gt;= 0)
+                        isMoveFragment = false;
+                    break;
+                case HORIZONAL:
+                    if (moveDis == 0)
+                        isMoveFragment = false;
+                    break;
+                default:
+                    break;
+                }
+
+            }
+
+            if (!isMoveFragment) {
+                break;
+            }
+
+            return true;
+        case MotionEvent.ACTION_UP:
+            if (!isMoveFragment)
+                break;
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        boolean res = false;
+        switch (direction) {
+        case LEFT:
+        case RIGHT:
+        case HORIZONAL:
+            res = slideHorizonalFinish(this, event);
+            break;
+        case TOP:
+        case BOTTOM:
+        case VERTICAL:
+            res = slideVerticalFinish(this, event);
+            break;
+            default:
+        }
+        return res;
+    }
+
+    private static final String TAG = &quot;SLIDEFRAMELAYOUT&quot;;
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        boolean judgeRes = false;
+        switch (direction) {
+        case LEFT:
+        case RIGHT:
+        case HORIZONAL:
+            judgeRes = judgeHorizonal(this, ev);
+            break;
+        case TOP:
+        case BOTTOM:
+        case VERTICAL:
+            judgeRes = judgeVertical(this, ev);
+            break;
+        case NO:
+            judgeRes = false;
+            break;
+        }
+        Log.i(TAG, &quot;onInterceptTouchEvent--&quot;+judgeRes);
+        return judgeRes;
+    }
+}
+</code></pre><p>由于将上下左右滑动整合到一起去了，还有点混乱。主要的思路就是在onIterceptTouchEvent中判断是否已经有了指定方向上的滑动，如果滑动了，则截断事件的派发，转而去滑动页面（onTouchEvent）。</p>
+<p>代码demo在：<a href="https://github.com/xxxzhi/SlideListener" target="_blank" rel="external">https://github.com/xxxzhi/SlideListener</a></p>
+<p>是一个library，可以引用后使用。</p>
+<p>在Activity中 使用的 demo如下：</p>
+<pre><code>View view = getLayoutInflater().inflate(R.layout.activity_test, null);
+SlideFrameLayout slideFrameLayout = new SlideFrameLayout(this);
+slideFrameLayout.addView(view);
+slideFrameLayout.setDirection(SlideDirection.BOTTOM);
+setContentView(slideFrameLayout);
+
+
+slideFrameLayout.setSlideListener(new SlideFrameLayout.SlideListener() {
+
+    @Override
+    public void onSlideFinish() {
+        finish();
+    }
+});
+</code></pre><h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><p>[1] <a href="http://mobile.51cto.com/abased-374715.htm" target="_blank" rel="external">http://mobile.51cto.com/abased-374715.htm</a>“</p>
+<hr>
+<p>多一点思考，多一点想法，多一点实践，多一份美妙</p>
+<p>==============================</p>
+<p>刚还在看鲁迅的杂文，特别赞同蔡元培先生的评论：</p>
+<blockquote>
+<p> 杂文与短评……他的感想之丰富，观察之深刻，意境之隽永，字句之正确，他人所苦思力索而不易得当的，他就很自然地写出来，这是何等天才！又是何等学力！</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/android/" rel="tag"># android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/03/15/android-soft-keyboard-summary/" rel="next" title="android 软键盘使用总结">
+                <i class="fa fa-chevron-left"></i> android 软键盘使用总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/04/17/using-fps-meter-to-obtain-fps/" rel="prev" title="利用Fps meter 的pipe来获取android 的 Fps值">
+                利用Fps meter 的pipe来获取android 的 Fps值 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#事件监听模型"><span class="nav-number">1.</span> <span class="nav-text">事件监听模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#有些概念如果换个方向去理解可能就很容易了。"><span class="nav-number">1.1.</span> <span class="nav-text">有些概念如果换个方向去理解可能就很容易了。</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#事件派发具体的过程"><span class="nav-number">1.2.</span> <span class="nav-text">事件派发具体的过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SlideFrameLayout"><span class="nav-number">2.</span> <span class="nav-text">SlideFrameLayout</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

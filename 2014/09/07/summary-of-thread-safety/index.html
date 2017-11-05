@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="编程," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前几天，师兄上传图片的Android手机应用，每次传输图片到我的后台，都会出现一个问题，第一次传输总是传了一个已经乱码了的图片，然后重新传这张图片，才ok。然后我跟他一起检查代码，就发现了这个原因就是多线程导致的问题。 因为图片需要压缩，所以师兄开始的处理是每次拍完照，确定图片后，就开始启动一个线程压缩图片，以便到了最后，需要上传图片的时候，能够直接上传。这样就能够节省了不少时间了。但是在处理的">
+<meta name="keywords" content="编程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线程安全总结">
+<meta property="og:url" content="http://yoursite.com/2014/09/07/summary-of-thread-safety/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前几天，师兄上传图片的Android手机应用，每次传输图片到我的后台，都会出现一个问题，第一次传输总是传了一个已经乱码了的图片，然后重新传这张图片，才ok。然后我跟他一起检查代码，就发现了这个原因就是多线程导致的问题。 因为图片需要压缩，所以师兄开始的处理是每次拍完照，确定图片后，就开始启动一个线程压缩图片，以便到了最后，需要上传图片的时候，能够直接上传。这样就能够节省了不少时间了。但是在处理的">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线程安全总结">
+<meta name="twitter:description" content="前几天，师兄上传图片的Android手机应用，每次传输图片到我的后台，都会出现一个问题，第一次传输总是传了一个已经乱码了的图片，然后重新传这张图片，才ok。然后我跟他一起检查代码，就发现了这个原因就是多线程导致的问题。 因为图片需要压缩，所以师兄开始的处理是每次拍完照，确定图片后，就开始启动一个线程压缩图片，以便到了最后，需要上传图片的时候，能够直接上传。这样就能够节省了不少时间了。但是在处理的">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/09/07/summary-of-thread-safety/"/>
+
+
+
+
+
+  <title>线程安全总结 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/09/07/summary-of-thread-safety/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">线程安全总结</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-09-07T00:00:00+08:00">
+                2014-09-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p>前几天，师兄上传图片的Android手机应用，每次传输图片到我的后台，都会出现一个问题，第一次传输总是传了一个已经乱码了的图片，然后重新传这张图片，才ok。然后我跟他一起检查代码，就发现了这个原因就是多线程导致的问题。</p>
+<p>因为图片需要压缩，所以师兄开始的处理是每次拍完照，确定图片后，就开始启动一个线程压缩图片，以便到了最后，需要上传图片的时候，能够直接上传。这样就能够节省了不少时间了。但是在处理的时候，忽略了一个多线程的问题，就是在上传压缩后的图片的时候，你并不能保证已经完全压缩完了。因为最开始没有做任何处理，结果就导致了，上传的图片只是压缩过程中的一个中间图片罢了。两个线程同时对那张图片进行操作，一个写，一个读，结果就导致只读取了写的一半。</p>
+<p>这个地方就完全体现出来多线程的困扰。当然，上面的问题很容易解决，用个标志量，判断是否已经压缩完全，否则的话，就让上传图片的进程等待。但是很多时候，往往是你自己都不知道发生了多线程竞争，不知道需要考虑线程同步。而且这种线程同步还是跟用户操作有关的，比如上面那个例子，假如用户拍完照后，看了一段时间再去上传图片，可能就没有任何问题了。</p>
+<h5 id="如何避免"><a href="#如何避免" class="headerlink" title="如何避免"></a>如何避免</h5><p>其实遇到这种问题，就当是给自己提个醒，在老师教我们的时候，都说多线程很麻烦，很容易出问题，大家要注意。但是我们那时候根本就没有什么体会，到了最终自己编写项目的时候，有时候就会因为这些看似不经意的小地方，出现一些莫名其妙地，本来看似不会出现的问题。而且这种问题，如果没有经过强力的测试，你是无法发现的，这才是最最严重的问题。我看了网上一些人的介绍，并且结合自己的一些经历和思考，总结了下面一些东西：</p>
+<ol>
+<li>在写多线程的时候，多留一颗心，脑子里面要有对每个线程执行的顺序印象，去思考，会不会有哪个地方出现线程安全的问题。一定要思路清晰。</li>
+<li>对于那些可能出现问题的地方要多留一颗心，提防着它们，对于一些可能不会出现问题的，也给它加个保护，因为一方面，你会判断错误，另一方面，现在不会，不代表以后不会。</li>
+<li>一个易错的细节：对于静态同步方法，锁是针对这个类的，锁对象是该类的Class对象。静态和非静态方法的锁互不干预。一个线程获得锁，当在一个同步方法中访问另外对象上的同步方法时，会获取这两个对象锁。</li>
+</ol>
+<p>其实如何避免线程问题，其实就是自己去发现问题，而发现这些线程问题，印象中很多教材都有不少介绍，记得我那时候学习的时候，老师布置的作业也是这方面的问题。发现问题，简化了后，就是书本上面的问题了。比如说画图之类的。</p>
+<h5 id="线程同步的方式和机制"><a href="#线程同步的方式和机制" class="headerlink" title="线程同步的方式和机制"></a>线程同步的方式和机制</h5><p>再介绍一下线程同步的方式与机制，其实这个我是也没有什么很深的印象的了，查了下资料。它主要有临界区、互斥量、信号量、事件这几种方式。</p>
+<ul>
+<li>临界区：通过对多线程的串行化来访问公共资源或一段代码，速度快，适合控制数据访问。在任意时刻只允许一个线程对共享资源进行访问，如果有多个线程试图访问公共资源，那么在有一个线程进入后，其他试图访问公共资源的线程将被挂起，并一直等到进入临界区的线程离开，临界区在被释放后，其他线程才可以抢占。</li>
+<li>互斥量：采用互斥对象机制。只有拥有互斥对象的线程才有访问公共资源的权限，因为互斥对象只有一个，所以能保证公共资源不会同时被多个线程访问。互斥不仅能实现同一应用程序的公共资源安全共享，还能实现不同应用程序的公共资源安全共享。</li>
+<li>信号量：它允许多个线程在同一时刻访问同一个资源，但是需要限制在同一时刻访问此资源的最大线程数目</li>
+<li>事件：通过通知操作的方式来保持线程的同步，还可以方便实现对多个线程的优先级比较的操作。</li>
+</ul>
+<h5 id="不同语言的线程同步"><a href="#不同语言的线程同步" class="headerlink" title="不同语言的线程同步"></a>不同语言的线程同步</h5><p>不同编程语言间，在线程同步使用上面是不相同的，本身C和C++就是操作系统主要的编写语言，C与上面四种方式更加相近。C主要有以下几个：</p>
+<ul>
+<li>互斥锁，像pthread_mutex_t结构 ，函数pthread_mutex_lock() …</li>
+<li>条件变量，pthread_cond_t结构，函数pthread_cond_wait()，pthread_cond_timedwait()等</li>
+<li>信号灯，有这些函数：sem_init，sem_destroy,sem_post,sem_wait等</li>
+<li>异步信号以及其他的一些同步方式</li>
+</ul>
+<p>这些都主要在头文件<pthread.h> 中，我前段时间在港中文实习的时候，因为要在Android里面，用C++写个Socket服务器，就经常需要跟各种线程方面的东西打交道，保持线程的同步。做这些东西需要很细致。</pthread.h></p>
+<p><strong>Java</strong>的线程同步使用比较多的一个关键字 synchronize 以及volatile。java中几乎已经将线程同步封装很好，所以使用起来会比C方便很多。但是千万别以为Java线程同步就这样而已。如果你想要应用好线程同步还是要认真领悟好<strong>Synchronize</strong> 跟 <strong>volatile</strong>,而且不同的使用方式，效率也会不一样。</p>
+<hr>
+<p>我思故我在，我思故我在…</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/编程/" rel="tag"># 编程</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/08/12/introduce-Astro-Boy/" rel="next" title="少侠请小心介绍">
+                <i class="fa fa-chevron-left"></i> 少侠请小心介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/09/16/android-surface-simple-introduce/" rel="prev" title="Android Surface 系统简单学习">
+                Android Surface 系统简单学习 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#如何避免"><span class="nav-number">1.</span> <span class="nav-text">如何避免</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#线程同步的方式和机制"><span class="nav-number">2.</span> <span class="nav-text">线程同步的方式和机制</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#不同语言的线程同步"><span class="nav-number">3.</span> <span class="nav-text">不同语言的线程同步</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="JDK1.5后新增了一些接口用于并发编程的接口，Callable，Future。以及1.6添加了FutureTask。之前看到了他们的使用，JDK1.8还添加了CompletableFuture，一直想了解一下这些东西。这里记录下对Callable, Future和FutureTask的理解。 相关接口FutureTask实现了RunnableFuture接口，而RunnableFuture继承了">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Callable, Future和FutureTask简述">
+<meta property="og:url" content="http://yoursite.com/2016/05/16/java-callable-future/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="JDK1.5后新增了一些接口用于并发编程的接口，Callable，Future。以及1.6添加了FutureTask。之前看到了他们的使用，JDK1.8还添加了CompletableFuture，一直想了解一下这些东西。这里记录下对Callable, Future和FutureTask的理解。 相关接口FutureTask实现了RunnableFuture接口，而RunnableFuture继承了">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Callable, Future和FutureTask简述">
+<meta name="twitter:description" content="JDK1.5后新增了一些接口用于并发编程的接口，Callable，Future。以及1.6添加了FutureTask。之前看到了他们的使用，JDK1.8还添加了CompletableFuture，一直想了解一下这些东西。这里记录下对Callable, Future和FutureTask的理解。 相关接口FutureTask实现了RunnableFuture接口，而RunnableFuture继承了">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/05/16/java-callable-future/"/>
+
+
+
+
+
+  <title>Callable, Future和FutureTask简述 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/16/java-callable-future/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Callable, Future和FutureTask简述</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-16T00:00:00+08:00">
+                2016-05-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>JDK1.5后新增了一些接口用于并发编程的接口，Callable，Future。以及1.6添加了FutureTask。之前看到了他们的使用，JDK1.8还添加了CompletableFuture，一直想了解一下这些东西。这里记录下对Callable, Future和FutureTask的理解。</p>
+<h2 id="相关接口"><a href="#相关接口" class="headerlink" title="相关接口"></a>相关接口</h2><p>FutureTask实现了RunnableFuture接口，而RunnableFuture继承了Runnable，Future接口。FutureTask又有一个Callable参数的构造函数，下面分别介绍这些接口。</p>
+<h3 id="Runnable"><a href="#Runnable" class="headerlink" title="Runnable"></a>Runnable</h3><p>这个是在Java一开始就出现了的接口，只有一个接口方法run，表示可以被运行的类。可以放到线程池，Thread中运行。跟Thread是两种不同的实现方式。</p>
+<h3 id="Future"><a href="#Future" class="headerlink" title="Future"></a>Future<v></v></h3><p>这是在JDK1.5新增的接口，展示异步执行的结果(结果，将来的，Future)。他有以下几个方法:</p>
+<ul>
+<li>cancel: 尝试去取消这个任务，如果该任务已经完成，或者已经取消，或者其他什么原因将不能取消。</li>
+<li>get: 可以通过get方法获取异步线程的结果，如果没有执行完成则阻塞当前线程，等待异步线程执行完获取结果。</li>
+<li>isDone: 判断该任务是否已经完成。如果是被取消，中断等，该方法也会返回true。</li>
+<li>isCancelled: 判断该任务是否已经取消。</li>
+</ul>
+<p>Runnable和Thread都有一个问题，就是不能够直接获取异步线程运行的结果，而Future可以做到。</p>
+<h3 id="RunnableFuture"><a href="#RunnableFuture" class="headerlink" title="RunnableFuture"></a>RunnableFuture<v></v></h3><p>实现了Runnable接口和Future接口。</p>
+<h3 id="Callable"><a href="#Callable" class="headerlink" title="Callable"></a>Callable<v></v></h3><p>一个可以返回结果的接口。只有一个方法call。</p>
+<h2 id="使用范例"><a href="#使用范例" class="headerlink" title="使用范例"></a>使用范例</h2><h3 id="使用Callable放到线程池中运行。"><a href="#使用Callable放到线程池中运行。" class="headerlink" title="使用Callable放到线程池中运行。"></a>使用Callable放到线程池中运行。</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">public class TestFuture &#123;</div><div class="line">    public static void main(String[] args) throws InterruptedException, ExecutionException&#123;</div><div class="line">        ExecutorService executor = Executors.newCachedThreadPool();</div><div class="line">        Task task = new Task();</div><div class="line">        Future&lt;Integer&gt; future = executor.submit(task);</div><div class="line">        // do something</div><div class="line">        System.out.println(&quot;可以先做一些事情，再去获取运行结果&quot;);</div><div class="line">        if(!future.isDone())&#123;</div><div class="line">            // you also can do something.</div><div class="line">        &#125;</div><div class="line">        System.out.println(&quot;运行结果: &quot;+future.get()); // 可能会阻塞等待结果</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    static class Task implements Callable&lt;Integer&gt;&#123;</div><div class="line"></div><div class="line">        @Override</div><div class="line">        public Integer call() throws Exception &#123;</div><div class="line">            System.out.println(&quot;异步任务开始运行&quot;);</div><div class="line">            TimeUnit.SECONDS.sleep(3);</div><div class="line">            int sum = 0 ;</div><div class="line">            for(int i = 0 ; i != 200; ++i)&#123;</div><div class="line">                sum+=i;</div><div class="line">            &#125;</div><div class="line">            System.out.println(&quot;异步任务完成运行&quot;);</div><div class="line">            return sum;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">//运行结果</div><div class="line">/*</div><div class="line">可以先做一些事情，再去获取运行结果</div><div class="line">异步任务开始运行</div><div class="line">异步任务完成运行</div><div class="line">运行结果: 19900</div><div class="line">*/</div></pre></td></tr></table></figure>
+<p>可以自己实现Callable接口，Executor执行完成后会返回一个Future对象。在获取运行结果前，可以先做一些其他的事情。</p>
+<h3 id="使用FutureTask"><a href="#使用FutureTask" class="headerlink" title="使用FutureTask"></a>使用FutureTask</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">public class TestFutureTask &#123;</div><div class="line">    public static void main(String[] args) throws InterruptedException, ExecutionException&#123;</div><div class="line">        ExecutorService executor = Executors.newCachedThreadPool();</div><div class="line">        FutureTask&lt;Integer&gt; futureTask = new FutureTask&lt;Integer&gt;(new Task());</div><div class="line">        executor.submit(futureTask); //调用的submit(Runnable runnable) 方法</div><div class="line">        // do something</div><div class="line">        System.out.println(&quot;可以先做一些事情，再去获取运行结果&quot;);</div><div class="line">        if(!futureTask.isDone())&#123;</div><div class="line">            // you also can do something.</div><div class="line">        &#125;</div><div class="line">        System.out.println(&quot;运行结果: &quot;+futureTask.get()); // 可能会阻塞等待结果</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    </div><div class="line">    static class Task implements Callable&lt;Integer&gt;&#123;</div><div class="line"></div><div class="line">        @Override</div><div class="line">        public Integer call() throws Exception &#123;</div><div class="line">            System.out.println(&quot;异步任务开始运行&quot;);</div><div class="line">            TimeUnit.SECONDS.sleep(3);</div><div class="line">            int sum = 0 ;</div><div class="line">            for(int i = 0 ; i != 200; ++i)&#123;</div><div class="line">                sum+=i;</div><div class="line">            &#125;</div><div class="line">            System.out.println(&quot;异步任务完成运行&quot;);</div><div class="line">            return sum;</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>跟前面直接使用Callable结果是一样的，只是使用方式有点不一样。这里不需要从submit中获得Future对象，直接就是传入的那个参数futureTask，在有些使用使用起来会更加方便。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我觉得Future接口提供了一种异步操作新的思路，Runnable和Thread都是直接执行完就没有了，并没有获得执行结果的接口，但是Future可以获得执行结果。Future就是用来展示执行结果。当然Future这一系列接口的使用远远不止这些，Future的get方法还可以设置超时时间。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/12/android-view-dispatch/" rel="next" title="关于Android事件派发流程的理解">
+                <i class="fa fa-chevron-left"></i> 关于Android事件派发流程的理解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/19/feature-source-code/" rel="prev" title="FutureTask源码分析">
+                FutureTask源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#相关接口"><span class="nav-number">1.</span> <span class="nav-text">相关接口</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Runnable"><span class="nav-number">1.1.</span> <span class="nav-text">Runnable</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Future"><span class="nav-number">1.2.</span> <span class="nav-text">Future</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RunnableFuture"><span class="nav-number">1.3.</span> <span class="nav-text">RunnableFuture</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Callable"><span class="nav-number">1.4.</span> <span class="nav-text">Callable</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用范例"><span class="nav-number">2.</span> <span class="nav-text">使用范例</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#使用Callable放到线程池中运行。"><span class="nav-number">2.1.</span> <span class="nav-text">使用Callable放到线程池中运行。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#使用FutureTask"><span class="nav-number">2.2.</span> <span class="nav-text">使用FutureTask</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

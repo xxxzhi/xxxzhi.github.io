@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,设计模式,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="其实适配器模式在Android源码中非常多，而从整体的源码角度上来看Activity的结构就是一种适配器模式。从这个角度上面看Activity，对Activity和应用层框架会有更加深入的理解。 适配器模式意图将一个接口转换为用户需要的另外一个接口，适配器模式使得原本由于接口不兼容不能一起工作的那些类可以一起工作。 UML图适配器模式有两种模式，UML分别如下:   第一种是直接继承已经有的接口适">
+<meta name="keywords" content="Android,设计模式,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android源码适配器模式---Activity类结构">
+<meta property="og:url" content="http://yoursite.com/2016/06/02/android-sourcecode-adapter-activity/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="其实适配器模式在Android源码中非常多，而从整体的源码角度上来看Activity的结构就是一种适配器模式。从这个角度上面看Activity，对Activity和应用层框架会有更加深入的理解。 适配器模式意图将一个接口转换为用户需要的另外一个接口，适配器模式使得原本由于接口不兼容不能一起工作的那些类可以一起工作。 UML图适配器模式有两种模式，UML分别如下:   第一种是直接继承已经有的接口适">
+<meta property="og:image" content="http://xxxzhi.github.io/images/adapter1.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/adapter2.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/adapter-activity.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/window-callback.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android源码适配器模式---Activity类结构">
+<meta name="twitter:description" content="其实适配器模式在Android源码中非常多，而从整体的源码角度上来看Activity的结构就是一种适配器模式。从这个角度上面看Activity，对Activity和应用层框架会有更加深入的理解。 适配器模式意图将一个接口转换为用户需要的另外一个接口，适配器模式使得原本由于接口不兼容不能一起工作的那些类可以一起工作。 UML图适配器模式有两种模式，UML分别如下:   第一种是直接继承已经有的接口适">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/adapter1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/06/02/android-sourcecode-adapter-activity/"/>
+
+
+
+
+
+  <title>Android源码适配器模式---Activity类结构 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/06/02/android-sourcecode-adapter-activity/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android源码适配器模式---Activity类结构</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-02T00:00:00+08:00">
+                2016-06-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>其实适配器模式在Android源码中非常多，而从整体的源码角度上来看Activity的结构就是一种适配器模式。从这个角度上面看Activity，对Activity和应用层框架会有更加深入的理解。</p>
+<h2 id="适配器模式"><a href="#适配器模式" class="headerlink" title="适配器模式"></a>适配器模式</h2><h3 id="意图"><a href="#意图" class="headerlink" title="意图"></a>意图</h3><p>将一个接口转换为用户需要的另外一个接口，适配器模式使得原本由于接口不兼容不能一起工作的那些类可以一起工作。</p>
+<h3 id="UML图"><a href="#UML图" class="headerlink" title="UML图"></a>UML图</h3><p>适配器模式有两种模式，UML分别如下:</p>
+<p><img src="http://xxxzhi.github.io/images/adapter1.png" alt="http://xxxzhi.github.io/images/adapter1.png"></p>
+<p><img src="http://xxxzhi.github.io/images/adapter2.png" alt="http://xxxzhi.github.io/images/adapter2.png"></p>
+<p>第一种是直接继承已经有的接口适配目标接口，而第二种是引用已有的接口适配目标接口。</p>
+<h3 id="示例代码"><a href="#示例代码" class="headerlink" title="示例代码"></a>示例代码</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">interface Target&#123;</div><div class="line">    void request();</div><div class="line">&#125;</div><div class="line"></div><div class="line">class Adaptee&#123;</div><div class="line">    public void specialRequest()&#123;</div><div class="line">        System.out.println(&quot;special from adaptee&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">class Adapter extends Adaptee implements Target&#123;</div><div class="line">    public void request()&#123;</div><div class="line">        //do something to implements request</div><div class="line">        specialRequest();</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public static final void main(String args[])&#123;</div><div class="line">    Target target = new Adapter();</div><div class="line">    target.request();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面是第一种适配器模式的简单代码示例，通过继承已有的类来适配，另外一种组合的方式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">interface Target&#123;</div><div class="line">    void request();</div><div class="line">&#125;</div><div class="line"></div><div class="line">class Adaptee&#123;</div><div class="line">    public void specialRequest()&#123;</div><div class="line">        System.out.println(&quot;special from adaptee&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">class Adapter implements Target&#123;</div><div class="line">    private Adaptee adaptee ;</div><div class="line">    public void Adapter(Adaptee adaptee)&#123;</div><div class="line">        this.adaptee = adaptee;</div><div class="line">    &#125;</div><div class="line">    public void request()&#123;</div><div class="line">        //do something to implements request</div><div class="line">        adaptee.specialRequest();</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public static final void main(String args[])&#123;</div><div class="line">    Target target = new Adapter(new Adaptee());</div><div class="line">    target.request();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>两种方式类适配器和对象适配器。</p>
+<h2 id="Activity与适配器模式"><a href="#Activity与适配器模式" class="headerlink" title="Activity与适配器模式"></a>Activity与适配器模式</h2><p>Activity是Android的核心组件，它是负责应用UI的组件，可以说是Android四大组件中最重要，使用最多，最复杂的组建。它的源码也相当地庞大。从适配器的角度上来看，Activity适配了多个接口，先看一下它的类结构图：<br><img src="http://xxxzhi.github.io/images/adapter-activity.png" alt="此处输入图片的描述"></p>
+<p>将Activity看成是适配器模式初看可能会有点牵强。但是ContextThemeWrapper是表示主题的环境类，Context可以翻译为应用环境,但是对于需要显示UI的一个应用组建除了应用环境外，还需要适应其他的内容信息，比如Window，比如KeyEvent等等。</p>
+<p>拿窗口系统举例。Android中有Window管理系统，但是窗口系统需要与的Window.Callback接口，但是现在是有了Context，组建需要Window.Callback接口，这样创建Activity(这个是Adapter)实现Window.Callback接口，并且继承ContextThemeWrapper，将ContextWrapper与Window.Callback协作，让Context与Window一起工作。Window.Callback只是Activity适配的其中一个接口，下面分别介绍类结构的每一个部分。</p>
+<h3 id="ContextThemeWrapper"><a href="#ContextThemeWrapper" class="headerlink" title="ContextThemeWrapper"></a>ContextThemeWrapper</h3><p>这是一个包含主题的Context装饰器，本身ContextWrapper是一个装饰器模式，在Android中，四大组建都是ContextWrapper的子类，四大组建都需要应用环境。关于这部分可以看我这篇文章<a href="http://blog.csdn.net/xxxzhi/article/details/51152751" target="_blank" rel="external">Android源码装饰模式—ContextWrapper</a>。需要理解的是Context是一个应用环境类型，Context包含了各种跟应用环境相关的信息，可以用来与应用系统打交道的。</p>
+<h3 id="Window-Callback-Window-OnWindowDismissedCallback"><a href="#Window-Callback-Window-OnWindowDismissedCallback" class="headerlink" title="Window.Callback, Window.OnWindowDismissedCallback"></a>Window.Callback, Window.OnWindowDismissedCallback</h3><p>Window.Callback 这个接口包含了很多接口函数，上面的UML图中只包含了部分接口，全部的接口类可见下面的Outline截图：</p>
+<p><img src="http://xxxzhi.github.io/images/window-callback.png" alt="此处输入图片的描述"></p>
+<p>这个接口是窗口的回调接口，主要分为屏幕事件触发，按键事件触发，Panel相关的View创建与Prepare,Menu的回调，Window的变化回调，SearchRequest的回调，以及ActionMode的回调。</p>
+<p>Window.OnWindowDismissedCallback是一个hide类，是无法通过API调用的，是当窗口消失（Window系统移除）的时候的回调接口。Activity的实现也很简单，直接finish掉自己。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * Called when the main window associated with the activity has been dismissed.</div><div class="line"> * @hide</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void onWindowDismissed() &#123;</div><div class="line">    finish();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>Callback,OnWindowDismissedCallback是Window与Activity交互的回调接口。</p>
+<p>初始部分代码为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">//Activity.java</div><div class="line">    final void attach(Context context, ActivityThread aThread,</div><div class="line">            Instrumentation instr, IBinder token, int ident,</div><div class="line">            Application application, Intent intent, ActivityInfo info,</div><div class="line">            CharSequence title, Activity parent, String id,</div><div class="line">            NonConfigurationInstances lastNonConfigurationInstances,</div><div class="line">            Configuration config, String referrer, IVoiceInteractor voiceInteractor) &#123;</div><div class="line">        attachBaseContext(context);</div><div class="line"></div><div class="line">        mFragments.attachHost(null /*parent*/);</div><div class="line"></div><div class="line">        mWindow = new PhoneWindow(this);</div><div class="line">        mWindow.setCallback(this);</div><div class="line">        mWindow.setOnWindowDismissedCallback(this);</div><div class="line">        mWindow.getLayoutInflater().setPrivateFactory(this);</div><div class="line">        ...</div></pre></td></tr></table></figure>
+<p>但实际上一个Window并不是只和一个Activity关联，而是一个Window和一个Callback关联，Activity也是Context，Android中Dialog里面也包含了Window，Dialog也实现了Callback接口。一个应用环境中(Context)可能包含多个Window，也就会有多个Callback，只是Activity这种应用环境本身就实现了Callback接口。</p>
+<h3 id="KeyEvent-Callback"><a href="#KeyEvent-Callback" class="headerlink" title="KeyEvent.Callback"></a>KeyEvent.Callback</h3><p>对应着Key事件的回调接口，当按下按键的时候，会回调该接口。主要是为了适配输入系统。</p>
+<h3 id="ComponentCallbacks2"><a href="#ComponentCallbacks2" class="headerlink" title="ComponentCallbacks2"></a>ComponentCallbacks2</h3><p>它是ComponentCallbacks的子接口，CompoentCallbacks包含下面两个接口:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">void onConfigurationChanged(Configuration newConfig);</div><div class="line"></div><div class="line">void onLowMemory();</div></pre></td></tr></table></figure>
+<p>ComponentCallbacks2新增了<code>onTrimMemory</code>接口。<br>ComponentCallbacks是专门为Android组件使用的回调接口，Android组件都会实现该接口(目前变成了ConponentCallbacks2)，当配置信息变化，内存变化的时候，这些接口会被调用。调用这些接口的是ActivityThread(消息循环中，收到变化消息时)，ViewRootImpl（在Window有变化的时候，ViewRootImpl负责与WindowManagerService通信）等。该接口是为了适配系统信息管理部分。</p>
+<p>这里有两个跟内存相关的接口，这其实是为帮应用应对Android内存满负荷，提醒应用程序做一些释放内存处理，如果占用内存过大，应用将会更容易被杀死。具体可以看LowMemoryKiller的介绍。</p>
+<h3 id="OnCreateContextMenuListener"><a href="#OnCreateContextMenuListener" class="headerlink" title="OnCreateContextMenuListener"></a>OnCreateContextMenuListener</h3><p>Android上下文菜单: 当给一个View注册了上下文菜单后，对这个View长按2秒，会弹出一个浮动的菜单。OnCreateContextMenuListener 它只有一个接口函数:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) &#123;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>当View的Context menu被创建的时候，该接口的会被调用，用于获取Menu(作为实现改接口的Activity来讲，是设置Menu)。在Activity中，与这个接口函数对应的函数是onContextItemSelected，而该函数是继承自Window.Callback接口的onMenuItemSelected函数:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">public boolean onMenuItemSelected(int featureId, MenuItem item) &#123;</div><div class="line">    CharSequence titleCondensed = item.getTitleCondensed();</div><div class="line"></div><div class="line">    switch (featureId) &#123;</div><div class="line">        case Window.FEATURE_OPTIONS_PANEL:</div><div class="line">            if(titleCondensed != null) &#123;</div><div class="line">                    EventLog.writeEvent(50000, 0, titleCondensed.toString());</div><div class="line">            &#125;</div><div class="line">            if (onOptionsItemSelected(item)) &#123;</div><div class="line">                return true;</div><div class="line">            &#125;</div><div class="line">        ...</div><div class="line">        case Window.FEATURE_CONTEXT_MENU:</div><div class="line">            if(titleCondensed != null) &#123;</div><div class="line">                EventLog.writeEvent(50000, 1, titleCondensed.toString());</div><div class="line">            &#125;</div><div class="line">            if (onContextItemSelected(item)) &#123; //这里</div><div class="line">                return true;</div><div class="line">            &#125;</div><div class="line">            return mFragments.dispatchContextItemSelected(item);</div><div class="line"></div><div class="line">        default:</div><div class="line">            return false;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们平时监听普通的Menu的函数<code>onOptionsItemSelected</code>也是由<code>onMenuItemSelected</code>调用的。</p>
+<p>另外一边View中显示ContextMenu的函数是showContextMenu:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public boolean showContextMenu() &#123;</div><div class="line">    return getParent().showContextMenuForChild(this);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>ViewGroup的showContextMenuForChild为:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public boolean showContextMenuForChild(View originalView) &#123;</div><div class="line">    return mParent != null &amp;&amp; mParent.showContextMenuForChild(originalView);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>getParent()</code>最终会到DecorView，DecorView中创建了ContextMenu。然后调用View的<code>createContextMenu</code>方法，最终使用mOnCreateContextMenuListener获取Menu:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">public void createContextMenu(ContextMenu menu) &#123;</div><div class="line">    ContextMenuInfo menuInfo = getContextMenuInfo();</div><div class="line"></div><div class="line">    // Sets the current menu info so all items added to menu will have</div><div class="line">    // my extra info set.</div><div class="line">    ((MenuBuilder)menu).setCurrentMenuInfo(menuInfo);</div><div class="line"></div><div class="line">    onCreateContextMenu(menu);</div><div class="line">    ListenerInfo li = mListenerInfo;</div><div class="line">    if (li != null &amp;&amp; li.mOnCreateContextMenuListener != null) &#123;</div><div class="line">        li.mOnCreateContextMenuListener.onCreateContextMenu(menu, this, menuInfo);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // Clear the extra information so subsequent items that aren&apos;t mine don&apos;t</div><div class="line">    // have my extra info.</div><div class="line">    ((MenuBuilder)menu).setCurrentMenuInfo(null);</div><div class="line"></div><div class="line">    if (mParent != null) &#123;</div><div class="line">        mParent.createContextMenu(menu);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>DecorView在PhoneWindow中，Menu其实会由Window统一管理，响应Item的点击事件的接口是一致的(<code>Window.Callback.onMenuItemSelected</code>)，另外ContextMenu实际上显示出来的就是一个Dialog。但由于ContextMenu是跟View对应的，所以有了OnCreateContextMenuListener接口，它是用于当View需要创建ContextMenu的时候，方便指定ContextMenu的内容。</p>
+<h3 id="LayoutInflater-Factory2"><a href="#LayoutInflater-Factory2" class="headerlink" title="LayoutInflater.Factory2"></a>LayoutInflater.Factory2</h3><p>这个接口只有一个接口函数:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">public View onCreateView(View parent, String name, Context context, AttributeSet attrs);</div></pre></td></tr></table></figure></p>
+<p>它继承自Factory:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public interface Factory &#123;</div><div class="line">     /**</div><div class="line">      * Hook you can supply that is called when inflating from a LayoutInflater.</div><div class="line">      * You can use this to customize the tag names available in your XML</div><div class="line">      * layout files.</div><div class="line">      *</div><div class="line">      * &lt;p&gt;</div><div class="line">      * Note that it is good practice to prefix these custom names with your</div><div class="line">      * package (i.e., com.coolcompany.apps) to avoid conflicts with system</div><div class="line">      * names.</div><div class="line">      */</div><div class="line">     public View onCreateView(String name, Context context, AttributeSet attrs);</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
+<p>用于跟LayoutInflater系统交互，为了适配LayoutInflater系统。实现改接口，可以在Inflater的时候，解析XML中自定义的Tag。该接口为LayoutInflater调用，而LayoutInflater的实现为PhoneLayoutInflater。对于Window和LayoutInflater结构可以看这篇<a href="http://blog.csdn.net/xxxzhi/article/details/51189013" target="_blank" rel="external">Android源码抽象工厂—IPolicy</a>。</p>
+<p>除了Activity外，Application和Service都实现了ComponnentCallbacks接口，继承了ContextWrapper，其实都可以用类适配器模式看待。</p>
+<h2 id="设计思考"><a href="#设计思考" class="headerlink" title="设计思考"></a>设计思考</h2><p>本身应用组件都应该是一种应用环境（Context)，但是又需要满足Window等系统的回调需求，我们平时可能直接单独实现Window.Callback接口，但是将Activity实现Window.Callback接口，那么Activity会更加具有整体性，不过设计意图在这里思考过多感觉有点太牵强。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>从Android应用层源码整理来看，Activity的类结构完全可以看成是一种适配器模式，在基于应用环境(Context)的情况下，去满足LayoutInflater系统（LayoutInflater.Factory2），Window系统（Window.Callback，Window.OnWindowDismissedCallback），输入系统（KeyEvent.Callback）的接口需求，另外ComponnentCallbacks更是ActivityThread和ViewRootImpl需要的接口。通过适配器模式来看Activity，对于Activity，对于Activity与其他部分的交互，对于应用层框架会有更好的理解。另外再有装饰模式看Context，对于整个应用层结构会更清晰。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/设计模式/" rel="tag"># 设计模式</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/29/android-parcel-bitmap-2/" rel="next" title="Android4.0之后Parcel传输Bitmap源码分析">
+                <i class="fa fa-chevron-left"></i> Android4.0之后Parcel传输Bitmap源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/07/android-bitmap-introduce-1/" rel="prev" title="Android Bitmap深入介绍（一）---基础">
+                Android Bitmap深入介绍（一）---基础 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#适配器模式"><span class="nav-number">1.</span> <span class="nav-text">适配器模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#意图"><span class="nav-number">1.1.</span> <span class="nav-text">意图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UML图"><span class="nav-number">1.2.</span> <span class="nav-text">UML图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#示例代码"><span class="nav-number">1.3.</span> <span class="nav-text">示例代码</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Activity与适配器模式"><span class="nav-number">2.</span> <span class="nav-text">Activity与适配器模式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ContextThemeWrapper"><span class="nav-number">2.1.</span> <span class="nav-text">ContextThemeWrapper</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Window-Callback-Window-OnWindowDismissedCallback"><span class="nav-number">2.2.</span> <span class="nav-text">Window.Callback, Window.OnWindowDismissedCallback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#KeyEvent-Callback"><span class="nav-number">2.3.</span> <span class="nav-text">KeyEvent.Callback</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ComponentCallbacks2"><span class="nav-number">2.4.</span> <span class="nav-text">ComponentCallbacks2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#OnCreateContextMenuListener"><span class="nav-number">2.5.</span> <span class="nav-text">OnCreateContextMenuListener</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#LayoutInflater-Factory2"><span class="nav-number">2.6.</span> <span class="nav-text">LayoutInflater.Factory2</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设计思考"><span class="nav-number">3.</span> <span class="nav-text">设计思考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

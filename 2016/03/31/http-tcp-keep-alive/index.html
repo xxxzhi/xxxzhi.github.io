@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="网络," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前两天面试遇到一个问题：如果让你对一个项目通信协议进行选择的话，你会选择Http还是Tcp(当时问的是套接字，其实套接字还有UDP啦，我好像也没去讲)协议？感觉当时脑子转的不太灵活。而且以为Http keep-alive与Tcp keep-alive是差不多的，所以根本没去讲两者之间的keep-alive。每次面试回答问题都有点着急，所以思考不够。实际上两者是不同的，下面分别介绍一下。 首先Htt">
+<meta name="keywords" content="网络">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Http keep-alive 与Tcp keep-alive">
+<meta property="og:url" content="http://yoursite.com/2016/03/31/http-tcp-keep-alive/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前两天面试遇到一个问题：如果让你对一个项目通信协议进行选择的话，你会选择Http还是Tcp(当时问的是套接字，其实套接字还有UDP啦，我好像也没去讲)协议？感觉当时脑子转的不太灵活。而且以为Http keep-alive与Tcp keep-alive是差不多的，所以根本没去讲两者之间的keep-alive。每次面试回答问题都有点着急，所以思考不够。实际上两者是不同的，下面分别介绍一下。 首先Htt">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Http keep-alive 与Tcp keep-alive">
+<meta name="twitter:description" content="前两天面试遇到一个问题：如果让你对一个项目通信协议进行选择的话，你会选择Http还是Tcp(当时问的是套接字，其实套接字还有UDP啦，我好像也没去讲)协议？感觉当时脑子转的不太灵活。而且以为Http keep-alive与Tcp keep-alive是差不多的，所以根本没去讲两者之间的keep-alive。每次面试回答问题都有点着急，所以思考不够。实际上两者是不同的，下面分别介绍一下。 首先Htt">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/03/31/http-tcp-keep-alive/"/>
+
+
+
+
+
+  <title>Http keep-alive 与Tcp keep-alive | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/03/31/http-tcp-keep-alive/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Http keep-alive 与Tcp keep-alive</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-03-31T00:00:00+08:00">
+                2016-03-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前两天面试遇到一个问题：如果让你对一个项目通信协议进行选择的话，你会选择Http还是Tcp(当时问的是套接字，其实套接字还有UDP啦，我好像也没去讲)协议？感觉当时脑子转的不太灵活。而且以为Http keep-alive与Tcp keep-alive是差不多的，所以根本没去讲两者之间的keep-alive。每次面试回答问题都有点着急，所以思考不够。实际上两者是不同的，下面分别介绍一下。</p>
+<p>首先Http是建立在Tcp协议的基础上的，Tcp是传输层的协议，Http是应用层协议。Http底层也是通过Tcp传输的。</p>
+<h3 id="HTTP-keep-alive"><a href="#HTTP-keep-alive" class="headerlink" title="HTTP keep-alive"></a>HTTP keep-alive</h3><p>Http是一个”请求-响应”协议，它的keep-alive主要是为了让多个http请求共享一个Tcp连接，以避免每个Http又新建一个Tcp连接。每个Http服务器默认的keep-alive时间可能是不一样的。</p>
+<h3 id="TCP-keep-alive"><a href="#TCP-keep-alive" class="headerlink" title="TCP keep-alive"></a>TCP keep-alive</h3><p>Tcp的keep-alive是Tcp协议的一种保鲜装置，当Tcp请求响应结束后，经过tcp_keep-alive_time时间后，服务器会发出监测包去看看改Tcp连接是否还是继续连接的，是否已经出现了网络问题，是否客户端崩溃了等等问题。如果发现出现了问题，那么服务端就会去关闭连接，把这个Tcp连接关闭。</p>
+<h4 id="关于TCP心跳"><a href="#关于TCP心跳" class="headerlink" title="关于TCP心跳"></a>关于TCP心跳</h4><p>在目前这两年的移动互联网火热的环境下，推送应用的非常多。推送实现的就是通过TCP长连接实现的，因为移动网络很多时候都会不稳定，另外NAT过一段时间就会刷新,所以而要如何保证客户端和服务器端连接就成了一个问题。TCP心跳包就是客户端监测连接的，它先发送一个心跳包到服务器，服务器再Ask，通过这种方式判断是否目前的长连接是否可用，如果断了，则通知上层应用，并关闭连接，另外发送心跳包也是避免一段时间都没有通信，NAT超时，NAT表被刷新，导致连接失效。</p>
+<h3 id="HTTP与TCP-keep-alive联系"><a href="#HTTP与TCP-keep-alive联系" class="headerlink" title="HTTP与TCP keep-alive联系"></a>HTTP与TCP keep-alive联系</h3><p>直接介绍一个场景就可能更容易明白了。客户端发送了一个Http请求，服务器响应后，判断这个Http是否是keep-alive的，如果不是则关闭连接。如果是keep-alive，则等待keep-alive time后再关闭，如果这期间再收到一个http 请求，则继续等待最后一个请求的keep-alive time时间，直到keep-alive time时间内没有收到请求，则关闭。</p>
+<p>上面是HTTP keep-alive的，而TCP是它下一层的协议，本身TCP是长连接的，除非主动关闭。HTTP的keep-alive time一般是15ms, 30ms之类的，如果是超过了HTTP的keep-alive time时间，则HTTP会关闭TCP连接。本身TCP是不会关闭连接的，TCP的keep alive是TCP的保鲜装置，在keep alive timeout 后服务端发送一个监测包来判断连接是否仍保持着，如果还是可连接，则继续保持，它不会主动关闭连接的。而心跳包是为了防止NAT超时。</p>
+<h3 id="杂记"><a href="#杂记" class="headerlink" title="杂记"></a>杂记</h3><p>对于问题要多问为什么，要去细细探究，注意细节。了解与理解是不同的，另外也需要在遇到问题的时候，充分利用自己的知识分析问题，心态要好。找个时间看一下HttpUrlConnection跟okHttp的源码。</p>
+<hr>
+<p>加强表述</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/网络/" rel="tag"># 网络</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/19/java-signature-reflect-jni/" rel="next" title="Java方法签名与JNI,反射">
+                <i class="fa fa-chevron-left"></i> Java方法签名与JNI,反射
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/14/android-source-code-decorator-contextwrapper/" rel="prev" title="Android源码装饰模式---ContextWrapper">
+                Android源码装饰模式---ContextWrapper <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP-keep-alive"><span class="nav-number">1.</span> <span class="nav-text">HTTP keep-alive</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TCP-keep-alive"><span class="nav-number">2.</span> <span class="nav-text">TCP keep-alive</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#关于TCP心跳"><span class="nav-number">2.1.</span> <span class="nav-text">关于TCP心跳</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#HTTP与TCP-keep-alive联系"><span class="nav-number">3.</span> <span class="nav-text">HTTP与TCP keep-alive联系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#杂记"><span class="nav-number">4.</span> <span class="nav-text">杂记</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

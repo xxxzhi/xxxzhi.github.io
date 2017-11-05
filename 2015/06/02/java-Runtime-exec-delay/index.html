@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="思考,Bug," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这篇文章是纪录了一个bug解决的过程，但是我还是没有能够真正地找出bug的缘由。希望大牛能够详细解释。 问题的发现当接触的系统越来越大的时候，对于系统的性能越来越高的时候，找到表面问题的真正原因就慢慢地成为了一个比较麻烦的问题。说实话，一开始我一直不知道是因为Runtime.getRuntime().exec()导致服务处理时间缓慢。发现这个原因倒是花了不少时间。 为了方便，我直接就用jav">
+<meta name="keywords" content="思考,Bug">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Runtime.exec使用错误导致延迟">
+<meta property="og:url" content="http://yoursite.com/2015/06/02/java-Runtime-exec-delay/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="这篇文章是纪录了一个bug解决的过程，但是我还是没有能够真正地找出bug的缘由。希望大牛能够详细解释。 问题的发现当接触的系统越来越大的时候，对于系统的性能越来越高的时候，找到表面问题的真正原因就慢慢地成为了一个比较麻烦的问题。说实话，一开始我一直不知道是因为Runtime.getRuntime().exec()导致服务处理时间缓慢。发现这个原因倒是花了不少时间。 为了方便，我直接就用jav">
+<meta property="og:image" content="http://i1383.photobucket.com/albums/ah295/houzhi/12934238772tru_zpsrzqqhdxf.jpg">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Runtime.exec使用错误导致延迟">
+<meta name="twitter:description" content="这篇文章是纪录了一个bug解决的过程，但是我还是没有能够真正地找出bug的缘由。希望大牛能够详细解释。 问题的发现当接触的系统越来越大的时候，对于系统的性能越来越高的时候，找到表面问题的真正原因就慢慢地成为了一个比较麻烦的问题。说实话，一开始我一直不知道是因为Runtime.getRuntime().exec()导致服务处理时间缓慢。发现这个原因倒是花了不少时间。 为了方便，我直接就用jav">
+<meta name="twitter:image" content="http://i1383.photobucket.com/albums/ah295/houzhi/12934238772tru_zpsrzqqhdxf.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/06/02/java-Runtime-exec-delay/"/>
+
+
+
+
+
+  <title>Runtime.exec使用错误导致延迟 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/06/02/java-Runtime-exec-delay/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Runtime.exec使用错误导致延迟</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-06-02T00:00:00+08:00">
+                2015-06-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <div align="center"><img src="http://i1383.photobucket.com/albums/ah295/houzhi/12934238772tru_zpsrzqqhdxf.jpg" width="640"></div>
+
+
+<p>这篇文章是纪录了一个bug解决的过程，但是我还是没有能够真正地找出bug的缘由。希望大牛能够详细解释。</p>
+<h2 id="问题的发现"><a href="#问题的发现" class="headerlink" title="问题的发现"></a>问题的发现</h2><p>当接触的系统越来越大的时候，对于系统的性能越来越高的时候，找到表面问题的真正原因就慢慢地成为了一个比较麻烦的问题。说实话，一开始我一直不知道是因为Runtime.getRuntime().exec()导致服务处理时间缓慢。发现这个原因倒是花了不少时间。</p>
+<p>为了方便，我直接就用java调用python脚本。用python脚本处理做核心的机器学习算法的东西。而java调用python脚本，我直接就采用了Runtime.getRuntime().exec()，这个方式类似于直接使用了shell来执行。一开始使用的挺好，也没有注意一些细节的问题，慢慢地用着用着，发现有一台机器处理相同地人脸头像比另外一台慢。从经验上考虑过很多的可能情况，但是都不是问题的真正原因。但每一个误判，我感觉都非常值得反思。</p>
+<h3 id="网络问题"><a href="#网络问题" class="headerlink" title="网络问题"></a>网络问题</h3><p>由于我使用了内网穿透工具，本身对工具性能也不熟悉，刚开始的时候立刻就想到了是不是因为使用了内网穿透工具，导致网速太慢了。由于这个问题我几乎就无法解决，所以我一想到这个原因，就没有再去想办法解决了。后面直接发现直接从访问的结果仍然是一样的慢。其实这个地方我应该去<strong>验证</strong>一下，直接从内网访问，看一下速度。这样就能够避免误判带来的问题了。</p>
+<h3 id="机器配置问题"><a href="#机器配置问题" class="headerlink" title="机器配置问题"></a>机器配置问题</h3><p>由于两台机器配置的时候还是存在一点点不同，我后面又想是不是一台机器配置出现问题？检查了半天还是不能确认是不是机器配置不同，安装的内容不同导致出现了问题。由于没什么时间，干脆我又扔一边去了。</p>
+<h3 id="某些随机因素"><a href="#某些随机因素" class="headerlink" title="某些随机因素"></a>某些随机因素</h3><p>因为一台机器执行快速，另外一台执行缓慢，而出现这种诡异的问题，很容易就让人想到是不是代码库因为某些原因，导致了这种情况。而往往这种问题就基本是没有办法搞定了。其实我还是一个新手的时候，我总是怀疑某些问题是因为一些系统错误，随机因素导致的。但是结果往往是自己的错误。因为有了之前的经验，我潜意识就感觉可能是自己哪段代码出现了错误。</p>
+<p>之后通过对代码片段打印时间，每一段执行完都打印时间点。最后查看日志发现，就是在调用process.waitfor的时候，python程序已经返回了，但是java程序仍然没有任何响应，还是在wait。这样才发现了这个问题。然后通过在网上搜索Runtime.getRuntime()执行程序应该注意的事项，找到问题的关键。我使用waitfor，之后再去读取python程序的输出，但是因为输出一直没有被读取，缓冲区满了，程序就被阻塞。</p>
+<h2 id="etRuntime-exec"><a href="#etRuntime-exec" class="headerlink" title="etRuntime().exec"></a>etRuntime().exec</h2><p>getRuntime().exec会返回一个Process，在jdk文档中有说明，Process的缓冲区是有限的，如果输出的内容太多，程序就会被阻塞掉。<br>我一开始的程序是像下面这样的：</p>
+<pre><code>​    ​try {          
+​    ​         final Process p = Runtime.getRuntime().exec(&quot;python test.py&quot;);
+​    ​    ​    ​ p.waitFor();       
+​    ​         BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+​    ​         try {
+​    ​                      while (br.readLine() != null)
+​    ​                          ;
+​    ​                      br.close();
+​    ​          } catch (IOException e) {
+​    ​               e.printStackTrace();
+​    ​          }
+​    ​} catch (Exception e) {
+​    ​          e.printStackTrace();      
+​    ​}
+</code></pre><p>这样的结果就是一台机器在waitFor那里被卡住很长一段时间。然后参考了网上给的原因，将程序改成下面这样：</p>
+<pre><code>try {          
+         final Process p = Runtime.getRuntime().exec(&quot;python test.py&quot;);
+
+         BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
+         try {
+                      while (br.readLine() != null)
+                          ;
+                      br.close();
+          } catch (IOException e) {
+               e.printStackTrace();
+          }
+          p.waitFor();  
+} catch (Exception e) {
+          e.printStackTrace();      
+}
+</code></pre><p>这样程序就不会长时间卡在那里。甚至于去掉p。waitFor程序也是OK的。因为程序结束后，Stream就被close掉了。网上很多人是遇到了因为exec执行的程序出现了错误，结果Error信息占满了缓冲区，导致程序被挂起。</p>
+<h2 id="原因探究"><a href="#原因探究" class="headerlink" title="原因探究"></a>原因探究</h2><p>从网上看的那些信息只能让我猜测可能是因为打印信息太多，没有及时读出，导致程序卡住。但是我心里还是有疑问，为什么一台机器ok，另外一台机器会卡住，过很长时间才返回呢？这里面具体的细节方面的原因我觉得我还是没有找对。其实我python程序打印的东西也不多的。</p>
+<p>另外也有一个可能是python程序执行完后，很长时间都没有完全返回。这也是一个猜测的原因。<strong>虽然我按照网上的方式暂时解决了问题，但这些原因其实我觉得都不够充分，希望有人能够给出正确的解释</strong>。基础真的要牢靠。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/思考/" rel="tag"># 思考</a>
+          
+            <a href="/tags/Bug/" rel="tag"># Bug</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/04/28/android-pageradapter-notifydatasetchanged/" rel="next" title="Android notifyDatasetChanged">
+                <i class="fa fa-chevron-left"></i> Android notifyDatasetChanged
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/06/21/android-childautomovi-layout/" rel="prev" title="子View按规则自动移动Layout">
+                子View按规则自动移动Layout <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#问题的发现"><span class="nav-number">1.</span> <span class="nav-text">问题的发现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#网络问题"><span class="nav-number">1.1.</span> <span class="nav-text">网络问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#机器配置问题"><span class="nav-number">1.2.</span> <span class="nav-text">机器配置问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#某些随机因素"><span class="nav-number">1.3.</span> <span class="nav-text">某些随机因素</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#etRuntime-exec"><span class="nav-number">2.</span> <span class="nav-text">etRuntime().exec</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#原因探究"><span class="nav-number">3.</span> <span class="nav-text">原因探究</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="设计模式,杂记," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近经常看到各种介绍MVP模式的博客的，之前写过不少的Android应用，在做那些应用的时候，都是要求快速完成，所以从开始设计到写代码就一直考虑着重用。以前写的项目基本都是不断重构项目，将项目代码变得更加精简，提高代码之间的复用性。但是代码并没有特别地注重按照MVC模式或者是MVP模式来，更多的是直接考虑模块化，重用，精简。所以看了MVP模式后，决定去总结一下自己代码中的问题并优化，算是对自己之前">
+<meta name="keywords" content="设计模式,杂记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于Android MVP模式的思考">
+<meta property="og:url" content="http://yoursite.com/2016/05/05/android-thinking-about-mvp/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="最近经常看到各种介绍MVP模式的博客的，之前写过不少的Android应用，在做那些应用的时候，都是要求快速完成，所以从开始设计到写代码就一直考虑着重用。以前写的项目基本都是不断重构项目，将项目代码变得更加精简，提高代码之间的复用性。但是代码并没有特别地注重按照MVC模式或者是MVP模式来，更多的是直接考虑模块化，重用，精简。所以看了MVP模式后，决定去总结一下自己代码中的问题并优化，算是对自己之前">
+<meta property="og:image" content="http://xxxzhi.github.io/images/mvp.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/stru.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/stru2.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="关于Android MVP模式的思考">
+<meta name="twitter:description" content="最近经常看到各种介绍MVP模式的博客的，之前写过不少的Android应用，在做那些应用的时候，都是要求快速完成，所以从开始设计到写代码就一直考虑着重用。以前写的项目基本都是不断重构项目，将项目代码变得更加精简，提高代码之间的复用性。但是代码并没有特别地注重按照MVC模式或者是MVP模式来，更多的是直接考虑模块化，重用，精简。所以看了MVP模式后，决定去总结一下自己代码中的问题并优化，算是对自己之前">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/mvp.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/05/05/android-thinking-about-mvp/"/>
+
+
+
+
+
+  <title>关于Android MVP模式的思考 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/05/android-thinking-about-mvp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">关于Android MVP模式的思考</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-05T00:00:00+08:00">
+                2016-05-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近经常看到各种介绍MVP模式的博客的，之前写过不少的Android应用，在做那些应用的时候，都是要求快速完成，所以从开始设计到写代码就一直考虑着重用。以前写的项目基本都是不断重构项目，将项目代码变得更加精简，提高代码之间的复用性。但是代码并没有特别地注重按照MVC模式或者是MVP模式来，更多的是直接考虑模块化，重用，精简。所以看了MVP模式后，决定去总结一下自己代码中的问题并优化，算是对自己之前写的代码的回顾。</p>
+<h2 id="MVP框架"><a href="#MVP框架" class="headerlink" title="MVP框架"></a>MVP框架</h2><p>MVP框架是目前在Android流行起来的框架，它非常适合用于Android开发上面。我最早接触MVP模式是在一本敏捷开发的书上。MVP分别指代M(model),V(View),P(Presenter)：</p>
+<ul>
+<li>M（Model）：表示数据模型，以及相关的数据结构。</li>
+<li>V（View）：表示视图，主要是指UI界面相关的那些东西。在Android里面比如说layout的xml文件，在MVP中，很多时候Activity/Fragment也是被看做View。</li>
+<li>P（Presenter）：可以直接理解为视图与模型的中间纽带。</li>
+</ul>
+<p><img src="http://xxxzhi.github.io/images/mvp.png" alt="此处输入图片的描述"></p>
+<p>在MVP模式中，Model和View不直接进行关联，而是通过Presenter来进行关联的。往往实现的方式是增加一个IModel接口和IView接口，用Model和View分别实现那两个接口，Presenter里面保存IModel和IView接口类型的成员变量。</p>
+<h2 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h2><p>下面举一个关于Android用户信息的MVP模式例子。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface IUserView&#123;</div><div class="line">void setName(String name);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>用户的JavaBean—User:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">class User&#123;</div><div class="line">    private String name;</div><div class="line">    private String id;</div><div class="line">    public String getName()&#123;</div><div class="line">        return name;</div><div class="line">    &#125;</div><div class="line">    public String getId()&#123;</div><div class="line">        return id;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setName(String name)&#123;</div><div class="line">        this.name = name;</div><div class="line">    &#125;</div><div class="line">    public void setId(String id)&#123;</div><div class="line">        this.id = id;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>用户模型接口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">public interface IUserModel&#123;</div><div class="line">void saveUser(User user);</div><div class="line">User load();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>真正模型</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public class UserModel implements IUserModel&#123;</div><div class="line">    void saveUser(User user)&#123;</div><div class="line">        // 保存用户信息，保存在本地数据库中，或者xml里面</div><div class="line">    &#125;</div><div class="line">    User loadUser()&#123;</div><div class="line">        // 从网络中，或者从本地缓存中读取用户信息</div><div class="line">        return null; //未实现</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>Presenter:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public class UserPresenter&#123;</div><div class="line">    private IUserView view;</div><div class="line">    private IUserModel userModel;</div><div class="line">    public UserPresenter(IUserView view)&#123;</div><div class="line">        this.view = view;</div><div class="line">        userModel = new UserModel();</div><div class="line">    &#125;</div><div class="line">    public void loadUser()&#123;</div><div class="line">        // 此处可能是异步load</div><div class="line">        User user = userModel.loadUser();</div><div class="line">        view.setName(user.getName());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>把Activity作为View来看待</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public class UserActivity extends Activity implements IUserView&#123;</div><div class="line">    TextView tvName; //名称对应的TextView</div><div class="line">    UserPresenter userPresenter ;</div><div class="line">    public void onCreate(Bundle bundle)&#123;</div><div class="line">        ...</div><div class="line">        userPresenter = new UserPresenter(this);</div><div class="line">        // userPresenter.loadUser(); 可以有先初始化</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    void setName(String name)&#123;</div><div class="line">        tvName.setText(name); //如果presenter的loadUser是异步线程，这里可以通过tvName.post来运行在UI线程。</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    void reloadUserData()&#123; //该函数可以某个按钮的onClick事件里面调用</div><div class="line">        userPresenter.loadUser(); // 可以是从网络中加载数据</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面代码中Activity不再与Model直接关联，而是通过Presenter来间接关联Model。并且当Model的数据变化了的时候，Presenter能够通知View。上面的例子是View需要变化了，请求Presenter获取数据。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>MVP与MVC最大的不同就是View和Model不再直接关联。很多Android的MVC模式都是直接将Activity看作Control，这会导致整个Activity非常臃肿，因为它既然进行UI交互，还需要加上Control这部分的功能。另外即使另外新建一个Control，而把Activity只当做View的功能，如果Activity还是直接跟Model直接关联的话，因为跟Model直接关联，还是会在Activity增加很多操作。而使用P作为Model和View的纽带，P可以先对模型数据进行一些处理，然后再显示到View。另外一方面对于View的一些请求，Presenter也可以进行一些处理再去请求Model。</p>
+<p>上面是关于代码方面的优势，其实通过分隔开Model和View，也是将各个模块进行了解耦。另外一方面通过增加IUserView和IUserModel，这样每个部分进行单元测试也更加方便了，比如可以直接实现IUserView来模拟测试Presenter。</p>
+<p>个人觉得MVP模式适合Android应用，一个很大的原因就是Activity这种组件的存在，UI交互完全放在了Activity里面，这导致很多时候Activity会在一不注意间就变得臃肿。View过于庞大。当然还有很多跟Android相关的优势，比如说能够更好地避免Activity的内存泄漏（Presenter直接引用View，而不是Activity的时候）。其实通过增加Presenter，一定程度上也增加了Presenter的复用，很多人说View和Presenter是一一对应的，但是我觉得如果不一一对应，比如说一个Activity里面包含多个Presenter，将Presenter细化，那样Presenter复用的可能性也就越高了，同时也避免了Presenter过于臃肿。</p>
+<h2 id="一个模式优化过程"><a href="#一个模式优化过程" class="headerlink" title="一个模式优化过程"></a>一个模式优化过程</h2><p>平时自己写代码的时候，其实还真的是比较少那么明显地使用这种MVP模式，或者说是MVC模式。更多的是模块化，类层次化（面向对象），面向切面，并且坚持代码精简，复用的原则。下面介绍一个将平时的项目简化后的模式，并且通过考虑优化结构将模式转变成MVP的过程。先看看下面这种类型结构:<br><img src="http://xxxzhi.github.io/images/stru.png" alt="此处输入图片的描述"></p>
+<p>先模块化将程序分为Fragment/Activity部分,Adapter部分,模型网络操作部分，通过将相关类进行层次化来减少类的臃肿，另外通过AOP编程的方式将一些内容从子父类中提取出来，作为一个单独的切面。这种面向切面能够提高代码的复用性。</p>
+<p>上面的类型图里面也有一个不合理的例子，正如上面的注释中所说的将网络操作作为模型的一部分，而不是再添加一个接口，会导致网络操作一旦修改，会影响到Model的子类。</p>
+<p>下面看看如何对上面的结构进行转换。上面这种结构更多的是MVC的方式，而且是将V和C基本合在一起了，内聚在一起能够更方面UI交互，但是也会导致臃肿。上面的图中发现只有BaseFragment单向地去关联Model，这样势必会导致Fragment增加更多的代码来控制，因为在Android中进行网络连接是一定要在非UI线程操作的，如果Model没有关连Fragment，必然需要将一个异步操作放到Fragment，等待Model操作完成了后，Fragment来更新Fragment的内容。如果增加一个接口，然后Fragment实现，并且用Model引用它，那么将能够减少Fragment的操作，而且能够更好地去对Model进行单元测试。如果增加一个Presenter，由Presenter与Fragment相互关联，然后Presenter也与Model相互关联，那么Fragment将会大大简化，更加专注一些其他的UI交互。增加Presenter整个架构就变成了MVP模式了。重构后的类型图如下:</p>
+<p><img src="http://xxxzhi.github.io/images/stru2.png" alt="此处输入图片的描述"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>模式总是坚持着复用，模块间低耦合，模块内高内聚等等原则来进行的，设计模式中就有六大原则: 单一职责原则，开闭原则，依赖倒转原则，迪米特法则，里氏替换原则，组合聚合原则。好的模式能够让人在阅读的时候能够很好地理解代码，在对程序进行修改的时候能够快速简洁，并且不对原有代码结构破坏。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/设计模式/" rel="tag"># 设计模式</a>
+          
+            <a href="/tags/杂记/" rel="tag"># 杂记</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/30/android-sourcecode-binder-process-analysis/" rel="next" title="Android Binder跨进程与非跨进程的传输异同源码分析">
+                <i class="fa fa-chevron-left"></i> Android Binder跨进程与非跨进程的传输异同源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/12/android-view-dispatch/" rel="prev" title="关于Android事件派发流程的理解">
+                关于Android事件派发流程的理解 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#MVP框架"><span class="nav-number">1.</span> <span class="nav-text">MVP框架</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码示例"><span class="nav-number">2.</span> <span class="nav-text">代码示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分析"><span class="nav-number">3.</span> <span class="nav-text">分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一个模式优化过程"><span class="nav-number">4.</span> <span class="nav-text">一个模式优化过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

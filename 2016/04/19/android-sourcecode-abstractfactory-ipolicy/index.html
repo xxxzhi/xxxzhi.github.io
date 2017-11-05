@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,设计模式,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="其实抽象工厂应用还是很广的，在Android源码中，这个IPolicy就是一个简单的抽象工厂模式，它负责产生跟对应的窗口相关的一系列对象:PhoneWindow,PhoneWindowPolicy,PhoneLayoutInflater,PhoneFallbackEventHandler。下面就分析一下（源码基于5.0.0）。 抽象工厂意图提供一个创建一系列相关或相互依赖对象的接口，而无需指定他们">
+<meta name="keywords" content="Android,设计模式,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android源码中的抽象工厂---IPolicy">
+<meta property="og:url" content="http://yoursite.com/2016/04/19/android-sourcecode-abstractfactory-ipolicy/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="其实抽象工厂应用还是很广的，在Android源码中，这个IPolicy就是一个简单的抽象工厂模式，它负责产生跟对应的窗口相关的一系列对象:PhoneWindow,PhoneWindowPolicy,PhoneLayoutInflater,PhoneFallbackEventHandler。下面就分析一下（源码基于5.0.0）。 抽象工厂意图提供一个创建一系列相关或相互依赖对象的接口，而无需指定他们">
+<meta property="og:image" content="http://xxxzhi.github.io/images/abs-factory.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/ipolicy.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/phonewindow.png">
+<meta property="og:image" content="http://xxxzhi.github.io/images/windowmanager.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android源码中的抽象工厂---IPolicy">
+<meta name="twitter:description" content="其实抽象工厂应用还是很广的，在Android源码中，这个IPolicy就是一个简单的抽象工厂模式，它负责产生跟对应的窗口相关的一系列对象:PhoneWindow,PhoneWindowPolicy,PhoneLayoutInflater,PhoneFallbackEventHandler。下面就分析一下（源码基于5.0.0）。 抽象工厂意图提供一个创建一系列相关或相互依赖对象的接口，而无需指定他们">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/abs-factory.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/04/19/android-sourcecode-abstractfactory-ipolicy/"/>
+
+
+
+
+
+  <title>Android源码中的抽象工厂---IPolicy | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/19/android-sourcecode-abstractfactory-ipolicy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android源码中的抽象工厂---IPolicy</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-19T00:00:00+08:00">
+                2016-04-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>其实抽象工厂应用还是很广的，在Android源码中，这个IPolicy就是一个简单的抽象工厂模式，它负责产生跟对应的窗口相关的一系列对象:PhoneWindow,PhoneWindowPolicy,PhoneLayoutInflater,PhoneFallbackEventHandler。下面就分析一下（源码基于5.0.0）。</p>
+<h2 id="抽象工厂"><a href="#抽象工厂" class="headerlink" title="抽象工厂"></a>抽象工厂</h2><h3 id="意图"><a href="#意图" class="headerlink" title="意图"></a>意图</h3><p>提供一个创建一系列相关或相互依赖对象的接口，而无需指定他们具体的类。</p>
+<h3 id="UML类图"><a href="#UML类图" class="headerlink" title="UML类图"></a>UML类图</h3><p><img src="http://xxxzhi.github.io/images/abs-factory.png" alt="此处输入图片的描述"></p>
+<p>通过继承抽象工厂，可以产生不同的产品系列。</p>
+<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbsFactory</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> AbsProductA <span class="title">createProduct1</span><span class="params">()</span></span>;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> AbsProdcutB <span class="title">createProduct2</span><span class="params">()</span></span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbsProductA</span></span>&#123;</div><div class="line">&#125;</div><div class="line"><span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">AbsProductB</span></span>&#123;</div><div class="line">&#125;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ProductA1</span> <span class="keyword">extends</span> <span class="title">AbsProductA</span></span>&#123;</div><div class="line">&#125;</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ProductB1</span> <span class="keyword">extends</span> <span class="title">AbsProductB</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">interactWithProductA</span><span class="params">(AbsProductA product)</span></span>&#123; <span class="comment">//与ProductA关联</span></div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ConcreteFactory1</span> <span class="keyword">extends</span> <span class="title">AbsFactory</span></span>&#123;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> ConcreteFactory instance = <span class="keyword">new</span> ConcreteFactory();</div><div class="line">    <span class="function"><span class="keyword">public</span> ConcreteFactory <span class="title">getInstance</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="keyword">return</span> instance;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> AbsProductA <span class="title">createProductA</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ProductA1();</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> AbsProdcutB <span class="title">createProductB</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> ProductB1();</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</div><div class="line">    ConcreteFactory instance = ConcreteFactory.</div><div class="line">    AbsProductA product1 = instance.createProductA();</div><div class="line">    AbsProductB product2 = instance.createProductB();</div><div class="line">    product2.interactWithProductA(product1);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>抽象工厂就是创建一系列相互关联的对象，这样每一个抽象工厂的具体实现创建的对象都是相互关联的，而且可以是不同的产品系列，相当于从上层就设计好了一套产品规范。这里只是简单介绍了一下抽象工厂。如果想很好的理解可以参考<strong><em>设计模式：可复用面向对象软件的基础</em></strong>关于抽象工厂的介绍。下面介绍IPolicy。</p>
+<h2 id="IPolicy"><a href="#IPolicy" class="headerlink" title="IPolicy"></a>IPolicy</h2><p>IPolicy在com.android.internal.policy包下面。它是关于Android窗口，窗口管理，布局加载，以及事件回退Handler这一系列窗口相关产品的抽象工厂。先看IPolicy的UML类图。</p>
+<h3 id="UML图"><a href="#UML图" class="headerlink" title="UML图"></a>UML图</h3><p><img src="http://xxxzhi.github.io/images/ipolicy.png" alt="此处输入图片的描述"></p>
+<p>IPolicy是产生窗口屏幕相关对象的抽象接口，在Android手机源码中，com.android.internal.policy.impl.Policy是它的唯一一个实现，按照源码中的注释所说的，是Policy是IPolicy的一个简单实现，用来生成对象集合。Policy创建一系列的Phone的窗口相关对象:PhoneWindow，PhoneLayoutInflater，PhoneWindowManager，PhoneFallbackEventHandler。从UML图就可以看出，IPolicy算是一个典型的抽象工厂，只不过在源码中只有一个具体的工厂实现。</p>
+<p>另外Policy的实现还有一点特殊的地方，它使用static域将他需要创建的对象都预先load出来，也就是说当虚拟机加载Policy类的时候，就会加载它创建的对象的class。</p>
+<h3 id="相关对象介绍"><a href="#相关对象介绍" class="headerlink" title="相关对象介绍"></a>相关对象介绍</h3><p>下面分别介绍IPolicy创建的每个对象</p>
+<h4 id="PolicyManager"><a href="#PolicyManager" class="headerlink" title="PolicyManager"></a>PolicyManager</h4><p>PolicyManager相当于是这个抽象工厂的客户端，它只有静态方法，他它的静态方法跟IPolicy的接口是相对应的。它内部包含了一个Policy对象，相当于是Policy的一个代理，对应的创建操作都会交给Policy去创建，比如说makeNewWindow方法的实现:</p>
+<pre><code>// The static methods to spawn new policy-specific objects
+public static Window makeNewWindow(Context context) {
+    return sPolicy.makeNewWindow(context);
+}
+</code></pre><h4 id="Window与PhoneWindow"><a href="#Window与PhoneWindow" class="headerlink" title="Window与PhoneWindow"></a>Window与PhoneWindow</h4><p>Window是Android中的窗口，每个Activity都会对应着一个Window，在Activity的attach方法中，就有Window的创建代码:</p>
+<pre><code>final void attach(Context context, ActivityThread aThread,
+    Instrumentation instr, IBinder token, int ident,
+    Application application, Intent intent, ActivityInfo info,
+    CharSequence title, Activity parent, String id,
+    NonConfigurationInstances lastNonConfigurationInstances,
+    Configuration config, IVoiceInteractor voiceInteractor) {
+    attachBaseContext(context);
+
+    mFragments.attachActivity(this, mContainer, null);
+
+    mWindow = PolicyManager.makeNewWindow(this);
+    mWindow.setCallback(this);
+    mWindow.setOnWindowDismissedCallback(this);
+    mWindow.getLayoutInflater().setPrivateFactory(this);
+    ...
+</code></pre><p>attach方法是将Context,application等赋值给Activity，在Activiy启动的过程会调用。我们弹出的对话框(Dialog)，里面也是有一个Window的。另外与Activity对应的还有启动窗口(Starting Window)。一个Window还可以有子Window。另外Android中还有一些其他的窗口还有输入法窗口，状态栏窗口，壁纸窗口。</p>
+<p>窗口有一个专门的窗口管理服务WindowManagerService，在WindowManagerService中与每个Activity对应的为AppWindowToken,而AppWindowToken描述的是一组窗口(一组WindowState)，对应于Activity中Context的各种窗口。</p>
+<p>而手机中, Window的具体实现是PhoneWindow。PhoneWindow是对应着Android手机的Window实现。PhoneWindow里面包含了DecorView, DecorView包含了标题栏以及具体View(由setContentView设置)。它们之间的关系如下：</p>
+<p><img src="http://xxxzhi.github.io/images/phonewindow.png" alt="phonewindow"></p>
+<p>而真正直接关联Window与View的是WindowManager，由Window.setWindowManager设置。每个Window都会对应一个WindowManager。通过WindowManager的addView，updateViewLayout，removeView来添加，更新，移除Window中的View。</p>
+<p>通过context.getSystemService(Context.WINDOW_SERVICE)可以获得WindowManager，这个就是Activity的mWindow的WindowManager，而WindowManager的具体实现是WindowManagerImpl，而WindowManagerImpl又会将Window的相关操作(addView, removeView)交给WindowManagerGlobal来实现。WindowManagerGlobal是一个单例模式，里面包含了一个ViewRootImpl列表（ArrayList），一个View列表， 一个WindowManager.LayoutParams列表，三个链表相互对应，表示一个View对应的LayoutParams和ViewRoot。WindowManagerGlobal获取了WindowManagerService的Binder接口IWindowManager。ViewRootImpl通过WindowManagerGlobal的IWindowManager获取WindowSession(Binder的Proxy)，将ViewRootImpl的W（Binder对象）传给WindowManagerService，来与WindowManagerService相互通信。他们之间的UML图如下：</p>
+<p><img src="http://xxxzhi.github.io/images/windowmanager.png" alt="windowmanager"></p>
+<h4 id="WindowManagerPolicy-PhoneWindowManager"><a href="#WindowManagerPolicy-PhoneWindowManager" class="headerlink" title="WindowManagerPolicy,PhoneWindowManager"></a>WindowManagerPolicy,PhoneWindowManager</h4><p>这个WindowManagerPolicy不同于Window中介绍的WindownManager，Window中介绍的WindowManager是属于Window与View交互的管理，而WindowManagerPolicy则是更多地倾向于对Window屏幕的管理，比如说启动窗口就是由它创建的。也包括一个具体的屏幕管理，比如说获取屏幕显示的大小，屏幕旋转，屏幕设置等等。PhoneWindowManager是WindowManagerPolicy在手机规格下的实现。WindowManagerPolicy还有一个内部静态类WindowManagerPolicy.WindowState，它是由WindowManagerService管理的，从一个窗口开始添加就存在，到窗口移除就删除，是一个窗口的状态接口，可以获得当前窗口所属的进程，包名，当前的Frame</p>
+<h4 id="LayoutInflater-PhoneLayoutInflater"><a href="#LayoutInflater-PhoneLayoutInflater" class="headerlink" title="LayoutInflater,PhoneLayoutInflater"></a>LayoutInflater,PhoneLayoutInflater</h4><p>LayoutInflater应该都比较熟悉，它是Android中用于XML布局加载的类，它是一个抽象类，PhoneLayoutInflater是它在Android手机上面的实现。PhoneLayoutInflater中主要是实现了onCreateView方法和cloneInContext方法。</p>
+<h4 id="FallbackEventHandler-PhoneFallbackEventHandler"><a href="#FallbackEventHandler-PhoneFallbackEventHandler" class="headerlink" title="FallbackEventHandler,PhoneFallbackEventHandler"></a>FallbackEventHandler,PhoneFallbackEventHandler</h4><p>这个使用来处理按键的接口，按键事件的处理会有三个部分view树、软键盘系统、FallbackEventHandler。FallbackEventHandler是优先级最低的处理部分。只有前面两个都不处理，FallbackEventHandler才会处理，它是针对所有Window的，像声音按键就是在这里最后处理的。</p>
+<h2 id="IPolicy抽象工厂的设计分析"><a href="#IPolicy抽象工厂的设计分析" class="headerlink" title="IPolicy抽象工厂的设计分析"></a>IPolicy抽象工厂的设计分析</h2><p>如果只看IPolicy,PolicyManager,Policy的UML,你会发现其实这三个部分也像是一个策略模式的UML图。这部分里面本身也可以说是一种策略，一种创建的策略。但把IPolicy作为抽象工厂理解会更为合适，它负责生成一系列相关产品，却不用管产品的具体实现。</p>
+<p>首先说说这四个产品之间的关系，Window是表示窗口，抽象的窗口管理，而WindowManagerPolicy是关于窗口屏幕的管理策略，LayoutInflater是XML解析器，将XML解析为Window中具体元素View，最后FallbackEventHandler是回退事件Handler，事件会作用在窗口上面。这四个产品在不同的产品簇的具体表现会是不一样的，但是他们又有相互之间的关联。用一个统一的创建接口，在使用这些接口的时候会更加方便。</p>
+<p>就拿Phone的这四种产品实现来说，Phone的Window，以及WindowManagerPolicy自然是不同的，另外LayoutInflater也会有所不同，比如XML的View可能限制不一样，在PhoneLayoutInflater中会从包名前缀为”android.widget.”,”android.webkit.”,”android.app.”这三个来创建View。另外如果产品簇是TV的话，FallbackEventHandler处理可能是直接回退到上一个台，而Phone的话会是返回上一个操作。</p>
+<h3 id="用四个工厂方法实现"><a href="#用四个工厂方法实现" class="headerlink" title="用四个工厂方法实现"></a>用四个工厂方法实现</h3><p>其实四种不同的产品（Window，WindowManagerPolicy，LayoutInflater，是XML解析器，将XML解析为Window中具体元素View，最后FallbackEventHandler），如果用四个工厂方法也肯定是可以的，但是会缺乏将本来应该有相互关联的产品拆分开了，抽象工厂一定程度上提高了它们之间的内聚。</p>
+<h3 id="扩展优势分析"><a href="#扩展优势分析" class="headerlink" title="扩展优势分析"></a>扩展优势分析</h3><p>假如除了Phone外，又突然有了一种新的产品簇（比如说TV，智能手表，我暂时并没有调查这两种的实现方式），那么只需要创建一个对应Policy，以及对应的产品系列，然后将PolicyManager的IPolicy指向新产品簇的Policy就好了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/设计模式/" rel="tag"># 设计模式</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/14/android-source-code-decorator-contextwrapper/" rel="next" title="Android源码装饰模式---ContextWrapper">
+                <i class="fa fa-chevron-left"></i> Android源码装饰模式---ContextWrapper
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/23/android-sourcecode-proxy-binder/" rel="prev" title="Android源码代理模式---Binder">
+                Android源码代理模式---Binder <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#抽象工厂"><span class="nav-number">1.</span> <span class="nav-text">抽象工厂</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#意图"><span class="nav-number">1.1.</span> <span class="nav-text">意图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UML类图"><span class="nav-number">1.2.</span> <span class="nav-text">UML类图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码示例"><span class="nav-number">1.3.</span> <span class="nav-text">代码示例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IPolicy"><span class="nav-number">2.</span> <span class="nav-text">IPolicy</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#UML图"><span class="nav-number">2.1.</span> <span class="nav-text">UML图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#相关对象介绍"><span class="nav-number">2.2.</span> <span class="nav-text">相关对象介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PolicyManager"><span class="nav-number">2.2.1.</span> <span class="nav-text">PolicyManager</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Window与PhoneWindow"><span class="nav-number">2.2.2.</span> <span class="nav-text">Window与PhoneWindow</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#WindowManagerPolicy-PhoneWindowManager"><span class="nav-number">2.2.3.</span> <span class="nav-text">WindowManagerPolicy,PhoneWindowManager</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#LayoutInflater-PhoneLayoutInflater"><span class="nav-number">2.2.4.</span> <span class="nav-text">LayoutInflater,PhoneLayoutInflater</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#FallbackEventHandler-PhoneFallbackEventHandler"><span class="nav-number">2.2.5.</span> <span class="nav-text">FallbackEventHandler,PhoneFallbackEventHandler</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#IPolicy抽象工厂的设计分析"><span class="nav-number">3.</span> <span class="nav-text">IPolicy抽象工厂的设计分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#用四个工厂方法实现"><span class="nav-number">3.1.</span> <span class="nav-text">用四个工厂方法实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#扩展优势分析"><span class="nav-number">3.2.</span> <span class="nav-text">扩展优势分析</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

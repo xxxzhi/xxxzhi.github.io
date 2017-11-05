@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Java泛型是从JDK1.5开始引入的，它与C++的模版非常类似。但是Java的模版完全在编译的时候实现，使用一种擦除的技术在编译的时候就将模版完全替换，由编译器执行类型检查和推断，编译成普通的非泛型字节码。正因为如此，虽然Java泛型是Java类型安全的一大进步，但是使用起来的时候可能会遇到各种非常困扰的问题。  Java泛型不协变在Java中，因为Number是Integer的父类，所以Int">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java泛型Type体系">
+<meta property="og:url" content="http://yoursite.com/2015/11/04/talk-about-java-generic/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Java泛型是从JDK1.5开始引入的，它与C++的模版非常类似。但是Java的模版完全在编译的时候实现，使用一种擦除的技术在编译的时候就将模版完全替换，由编译器执行类型检查和推断，编译成普通的非泛型字节码。正因为如此，虽然Java泛型是Java类型安全的一大进步，但是使用起来的时候可能会遇到各种非常困扰的问题。  Java泛型不协变在Java中，因为Number是Integer的父类，所以Int">
+<meta property="og:image" content="http://xxxzhi.github.io/images/beautiful7.jpg">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java泛型Type体系">
+<meta name="twitter:description" content="Java泛型是从JDK1.5开始引入的，它与C++的模版非常类似。但是Java的模版完全在编译的时候实现，使用一种擦除的技术在编译的时候就将模版完全替换，由编译器执行类型检查和推断，编译成普通的非泛型字节码。正因为如此，虽然Java泛型是Java类型安全的一大进步，但是使用起来的时候可能会遇到各种非常困扰的问题。  Java泛型不协变在Java中，因为Number是Integer的父类，所以Int">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/beautiful7.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/11/04/talk-about-java-generic/"/>
+
+
+
+
+
+  <title>Java泛型Type体系 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/11/04/talk-about-java-generic/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java泛型Type体系</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-11-04T00:00:00+08:00">
+                2015-11-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Java泛型是从JDK1.5开始引入的，它与C++的模版非常类似。但是Java的模版完全在编译的时候实现，使用一种擦除的技术在编译的时候就将模版完全替换，由编译器执行类型检查和推断，编译成普通的非泛型字节码。正因为如此，虽然Java泛型是Java类型安全的一大进步，但是使用起来的时候可能会遇到各种非常困扰的问题。</p>
+<p><img src="http://xxxzhi.github.io/images/beautiful7.jpg" alt="enter image description here"></p>
+<h3 id="Java泛型不协变"><a href="#Java泛型不协变" class="headerlink" title="Java泛型不协变"></a>Java泛型不协变</h3><p>在Java中，因为Number是Integer的父类，所以Integer也是Number，不仅如此，而且Integer[]也Number[]。所以下面这段代码是没有任何问题的：</p>
+<pre><code>Number[] nums = new Integer[5];
+</code></pre><p>这就是协变，因为Integer是Number，所以Integer[]也是Number[]。Java的数组是支持协变的。但是Java泛型时不支持协变的。所以下面这段代码将会出现编译错误。</p>
+<pre><code>List&lt;Number&gt; list = new ArrayList&lt;Integer&gt;(); //compile error
+</code></pre><p>如果想要编译通过，这需要将List的申明改成如下</p>
+<pre><code>List&lt;? extends Number&gt; list = new ArrayList&lt;Integer&gt;();  //ok
+</code></pre><p>这是通过<strong><em>通配符引用</em></strong>来解决这个编译不通过的问题，现在上面那段代码的泛型类型就是TypeVariable了。Integer也是符合<code>? extends Number</code>的。</p>
+<h4 id="不能实例化泛型数组"><a href="#不能实例化泛型数组" class="headerlink" title="不能实例化泛型数组"></a>不能实例化泛型数组</h4><p>Java泛型的不协变导致的一个问题就是不能实例化泛型数组。因为数组是协变的，但是泛型不协变。这样如果可以实例化泛型数组，那么就会导致问题的出现，看下面这段代码</p>
+<pre><code>List&lt;Character&gt;[] listArr = new List&lt;Character&gt;[10]; // illegal, 非法，假设可以通过编译
+Object[] oa = listArr;       //数组协变，这句没有问题
+oa[0] = new ArrayList&lt;Integer&gt;();    // 看似没问题，但已经出问题了
+</code></pre><p>上面最后一句已经是有问题了，oa中每个元素的类型时List<character>，但是现在却将ArrayList<integer>赋值给了它。</integer></character></p>
+<p>不能够实例化泛型数组，但是这种通配符类型(List&lt;?&gt;)除外，如：</p>
+<pre><code>List&lt;?&gt;[] listArr = new List&lt;?&gt;[10];
+</code></pre><h3 id="构造"><a href="#构造" class="headerlink" title="构造"></a>构造</h3><h4 id="构造变量"><a href="#构造变量" class="headerlink" title="构造变量"></a>构造变量</h4><p>我们不能直接new 泛型数组，也不能够直接实例化一个泛型类型对象，比如下面这种也是不能够通过编译的：</p>
+<pre><code>T t = new T();  //error
+</code></pre><p>对于泛型的初始化，可以考虑clone：</p>
+<pre><code>static &lt;T extends Cloneable&gt; void create(T t1){
+    T t = t1.clone();
+}
+</code></pre><p>但是必须将clone 的改为public。</p>
+<h4 id="构造数组"><a href="#构造数组" class="headerlink" title="构造数组"></a>构造数组</h4><p>对于数组，我们可以通过下面的方式创新新的数组</p>
+<pre><code>V[] arr = （V[]） new Object[10]
+</code></pre><p>这种方式通过强制转换Object[]为V[]，但是太别扭，并不推荐这种方式。或者通过每次使用V的时候，将Object[]读取的时候进行强制转换。</p>
+<p>最好的办法是向构造函数传递类文字（Foo.class），这样，该实现就能在运行时知道 T的值。不采用这种方法的原因在于向后兼容性 —— 新的泛型集合类不能与 Collections 框架以前的版本兼容。</p>
+<p>所以在Collections中也有这么一种方式实现构造数组</p>
+<pre><code>ArrayList&lt;V&gt; implements List&lt;V&gt; {
+
+    public ArrayList(Class&lt;V&gt; elementType){
+        blockArray = (V[])Array.newInstance(elementType,DEFAULT_LENGTH);
+    }
+}
+</code></pre><p>其中Array.newInstance返回的是Object[]，这是为了向下兼容而做的妥协。</p>
+<p>擦除也是造成上述构造问题的原因，即不能创建泛型类型的对象，因为编译器不知道要调用什么构造函数。如果泛型类需要构造用泛型类型参数来指定类型的对象，那么构造函数应该接受类文字（Foo.class）并将它们保存起来，以便通过反射创建实例。</p>
+<h3 id="Java擦除"><a href="#Java擦除" class="headerlink" title="Java擦除"></a>Java擦除</h3><p>Java的泛型是在编译的时候就被擦除的，因为泛型基本上都是在 Java 编译器中而不是运行库中实现的，所以在生成字节码的时候，差不多所有关于泛型类型的类型信息都被“擦掉”了。换句话说，编译器生成的代码与您手工编写的不用泛型、检查程序的类型安全后进行强制类型转换所得到的代码基本相同。如List<string>与List<integer>这两个类型是一样的，也因为擦出，instanceof在范型是没有任何意义的。</integer></string></p>
+<p>另外强制转换也是没什么作用，比如下面这段代码：</p>
+<pre><code>public static &lt;T&gt; T nativeCast(Object o){
+    return (T)o;
+}
+</code></pre><p>实际上编译之后T就被擦出了，其实就是直接返回o（是Object类型）。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/10/30/java-type-reflect/" rel="next" title="Java泛型Type体系">
+                <i class="fa fa-chevron-left"></i> Java泛型Type体系
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/11/19/compare-otto-with-eventbus/" rel="prev" title="Otto与EventBus框架比较">
+                Otto与EventBus框架比较 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Java泛型不协变"><span class="nav-number">1.</span> <span class="nav-text">Java泛型不协变</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#不能实例化泛型数组"><span class="nav-number">1.1.</span> <span class="nav-text">不能实例化泛型数组</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构造"><span class="nav-number">2.</span> <span class="nav-text">构造</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#构造变量"><span class="nav-number">2.1.</span> <span class="nav-text">构造变量</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#构造数组"><span class="nav-number">2.2.</span> <span class="nav-text">构造数组</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java擦除"><span class="nav-number">3.</span> <span class="nav-text">Java擦除</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

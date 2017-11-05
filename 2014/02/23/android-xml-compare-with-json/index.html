@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="xml,json," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近接触一个项目的代码，看到里面的数据传输方式都是用xml。之前一直都是用json进行数据传输，不禁对这两种方式的比较进行了了解了一番，根据网上看到的，比较全面的比较以及自己使用过程中的思考。  定义JSON（Javascript Object Notation）定义： 一种轻量级的数据交换格式，具有良好的可读和便于快速编写的特性。可在不同平台之间进行数据交换。JSON 采用兼容性很高的文本格式，">
+<meta name="keywords" content="xml,json">
+<meta property="og:type" content="article">
+<meta property="og:title" content="xml 与json 的比较">
+<meta property="og:url" content="http://yoursite.com/2014/02/23/android-xml-compare-with-json/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="最近接触一个项目的代码，看到里面的数据传输方式都是用xml。之前一直都是用json进行数据传输，不禁对这两种方式的比较进行了了解了一番，根据网上看到的，比较全面的比较以及自己使用过程中的思考。  定义JSON（Javascript Object Notation）定义： 一种轻量级的数据交换格式，具有良好的可读和便于快速编写的特性。可在不同平台之间进行数据交换。JSON 采用兼容性很高的文本格式，">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="xml 与json 的比较">
+<meta name="twitter:description" content="最近接触一个项目的代码，看到里面的数据传输方式都是用xml。之前一直都是用json进行数据传输，不禁对这两种方式的比较进行了了解了一番，根据网上看到的，比较全面的比较以及自己使用过程中的思考。  定义JSON（Javascript Object Notation）定义： 一种轻量级的数据交换格式，具有良好的可读和便于快速编写的特性。可在不同平台之间进行数据交换。JSON 采用兼容性很高的文本格式，">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/02/23/android-xml-compare-with-json/"/>
+
+
+
+
+
+  <title>xml 与json 的比较 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/02/23/android-xml-compare-with-json/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">xml 与json 的比较</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-02-23T00:00:00+08:00">
+                2014-02-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">in</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/技术手段/" itemprop="url" rel="index">
+                    <span itemprop="name">技术手段</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近接触一个项目的代码，看到里面的数据传输方式都是用xml。之前一直都是用json进行数据传输，不禁对这两种方式的比较进行了了解了一番，根据网上看到的，比较全面的比较以及自己使用过程中的思考。</p>
+<hr>
+<h3 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h3><p>JSON（Javascript Object Notation）定义：</p>
+<p>一种轻量级的数据交换格式，具有良好的可读和便于快速编写的特性。可在不同平台之间进行数据交换。JSON 采用兼容性很高的文本格式，同时也具备C语言体系的行为。</p>
+<p>XML定义</p>
+<p>扩展标记语言（Extensible Markup Language，XML），用于标记电子文件使其具有结构性的标记语言，可以用来标记数据、定义数据类型，是一种允许用户对自己的标记语言进行定义的源语言。XML是标准通用标记语言（SGML）的子集，非常适合Web传输。XML提供统一的方法来描述和交换独立于应用或供应商的结构化数据。</p>
+<h3 id="优劣性"><a href="#优劣性" class="headerlink" title="优劣性"></a>优劣性</h3><h4 id="XML："><a href="#XML：" class="headerlink" title="XML："></a>XML：</h4><p>优点：</p>
+<ul>
+<li>格式统一，符合标准；</li>
+<li>容易与其他系统进行远程交互，数据传输比较方便。</li>
+</ul>
+<p>缺点：</p>
+<ul>
+<li>XML文件庞大，文件格式复杂，传输占带宽；</li>
+<li>服务器端和客户端都需要花费大量代码来解析XML，导致服务器端和客户端代码变得异常复杂且不易维护；</li>
+<li>客户端不同浏览器之间解析XML的方式不一致，需要重复编写很多代码；</li>
+<li>服务器端和客户端解析XML花费较多的资源和时间。</li>
+</ul>
+<h5 id="JSON"><a href="#JSON" class="headerlink" title="JSON"></a>JSON</h5><p>优点：</p>
+<ul>
+<li>数据格式比较简单，易于读写，格式都是压缩的，占用带宽小；</li>
+<li><p>易于解析，客户端JavaScript可以简单的通过eval_r()进行JSON数据的读取；</p>
+<pre><code>object.key //在javascript中，完全可以直接读取， jsonObject.key就可以得到数据
+</code></pre></li>
+<li>支持多种语言，包括ActionScript, C, C#, ColdFusion, Java, JavaScript, Perl, PHP, Python, Ruby等服务器端语言，便于服务器端的解析；</li>
+<li>在PHP世界，已经有PHP-JSON和JSON-PHP出现了，偏于PHP序列化后的程序直接调用，PHP服务器端的对象、数组等能直接生成JSON格式，便于客户端的访问提取；</li>
+<li>因为JSON格式能直接为服务器端代码使用，大大简化了服务器端和客户端的代码开发量，且完成任务不变，并且易于维护。</li>
+</ul>
+<p>缺点：</p>
+<ol>
+<li>没有XML格式这么推广的深入人心和喜用广泛，没有XML那么通用性；<br>json出现地比较晚，但越来越受欢迎</li>
+<li>JSON格式目前在Web Service中推广还属于初级阶段</li>
+</ol>
+<h5 id="【XML】和【JSON】的优缺点对比："><a href="#【XML】和【JSON】的优缺点对比：" class="headerlink" title="【XML】和【JSON】的优缺点对比："></a>【XML】和【JSON】的优缺点对比：</h5><ol>
+<li>在可读性方面，JSON和XML的数据可读性基本相同。JSON和XML的可读性可谓不相上下，一边是建议的语法，一边是规范的标签形式，很难分出胜负。</li>
+<li>在可扩展性方面，XML天生有很好的扩展性，JSON当然也有，没有什么是XML能扩展，JSON不能的。</li>
+<li>在编码难度方面，XML有丰富的编码工具，比如Dom4j、JDom等，JSON也有json.org提供的工具，但是JSON的编码明显比XML容易许多，即使不借助工具也能写出JSON的代码，可是要写好XML就不太容易了。</li>
+<li>在解码难度方面，XML的解析得考虑子节点父节点，让人头昏眼花，而JSON的解析难度几乎为0。这一点XML输的真是没话说。</li>
+<li>在流行度方面，XML已经被业界广泛的使用，而JSON才刚刚开始，但是在Ajax这个特定的领域，未来的发展一定是XML让位于JSON。到时Ajax应该变成Ajaj(Asynchronous Javascript and JSON)了。</li>
+<li>JSON和XML同样拥有丰富的解析手段。</li>
+<li>JSON相对于XML来讲，数据的体积小。</li>
+<li>JSON与JavaScript的交互更加方便。</li>
+<li>JSON对数据的描述性比XML较差。</li>
+<li>JSON的速度要远远快于XML。</li>
+</ol>
+<h3 id="数据交换格式比较之关于XML和JSON："><a href="#数据交换格式比较之关于XML和JSON：" class="headerlink" title="数据交换格式比较之关于XML和JSON："></a>数据交换格式比较之关于XML和JSON：</h3><p>　【XML】extensible markup language,一种类似于HTML的语言，他没有预先定义的标签，使用DTD(document type definition)文档类型定义来组织数据;格式统一，跨平台和语言，早已成为业界公认的标准。具体的可以问Google或百度。相比之JSON这种轻量级的数据交换格式，XML可以称为重量级的了。</p>
+<p> 【JSON】JavaScript Object Notation 是一种轻量级的数据交换格式。易于人阅读和编写。同时也易于机器解析和生成。它基于JavaScript Programming Language , Standard ECMA-262 3rd Edition - December 1999 的一个子集。 JSON采用完全独立于语言的文本格式，但是也使用了类似于C语言家族的习惯(包括C, C++, C#, Java, JavaScript, Perl, Python等)。这些特性使JSON成为理想的数据交换语言。</p>
+<h3 id="数据交换格式比较之关于轻量级和重量级："><a href="#数据交换格式比较之关于轻量级和重量级：" class="headerlink" title="数据交换格式比较之关于轻量级和重量级："></a>数据交换格式比较之关于轻量级和重量级：</h3><p>　　轻量级和重量级是相对来说的，那么XML相对于JSON的重量级体现在哪呢?我想应该体现在解析上，XML目前设计了两种解析方式：DOM和 SAX;<br>　　DOM是把一个数据交换格式XML看成一个DOM对象，需要把XML文件整个读入内存，这一点上JSON和XML的原理是一样的，但是XML要考虑父节点和子节点，这一点上JSON的解析难度要小很多，因为JSON构建于两种结构：key/value，键值对的集合;值的有序集合，可理解为数组;<br>　　SAX不需要整个读入文档就可以对解析出的内容进行处理，是一种逐步解析的方法。程序也可以随时终止解析。这样，一个大的文档就可以逐步的、一点一点的展现出来，所以SAX适合于大规模的解析。这一点，JSON目前是做不到得。<br>　　所以，JSON和XML的轻/重量级的区别在于：JSON只提供整体解析方案，而这种方法只在解析较少的数据时才能起到良好的效果;而XML提供了对大规模数据的逐步解析方案，这种方案很适合于对大量数据的处理。</p>
+<h3 id="数据交换格式比较之关于数据格式编码及解析的难度："><a href="#数据交换格式比较之关于数据格式编码及解析的难度：" class="headerlink" title="数据交换格式比较之关于数据格式编码及解析的难度："></a>数据交换格式比较之关于数据格式编码及解析的难度：</h3><p>　　在编码上，虽然XML和JSON都有各自的编码工具，但是JSON的编码要比XML简单，即使不借助工具，也可以写出JSON代码，但要写出好的XML代码就有点困难;与XML一样，JSON也是基于文本的，且它们都使用Unicode编码，且其与数据交换格式XML一样具有可读性。<br>　　主观上来看，JSON更为清晰且冗余更少些。JSON网站提供了对JSON语法的严格描述，只是描述较简短。从总体来看，XML比较适合于标记文档，而JSON却更适于进行数据交换处理。<br>　　在解析上，在普通的web应用领域，开发者经常为XML的解析伤脑筋，无论是服务器端生成或处理XML，还是客户端用 JavaScript 解析XML，都常常导致复杂的代码，极低的开发效率。<br>　　实际上，对于大多数web应用来说，他们根本不需要复杂的XML来传输数据，XML宣称的扩展性在此就很少具有优势;许多Ajax应用甚至直接返回HTML片段来构建动态web页面。和返回XML并解析它相比，返回HTML片段大大降低了系统的复杂性，但同时缺少了一定的灵活性。同XML或 HTML片段相比，数据交换格式JSON 提供了更好的简单性和灵活性。在web serivice应用中，至少就目前来说XML仍有不可动摇的地位。</p>
+<hr>
+<h4 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h4><p>（这篇机会是完全参考的）</p>
+<ul>
+<li><a href="&quot;http://blog.sina.com.cn/s/blog_8a30865f0101amjh.html&quot;">http://blog.sina.com.cn/s/blog_8a30865f0101amjh.html</a></li>
+</ul>
+<hr>
+<h4 id="自勉诗词"><a href="#自勉诗词" class="headerlink" title="自勉诗词"></a>自勉诗词</h4><blockquote>
+<p>博闻强识而让，敦善行而不怠，谓之君子。 —《礼记·曲礼上》</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/xml/" rel="tag"># xml</a>
+          
+            <a href="/tags/json/" rel="tag"># json</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/02/19/start-develop-ios-1/" rel="next" title="学习ios笔记（一）">
+                <i class="fa fa-chevron-left"></i> 学习ios笔记（一）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/03/01/android-xml-paraser/" rel="prev" title="android xml 解析">
+                android xml 解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#定义"><span class="nav-number">1.</span> <span class="nav-text">定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#优劣性"><span class="nav-number">2.</span> <span class="nav-text">优劣性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#XML："><span class="nav-number">2.1.</span> <span class="nav-text">XML：</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#JSON"><span class="nav-number">2.1.1.</span> <span class="nav-text">JSON</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#【XML】和【JSON】的优缺点对比："><span class="nav-number">2.1.2.</span> <span class="nav-text">【XML】和【JSON】的优缺点对比：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据交换格式比较之关于XML和JSON："><span class="nav-number">3.</span> <span class="nav-text">数据交换格式比较之关于XML和JSON：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据交换格式比较之关于轻量级和重量级："><span class="nav-number">4.</span> <span class="nav-text">数据交换格式比较之关于轻量级和重量级：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#数据交换格式比较之关于数据格式编码及解析的难度："><span class="nav-number">5.</span> <span class="nav-text">数据交换格式比较之关于数据格式编码及解析的难度：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#参考"><span class="nav-number">5.1.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#自勉诗词"><span class="nav-number">5.2.</span> <span class="nav-text">自勉诗词</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

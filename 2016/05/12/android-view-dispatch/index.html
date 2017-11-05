@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="以前看了很多人介绍的Android事件派发流程，但最近使用那些来写代码的时候出现了不少错误。所以回顾一下整个流程，简单介绍从手触摸屏幕开始到事件在View树派发。从源码上分析ViewGroup.dispatchTouchEvent。 事件从触摸到View简述Android的事件产生是从我们触摸屏幕开始，在经过Input子系统，最后达到我们的应用程序(或者经过WindowManagerService">
+<meta name="keywords" content="Android,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关于Android事件派发流程的理解">
+<meta property="og:url" content="http://yoursite.com/2016/05/12/android-view-dispatch/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="以前看了很多人介绍的Android事件派发流程，但最近使用那些来写代码的时候出现了不少错误。所以回顾一下整个流程，简单介绍从手触摸屏幕开始到事件在View树派发。从源码上分析ViewGroup.dispatchTouchEvent。 事件从触摸到View简述Android的事件产生是从我们触摸屏幕开始，在经过Input子系统，最后达到我们的应用程序(或者经过WindowManagerService">
+<meta property="og:image" content="http://xxxzhi.github.io/images/touch-event-application.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="关于Android事件派发流程的理解">
+<meta name="twitter:description" content="以前看了很多人介绍的Android事件派发流程，但最近使用那些来写代码的时候出现了不少错误。所以回顾一下整个流程，简单介绍从手触摸屏幕开始到事件在View树派发。从源码上分析ViewGroup.dispatchTouchEvent。 事件从触摸到View简述Android的事件产生是从我们触摸屏幕开始，在经过Input子系统，最后达到我们的应用程序(或者经过WindowManagerService">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/touch-event-application.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/05/12/android-view-dispatch/"/>
+
+
+
+
+
+  <title>关于Android事件派发流程的理解 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/12/android-view-dispatch/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">关于Android事件派发流程的理解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-12T00:00:00+08:00">
+                2016-05-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>以前看了很多人介绍的Android事件派发流程，但最近使用那些来写代码的时候出现了不少错误。所以回顾一下整个流程，简单介绍从手触摸屏幕开始到事件在View树派发。从源码上分析ViewGroup.dispatchTouchEvent。</p>
+<h3 id="事件从触摸到View简述"><a href="#事件从触摸到View简述" class="headerlink" title="事件从触摸到View简述"></a>事件从触摸到View简述</h3><p>Android的事件产生是从我们触摸屏幕开始，在经过Input子系统，最后达到我们的应用程序(或者经过WindowManagerService到达应用程序)。</p>
+<p>而其中Input子系统在Java层对应着InputManagerService，其主要在native层，由InputReader读取EventHub的元数据，将这些数据加工成InputEvent，最后发到InputDispatcher，而InputDispatcher则负责将时间发到应用程序，Input子系统流程可以参见这篇文章<a href="http://www.cnblogs.com/haiming/p/3318614.html" target="_blank" rel="external">Android Framework——之Input子系统</a>。</p>
+<p>对于应用层的事件流程，主要是下面的流程图所示：<br><img src="http://xxxzhi.github.io/images/touch-event-application.png" alt="此处输入图片的描述"><br>其中最后一步就是我们经常说的View事件派发流程。另外上面DecorView是经过了两次，第一次是调用DecorView的dispatchTouchEvent，它的源码是:</p>
+<pre><code>@Override
+public boolean dispatchTouchEvent(MotionEvent ev) {
+    final Callback cb = getCallback();
+    return cb != null &amp;&amp; !isDestroyed() &amp;&amp; mFeatureId &lt; 0 ? cb.dispatchTouchEvent(ev)
+            : super.dispatchTouchEvent(ev);
+}
+</code></pre><p>Callback就是Window.Callback，Activity实现了这个接口。在Activity的attach函数中，会调用window的setCallback，将Activity设置给Window。所以这里getCallback返回的就是Activity，最终会调用Activity的dispatchTouchEvent。下面看一下Activity的dispatchTouchEvent函数:</p>
+<pre><code>public boolean dispatchTouchEvent(MotionEvent ev) {
+    if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+        onUserInteraction();
+    }
+    if (getWindow().superDispatchTouchEvent(ev)) {
+        return true;
+    }
+    return onTouchEvent(ev);
+}
+</code></pre><p>在ACTION_DOWN的时候会调用onUserInteraction方法，然后调用Window（实际上是PhoneWindow)的superDispatchTouchEvent，<strong><em>如果Window的superDispatchTouchEvent消耗了事件，则直接返回，不会调用Activity的onTouchEvent方法。</em></strong><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public boolean superDispatchTouchEvent(MotionEvent event) &#123;</div><div class="line">    return mDecor.superDispatchTouchEvent(event);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>而DecorView的superDispatchTouchEvent为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public boolean superDispatchTouchEvent(MotionEvent event) &#123;</div><div class="line">    return super.dispatchTouchEvent(event);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>最终还是调用DecorView的父类的dispatchTouchEvent，DecorView的父类是FrameLayout，它没实现该方法，最终会调用ViewGroup的dispatchTouchEvent方法。从这里开始就进入了view树的时间派发流程了。</p>
+<h3 id="View树的事件派发流程"><a href="#View树的事件派发流程" class="headerlink" title="View树的事件派发流程"></a>View树的事件派发流程</h3><p>这里从源码上分析事件派发的一些特性。事件派发最开始会进入到ViewGroup的dispatchTouchEvent(DecorVIew父类)，下面是ViewGroup的dispatchTouchEvent伪代码的分析，直接在对应的代码部分加了注释：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div><div class="line">194</div><div class="line">195</div><div class="line">196</div><div class="line">197</div><div class="line">198</div><div class="line">199</div><div class="line">200</div><div class="line">201</div><div class="line">202</div><div class="line">203</div><div class="line">204</div><div class="line">205</div><div class="line">206</div><div class="line">207</div><div class="line">208</div><div class="line">209</div><div class="line">210</div><div class="line">211</div><div class="line">212</div><div class="line">213</div><div class="line">214</div><div class="line">215</div><div class="line">216</div><div class="line">217</div><div class="line">218</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public boolean dispatchTouchEvent(MotionEvent ev) &#123;</div><div class="line">    //一开始做一些调试验证，另外如果事件的目标是focused view,并且当前view就是一个focused view,</div><div class="line">    //有可能view的子View就会处理这次事件，所以将targetAccessibilityFocus设置为false。</div><div class="line">    ...</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">    boolean handled = false;</div><div class="line">    if (onFilterTouchEventForSecurity(ev)) &#123;　//检查event是否是安全的</div><div class="line">        final int action = ev.getAction();</div><div class="line">        final int actionMasked = action &amp; MotionEvent.ACTION_MASK;</div><div class="line"></div><div class="line">        // Handle an initial down.</div><div class="line">        if (actionMasked == MotionEvent.ACTION_DOWN) &#123;</div><div class="line">            // Throw away all previous state when starting a new touch gesture.</div><div class="line">            // The framework may have dropped the up or cancel event for the previous gesture</div><div class="line">            // due to an app switch, ANR, or some other state change.</div><div class="line">            //清除之前的事件状态。比如说在app切换，ANR或其他状态改变时，系统框架将会去掉up或cancel事件。在这里会将mFirstTouchTarget清空，mFirstTouchTarget是保存了会接受事件的View处理对象。</div><div class="line">            cancelAndClearTouchTargets(ev);</div><div class="line">            resetTouchState();　//这里会将mGroupFlags的FLAG_DISALLOW_INTERCEPT标识清除，</div><div class="line">            //1. 每次事件流开始的时候都会先清除FLAG_DISALLOW_INTERCEPT，所以子view的requestDisallowInterceptTouchEvent只有当次事件流有效。</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 判断是否需要拦截事件，去判断是否拦截事件的条件是此次事件是DOWN事件，或者有子类会处理这次事件(mFirstTouchTarget不为null)，并且FLAG_DISALLOW_INTERCEPT没被设置。</div><div class="line">        final boolean intercepted;</div><div class="line">        if (actionMasked == MotionEvent.ACTION_DOWN</div><div class="line">                || mFirstTouchTarget != null) &#123;</div><div class="line">            final boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0;</div><div class="line">            if (!disallowIntercept) &#123;</div><div class="line">                //2. 只有有TouchTarget并且没有被disallow，或者是ACTION_DOWN时才会调用onInterceptTouchEvent。</div><div class="line">                intercepted = onInterceptTouchEvent(ev);</div><div class="line">                ev.setAction(action); // restore action in case it was changed</div><div class="line">            &#125; else &#123;</div><div class="line">                intercepted = false;</div><div class="line">            &#125;</div><div class="line">        &#125; else &#123;</div><div class="line">            // There are no touch targets and this action is not an initial down</div><div class="line">            // so this view group continues to intercept touches.</div><div class="line">            intercepted = true;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // If intercepted, start normal event dispatch. Also if there is already</div><div class="line">        // a view that is handling the gesture, do normal event dispatch.</div><div class="line">        if (intercepted || mFirstTouchTarget != null) &#123;</div><div class="line">            ev.setTargetAccessibilityFocus(false);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // Check for cancelation.判断是否取消</div><div class="line">        final boolean canceled = resetCancelNextUpFlag(this)</div><div class="line">                || actionMasked == MotionEvent.ACTION_CANCEL;</div><div class="line"></div><div class="line">        // Update list of touch targets for pointer down, if needed.</div><div class="line">        final boolean split = (mGroupFlags &amp; FLAG_SPLIT_MOTION_EVENTS) != 0;</div><div class="line">        TouchTarget newTouchTarget = null;</div><div class="line">        boolean alreadyDispatchedToNewTouchTarget = false;</div><div class="line">        if (!canceled &amp;&amp; !intercepted) &#123;</div><div class="line"></div><div class="line">            // If the event is targeting accessiiblity focus we give it to the</div><div class="line">            // view that has accessibility focus and if it does not handle it</div><div class="line">            // we clear the flag and dispatch the event to all children as usual.</div><div class="line">            // We are looking up the accessibility focused host to avoid keeping</div><div class="line">            // state since these events are very rare.</div><div class="line">            View childWithAccessibilityFocus = ev.isTargetAccessibilityFocus()</div><div class="line">                    ? findChildWithAccessibilityFocus() : null;</div><div class="line"></div><div class="line">            if (actionMasked == MotionEvent.ACTION_DOWN</div><div class="line">                    || (split &amp;&amp; actionMasked == MotionEvent.ACTION_POINTER_DOWN)</div><div class="line">                    || actionMasked == MotionEvent.ACTION_HOVER_MOVE) &#123;</div><div class="line">                final int actionIndex = ev.getActionIndex(); // always 0 for down</div><div class="line">                final int idBitsToAssign = split ? 1 &lt;&lt; ev.getPointerId(actionIndex)</div><div class="line">                        : TouchTarget.ALL_POINTER_IDS;</div><div class="line"></div><div class="line">                // Clean up earlier touch targets for this pointer id in case they</div><div class="line">                // have become out of sync.</div><div class="line">                removePointersFromTouchTargets(idBitsToAssign);</div><div class="line"></div><div class="line">                final int childrenCount = mChildrenCount;</div><div class="line">                if (newTouchTarget == null &amp;&amp; childrenCount != 0) &#123;</div><div class="line">                    final float x = ev.getX(actionIndex);</div><div class="line">                    final float y = ev.getY(actionIndex);</div><div class="line">                    // Find a child that can receive the event.</div><div class="line">                    // Scan children from front to back.</div><div class="line">                    final ArrayList&lt;View&gt; preorderedList = buildOrderedChildList();</div><div class="line">                    final boolean customOrder = preorderedList == null</div><div class="line">                            &amp;&amp; isChildrenDrawingOrderEnabled();</div><div class="line">                    final View[] children = mChildren;</div><div class="line">                    for (int i = childrenCount - 1; i &gt;= 0; i--) &#123;</div><div class="line">                        final int childIndex = customOrder</div><div class="line">                                ? getChildDrawingOrder(childrenCount, i) : i;</div><div class="line">                        final View child = (preorderedList == null)</div><div class="line">                                ? children[childIndex] : preorderedList.get(childIndex);</div><div class="line"></div><div class="line">                        // If there is a view that has accessibility focus we want it</div><div class="line">                        // to get the event first and if not handled we will perform a</div><div class="line">                        // normal dispatch. We may do a double iteration but this is</div><div class="line">                        // safer given the timeframe.</div><div class="line">                        if (childWithAccessibilityFocus != null) &#123;</div><div class="line">                            if (childWithAccessibilityFocus != child) &#123;</div><div class="line">                                continue;</div><div class="line">                            &#125;</div><div class="line">                            childWithAccessibilityFocus = null;</div><div class="line">                            i = childrenCount - 1;</div><div class="line">                        &#125;</div><div class="line">                        //判断当前的child是否可以接收事件，并且事件是否在当前的view范围</div><div class="line">                        if (!canViewReceivePointerEvents(child)</div><div class="line">                                || !isTransformedTouchPointInView(x, y, child, null)) &#123;</div><div class="line">                            ev.setTargetAccessibilityFocus(false);</div><div class="line">                            continue;</div><div class="line">                        &#125;</div><div class="line"></div><div class="line">                        newTouchTarget = getTouchTarget(child);</div><div class="line">                        if (newTouchTarget != null) &#123;</div><div class="line">                            // Child is already receiving touch within its bounds.</div><div class="line">                            // Give it the new pointer in addition to the ones it is handling.</div><div class="line">                            newTouchTarget.pointerIdBits |= idBitsToAssign;</div><div class="line">                            break;</div><div class="line">                        &#125;</div><div class="line"></div><div class="line">                        resetCancelNextUpFlag(child);</div><div class="line">                                    //3.dispatchTransformedTouchEvent会将Event转化为child坐标空间(getX的变化)，然后去除无关的points id，如果有必要更改事件，最后调用child.dispatchTouchEvent。 dispatchTransformedTouchEvent把事件派发给child，如果child成功处理了，则会将child添加到mFirstTouchTarget</div><div class="line">                        if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) &#123;</div><div class="line">                            // Child wants to receive touch within its bounds.</div><div class="line">                            mLastTouchDownTime = ev.getDownTime();</div><div class="line">                            if (preorderedList != null) &#123;</div><div class="line">                                // childIndex points into presorted list, find original index</div><div class="line">                                for (int j = 0; j &lt; childrenCount; j++) &#123;</div><div class="line">                                    if (children[childIndex] == mChildren[j]) &#123;</div><div class="line">                                        mLastTouchDownIndex = j;</div><div class="line">                                        break;</div><div class="line">                                    &#125;</div><div class="line">                                &#125;</div><div class="line">                            &#125; else &#123;</div><div class="line">                                mLastTouchDownIndex = childIndex;</div><div class="line">                            &#125;</div><div class="line">                            mLastTouchDownX = ev.getX();</div><div class="line">                            mLastTouchDownY = ev.getY();</div><div class="line">                            //addTouchTarget会创建新的TouchTarget，并将其加入到mFirstTouchTarget</div><div class="line">                            newTouchTarget = addTouchTarget(child, idBitsToAssign);</div><div class="line">                            alreadyDispatchedToNewTouchTarget = true;</div><div class="line">                            break;</div><div class="line">                        &#125;</div><div class="line"></div><div class="line">                        // The accessibility focus didn&apos;t handle the event, so clear</div><div class="line">                        // the flag and do a normal dispatch to all children.</div><div class="line">                        ev.setTargetAccessibilityFocus(false);</div><div class="line">                    &#125;</div><div class="line">                    if (preorderedList != null) preorderedList.clear();</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                if (newTouchTarget == null &amp;&amp; mFirstTouchTarget != null) &#123;</div><div class="line">                    // Did not find a child to receive the event.</div><div class="line">                    // Assign the pointer to the least recently added target.</div><div class="line">                    newTouchTarget = mFirstTouchTarget;</div><div class="line">                    while (newTouchTarget.next != null) &#123;</div><div class="line">                        newTouchTarget = newTouchTarget.next;</div><div class="line">                    &#125;</div><div class="line">                    newTouchTarget.pointerIdBits |= idBitsToAssign;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        //4. 派发事件</div><div class="line">        // Dispatch to touch targets.</div><div class="line">        if (mFirstTouchTarget == null) &#123; //mFirstTouchTarget为空表示没有子View会处理这次事件，则交给当前的ViewGroup处理。</div><div class="line">            // No touch targets so treat this as an ordinary view.</div><div class="line">            handled = dispatchTransformedTouchEvent(ev, canceled, null,</div><div class="line">                    TouchTarget.ALL_POINTER_IDS);</div><div class="line">        &#125; else &#123;</div><div class="line">            // Dispatch to touch targets, excluding the new touch target if we already</div><div class="line">            // dispatched to it.  Cancel touch targets if necessary.</div><div class="line">            TouchTarget predecessor = null;</div><div class="line">            TouchTarget target = mFirstTouchTarget;　</div><div class="line">            while (target != null) &#123;//遍历mFirstTouchTarget链表，一个一个地处理TouchTarget。</div><div class="line">                final TouchTarget next = target.next;</div><div class="line">                if (alreadyDispatchedToNewTouchTarget &amp;&amp; target == newTouchTarget) &#123;//新添加的不会立刻处理，ACTION_DOWN已经在前面派发了</div><div class="line">                    handled = true;</div><div class="line">                &#125; else &#123;</div><div class="line">                    final boolean cancelChild = resetCancelNextUpFlag(target.child)</div><div class="line">                            || intercepted;</div><div class="line">                    //dispatchTransformedTouchEvent会将Event转化为child坐标空间(getX的变化)，然后去除无关的points id，如果有必要更改事件，最后调用child.dispatchTouchEvent</div><div class="line">                    if (dispatchTransformedTouchEvent(ev, cancelChild,</div><div class="line">                            target.child, target.pointerIdBits)) &#123;</div><div class="line">                        handled = true;</div><div class="line">                    &#125;</div><div class="line">                    if (cancelChild) &#123;</div><div class="line">                        if (predecessor == null) &#123;</div><div class="line">                            mFirstTouchTarget = next;</div><div class="line">                        &#125; else &#123;</div><div class="line">                            predecessor.next = next;</div><div class="line">                        &#125;</div><div class="line">                        target.recycle();</div><div class="line">                        target = next;</div><div class="line">                        continue;</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line">                predecessor = target;</div><div class="line">                target = next;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // Update list of touch targets for pointer up or cancel, if needed.</div><div class="line">        if (canceled</div><div class="line">                || actionMasked == MotionEvent.ACTION_UP</div><div class="line">                || actionMasked == MotionEvent.ACTION_HOVER_MOVE) &#123;</div><div class="line">            resetTouchState();</div><div class="line">        &#125; else if (split &amp;&amp; actionMasked == MotionEvent.ACTION_POINTER_UP) &#123;</div><div class="line">            final int actionIndex = ev.getActionIndex();</div><div class="line">            final int idBitsToRemove = 1 &lt;&lt; ev.getPointerId(actionIndex);</div><div class="line">            removePointersFromTouchTargets(idBitsToRemove);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    ...</div><div class="line">    //用于测试的代码</div><div class="line"></div><div class="line">    return handled;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<pre><code>事件派发流程主要集中在这几个方法的调用:
+- dispatchTouchEvent 这是事件派发每个View的时候，第一个被调用的方法，如果是ViewGroup，dispatchTouchEvent会先去调用onInterceptTouchEvent是否应该拦截事件，不拦截的话会先从子View中判断是否有处理该次事件的（在ACTION_DOWN中采用mFirstTouchTarget链接保存会处理事件的TouchTarget），如果没有的话则调用当前View的onTouchEvent。
+- onInterceptTouchEvent 判断是否应该拦截事件，ViewGroup默认实现是返回false，子View可以调用getParent.requestDisallowInterceptTouchEvent()来阻止父View拦截。否则只要有子View可能消费事件，该方法都会被调用。
+- onTouchEvent这个方法是在没有子View将会消耗事件时才会被调用，onClickListener，onTouchListener,onLongClickListener都是在这个方法中处理的。如果返回true表示消费这次事件。
+
+
+
+对于事件派发流程，我觉得有几个地方需要注意的：
+1. 应该把ViewGroup以及它所包含的子View都看作是这个ViewGroup的一部分，对于一个ViewGroup是否会处理一次事件，应该是包含了它的子View是否也处理。
+2. 如果整个ViewGroup以及它的子类没有一个View处理ACTION_DOWN事件，那么下一次就不会调用这个ViewGroup的dispatchTouchEvent。***但是如果ACTION_DOWN返回了true，那么下一次事件还是会继续派发到ViewGroup，即使中间某个ACTION_MOVE返回了false***。
+3. onInterceptTouchEvent是在子View可能会处理该次事件，并且没有被设置FLAG_DISALLOW_INTERCEPT才会被调用。正常情况下，它在ACTION_DOWN的时候一定会被调用的，因为在ACTION_DOWN的时候会先调用resetTouchState()。
+</code></pre><p>这个是最近略微改了一下很久之前写的一个模仿QQ邮箱滑动退出写的一个东西:<a href="https://github.com/xxxzhi/SlideListener，改的过程发现之前看的东西理解地不够好…" target="_blank" rel="external">https://github.com/xxxzhi/SlideListener，改的过程发现之前看的东西理解地不够好…</a></p>
+<p>源码是解释很多现象的最根本的原因，阅读源码能够更好地理解事件派发流程，理解地更加深刻。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/05/android-thinking-about-mvp/" rel="next" title="关于Android MVP模式的思考">
+                <i class="fa fa-chevron-left"></i> 关于Android MVP模式的思考
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/16/java-callable-future/" rel="prev" title="Callable, Future和FutureTask简述">
+                Callable, Future和FutureTask简述 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#事件从触摸到View简述"><span class="nav-number">1.</span> <span class="nav-text">事件从触摸到View简述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#View树的事件派发流程"><span class="nav-number">2.</span> <span class="nav-text">View树的事件派发流程</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

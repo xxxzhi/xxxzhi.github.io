@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="前面一篇文章，分析了AppWidgetProvider和RemoteView的源码，从中我们可以知道它们的实现原理，AppWidgetProvider是一个BroadcastReceiver，所以它是通过广播接收通知的，收到更新通知后，AppWidgetProvider需要去提供View供远程进程显示，而提供的View则是使用RemoteView来代替，通过RemoteView（是一个Parcel">
+<meta name="keywords" content="Android,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="AppWidget源码分析（2）---updateAppWidget过程分析">
+<meta property="og:url" content="http://yoursite.com/2016/08/13/android-appwidget-sourcecode2/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="前面一篇文章，分析了AppWidgetProvider和RemoteView的源码，从中我们可以知道它们的实现原理，AppWidgetProvider是一个BroadcastReceiver，所以它是通过广播接收通知的，收到更新通知后，AppWidgetProvider需要去提供View供远程进程显示，而提供的View则是使用RemoteView来代替，通过RemoteView（是一个Parcel">
+<meta property="og:image" content="http://img.blog.csdn.net/20160813013648728">
+<meta property="og:image" content="http://img.blog.csdn.net/20160813013708416">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="AppWidget源码分析（2）---updateAppWidget过程分析">
+<meta name="twitter:description" content="前面一篇文章，分析了AppWidgetProvider和RemoteView的源码，从中我们可以知道它们的实现原理，AppWidgetProvider是一个BroadcastReceiver，所以它是通过广播接收通知的，收到更新通知后，AppWidgetProvider需要去提供View供远程进程显示，而提供的View则是使用RemoteView来代替，通过RemoteView（是一个Parcel">
+<meta name="twitter:image" content="http://img.blog.csdn.net/20160813013648728">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/08/13/android-appwidget-sourcecode2/"/>
+
+
+
+
+
+  <title>AppWidget源码分析（2）---updateAppWidget过程分析 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/08/13/android-appwidget-sourcecode2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">AppWidget源码分析（2）---updateAppWidget过程分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-13T00:00:00+08:00">
+                2016-08-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>前面一篇文章，分析了AppWidgetProvider和RemoteView的源码，从中我们可以知道它们的实现原理，AppWidgetProvider是一个BroadcastReceiver，所以它是通过广播接收通知的，收到更新通知后，AppWidgetProvider需要去提供View供远程进程显示，而提供的View则是使用RemoteView来代替，通过RemoteView（是一个Parcelable，可跨进程传输数据类型）来作为媒介去传递给远程进程。由远程进程解析RemoteView，然后显示RemoteView表示的真正的View。在这篇文章将分析这个传输过程。</p>
+<h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><p>还是先看一下上一篇给出的一个过程图示：</p>
+<p><img src="http://img.blog.csdn.net/20160813013648728" alt="这里写图片描述"></p>
+<p>实际上，AppWidgetProvider是通过AppWidgetManager来更新View的，而AppWidgetManager里面是有一个IAppWidgetService，一看就知道这是一个idle生成的，是一个Binder通信。关于Binder通信我之前也写过一篇文章叫<a href="http://blog.houzhi.me/2016/04/23/android-sourcecode-proxy-binder" target="_blank" rel="external">Android源码代理模式—Binder</a>，可以参考一下。而服务端的AppWidgetService是AppWidgetServiceImpl，AppWidgetServiceImpl又会通过一个IAppWidgetHost来跨进程通知AppWidgetHost，AppWidgetHost内部的IAppWidgetHost是AppWidgetHost.Callback。这样就到了显示我们的AppWidget的进程（大部分是Launcher应用）。</p>
+<p>分清楚每个部分是在什么进程运行的对于理解整个流程是非常有帮助的，AppWidgetProvider是在我们自己的应用程序进程当中，而AppWidgetService是运行在SystemServer进程，AppWidgetHost则是运行在显示AppWidget的进程中，比如Launcher应用（桌面）。整个流程相当于是跨越了三个进程。</p>
+<h2 id="updateAppWidgetIds过程分析"><a href="#updateAppWidgetIds过程分析" class="headerlink" title="updateAppWidgetIds过程分析"></a>updateAppWidgetIds过程分析</h2><p>这是AppWidgetManager的一个接口函数，根据id来更新AppWidget。先把整个更新过程的时序图拿出来看一下：</p>
+<p><img src="http://img.blog.csdn.net/20160813013708416" alt="这里写图片描述"></p>
+<p>从我们普通的调用AppWidgetManager的updateAppWidget看起吧：</p>
+<pre><code>appWidgetManager.updateAppWidget(appwidgetids,remoteViews);
+</code></pre><ol>
+<li>这里进入updateAppWidget方法：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public void updateAppWidget(int[] appWidgetIds, RemoteViews views) &#123;</div><div class="line">   if (mService == null) &#123;</div><div class="line">       return;</div><div class="line">   &#125;</div><div class="line">   try &#123;</div><div class="line">       mService.updateAppWidgetIds(mPackageName, appWidgetIds, views);</div><div class="line">   &#125;</div><div class="line">   catch (RemoteException e) &#123;</div><div class="line">       throw new RuntimeException(&quot;system server dead?&quot;, e);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>mService是一个IAppWidgetService类型，初始化是在SystemServiceRegistry（6.0才出现的，之前在ContextImpl里面）里面：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">registerService(Context.APPWIDGET_SERVICE, AppWidgetManager.class,</div><div class="line">       new CachedServiceFetcher&lt;AppWidgetManager&gt;() &#123;</div><div class="line">   @Override</div><div class="line">   public AppWidgetManager createService(ContextImpl ctx) &#123;</div><div class="line">       IBinder b = ServiceManager.getService(Context.APPWIDGET_SERVICE);</div><div class="line">       return new AppWidgetManager(ctx, IAppWidgetService.Stub.asInterface(b));</div><div class="line">   &#125;&#125;);</div></pre></td></tr></table></figure>
+<p>注册服务的时候获取APPWIDGET_SERVICE。所以mService.updateAppWidgetIds最后会调用到远程进程，而IAppWidgetService的实现者是AppWidgetServiceImpl，所以最终会调用AppWidgetServiceImpl的updateAppWidgetIds。</p>
+<ol>
+<li>AppWidgetServiceImpl中的updateAppWidgetIds:</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">@Override</div><div class="line">public void updateAppWidgetIds(String callingPackage, int[] appWidgetIds,</div><div class="line">       RemoteViews views) &#123;</div><div class="line">   if (DEBUG) &#123;</div><div class="line">       Slog.i(TAG, &quot;updateAppWidgetIds() &quot; + UserHandle.getCallingUserId());</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   updateAppWidgetIds(callingPackage, appWidgetIds, views, false);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这就是AppWidgetServiceImpl的updateAppWidgetIds方法。程序已经开始进入到AppWidgetServiceImpl所在的进程了，实际上是SystemServer进程。怎么看出AppWidgetServiceImpl是运行在SystemServer进程呢？AppWidgetService类new了一个AppWidgetServiceImpl，并且注册到ServiceManager中:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public class AppWidgetService extends SystemService &#123;</div><div class="line">   private final AppWidgetServiceImpl mImpl;</div><div class="line"></div><div class="line">   public AppWidgetService(Context context) &#123;</div><div class="line">       super(context);</div><div class="line">       mImpl = new AppWidgetServiceImpl(context);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void onStart() &#123;</div><div class="line">       publishBinderService(Context.APPWIDGET_SERVICE, mImpl); //注册mImpl到ServiceManager当中</div><div class="line">       AppWidgetBackupBridge.register(mImpl);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void onBootPhase(int phase) &#123;</div><div class="line">       if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) &#123;</div><div class="line">           mImpl.setSafeMode(isSafeMode());</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>而AppWidgetService在SystemServer.java中使用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">private static final String APPWIDGET_SERVICE_CLASS =</div><div class="line">       &quot;com.android.server.appwidget.AppWidgetService&quot;;</div></pre></td></tr></table></figure>
+<p>SystemServer是通过反射的方式new一个AppWidgetService对象，然后调用它的start函数。很多service类都是这样启动的。</p>
+<p>回到updateAppWidgetIds方法，最后它会调用四个参数的updateAppWidgetIds方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">private void updateAppWidgetIds(String callingPackage, int[] appWidgetIds,</div><div class="line">       RemoteViews views, boolean partially) &#123;</div><div class="line">   final int userId = UserHandle.getCallingUserId();</div><div class="line"></div><div class="line">   if (appWidgetIds == null || appWidgetIds.length == 0) &#123;</div><div class="line">       return;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   // Make sure the package runs under the caller uid.</div><div class="line">   mSecurityPolicy.enforceCallFromPackage(callingPackage);</div><div class="line"></div><div class="line">   final int bitmapMemoryUsage = (views != null) ? views.estimateMemoryUsage() : 0;</div><div class="line">   if (bitmapMemoryUsage &gt; mMaxWidgetBitmapMemory) &#123;</div><div class="line">       throw new IllegalArgumentException(&quot;RemoteViews for widget update exceeds&quot;</div><div class="line">               + &quot; maximum bitmap memory usage (used: &quot; + bitmapMemoryUsage</div><div class="line">               + &quot;, max: &quot; + mMaxWidgetBitmapMemory + &quot;)&quot;);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   synchronized (mLock) &#123;</div><div class="line">       ensureGroupStateLoadedLocked(userId);</div><div class="line"></div><div class="line">       final int N = appWidgetIds.length;</div><div class="line">       for (int i = 0; i &lt; N; i++) &#123;</div><div class="line">           final int appWidgetId = appWidgetIds[i];</div><div class="line"></div><div class="line">           // NOTE: The lookup is enforcing security across users by making</div><div class="line">           // sure the caller can only access widgets it hosts or provides.</div><div class="line">           Widget widget = lookupWidgetLocked(appWidgetId,</div><div class="line">                   Binder.getCallingUid(), callingPackage);</div><div class="line"></div><div class="line">           if (widget != null) &#123;</div><div class="line">               updateAppWidgetInstanceLocked(widget, views, partially);</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>该方法首先会做些安全性检查，以及图片大小限制检查。最后会针对每一个appWidgetId，通过lookupWidgetLocked找到其对应的Widget。</p>
+<ol>
+<li>Widget是一个带有很多信息的类，我们看看lookupWidgetLocked方法：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">private Widget lookupWidgetLocked(int appWidgetId, int uid, String packageName) &#123;</div><div class="line">   final int N = mWidgets.size();</div><div class="line">   for (int i = 0; i &lt; N; i++) &#123;</div><div class="line">       Widget widget = mWidgets.get(i);</div><div class="line">       if (widget.appWidgetId == appWidgetId</div><div class="line">               &amp;&amp; mSecurityPolicy.canAccessAppWidget(widget, uid, packageName)) &#123;</div><div class="line">           return widget;</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">   return null;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>实际上它是从mWidgets找到对应的Widget，先看看Widget类，它是AppWidgetServiceImpl的非静态内部类：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">private static final class Widget &#123;</div><div class="line">   int appWidgetId;</div><div class="line">   int restoredId;  // tracking &amp; remapping any restored state</div><div class="line">   Provider provider; // 对应AppWidgetProvider，里面有AppWidgetProvider信息。</div><div class="line">   RemoteViews views; //表示View的RemoteView</div><div class="line">   Bundle options;</div><div class="line">   Host host; //显示的地方</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public String toString() &#123;</div><div class="line">       return &quot;AppWidgetId&#123;&quot; + appWidgetId + &apos;:&apos; + host + &apos;:&apos; + provider + &apos;&#125;&apos;;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>而是从什么时候把Widget添加到mWidgets的呢？主要有三个地方，一个是绑定AppWidgetProvider跟id时，初始化时加载AppWidget与对应的host;一个是第一次添加AppWidget到桌面时，给AppWidget分配id的时候;一个是restore AppWidget的时候。我们看看分配id时，添加Widget的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">@Override</div><div class="line"></div><div class="line">public int allocateAppWidgetId(String callingPackage, int hostId) &#123;</div><div class="line">   final int userId = UserHandle.getCallingUserId();</div><div class="line"></div><div class="line">   // Make sure the package runs under the caller uid.</div><div class="line">   mSecurityPolicy.enforceCallFromPackage(callingPackage);</div><div class="line"></div><div class="line">   synchronized (mLock) &#123;</div><div class="line">       ensureGroupStateLoadedLocked(userId);</div><div class="line"></div><div class="line">       if (mNextAppWidgetIds.indexOfKey(userId) &lt; 0) &#123;</div><div class="line">           mNextAppWidgetIds.put(userId, AppWidgetManager.INVALID_APPWIDGET_ID + 1);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       final int appWidgetId = incrementAndGetAppWidgetIdLocked(userId); //增量分配一个id，保证不冲突</div><div class="line"></div><div class="line">       // NOTE: The lookup is enforcing security across users by making</div><div class="line">       // sure the caller can only access hosts it owns.</div><div class="line">       HostId id = new HostId(Binder.getCallingUid(), hostId, callingPackage); //得到hostid</div><div class="line">       Host host = lookupOrAddHostLocked(id); //根据id获取host</div><div class="line"></div><div class="line">       Widget widget = new Widget();</div><div class="line">       widget.appWidgetId = appWidgetId;</div><div class="line">       widget.host = host;</div><div class="line"></div><div class="line">       host.widgets.add(widget);   //把widget添加到host的widgets列表中</div><div class="line">       addWidgetLocked(widget); //添加</div><div class="line"></div><div class="line">       saveGroupStateAsync(userId);</div><div class="line"></div><div class="line">       return appWidgetId;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>实际上这里还没有添加对应的provider，所以在Launcher开发的时候，我们需要先调用allocateAppWidgetId方法，然后调用bindAppWidgetId方法绑定id与AppWidgetProvider。而当View有变化的时候，Host需要接收AppWidgetServiceImpl的通知，如何实现的呢？Host（Launcher应用）会跨进程调用AppWidgetServiceImpl的startListening方法，将AppWidgetHost端的Callback服务传递给AppWidgetServiceImpl：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">// 在AppWidgetHost类当中，AppWidgetHost是Host端的代码</div><div class="line"></div><div class="line">public void startListening() &#123;</div><div class="line">   int[] updatedIds;</div><div class="line">   ArrayList&lt;RemoteViews&gt; updatedViews = new ArrayList&lt;RemoteViews&gt;();</div><div class="line">   try &#123;</div><div class="line">       updatedIds = sService.startListening(mCallbacks, mContextOpPackageName, mHostId,</div><div class="line">               updatedViews); //把AppWidgetHost端的mCallbacks传递给AppWidgetService，mCallbacks是Binder对象。</div><div class="line">   &#125;</div><div class="line">   catch (RemoteException e) &#123;</div><div class="line">       throw new RuntimeException(&quot;system server dead?&quot;, e);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   final int N = updatedIds.length;</div><div class="line">   for (int i = 0; i &lt; N; i++) &#123;</div><div class="line">       updateAppWidgetView(updatedIds[i], updatedViews.get(i));</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在AppWidgetServiceImpl里面会将mCallbacks保存在对应的Host当中。</p>
+<ol>
+<li>从mWidgets里面找到Widget后，会调用updateAppWidgetInstanceLocked方法来更新Widget。</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">private void updateAppWidgetInstanceLocked(Widget widget, RemoteViews views,</div><div class="line">       boolean isPartialUpdate) &#123;</div><div class="line">   if (widget != null &amp;&amp; widget.provider != null</div><div class="line">           &amp;&amp; !widget.provider.zombie &amp;&amp; !widget.host.zombie) &#123; // 保证widget有效，并且host也有效</div><div class="line"></div><div class="line">       if (isPartialUpdate &amp;&amp; widget.views != null) &#123;</div><div class="line">           // For a partial update, we merge the new RemoteViews with the old. 这里是对于partial update的。</div><div class="line">           widget.views.mergeRemoteViews(views);</div><div class="line">       &#125; else &#123;</div><div class="line">           // For a full update we replace the RemoteViews completely.</div><div class="line">           widget.views = views;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       scheduleNotifyUpdateAppWidgetLocked(widget, views);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>而scheduleNotifyUpdateAppWidgetLocked 则是使用handler发送一个消息给主线程处理：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">private void scheduleNotifyUpdateAppWidgetLocked(Widget widget, RemoteViews updateViews) &#123;</div><div class="line">   if (widget == null || widget.provider == null || widget.provider.zombie</div><div class="line">           || widget.host.callbacks == null || widget.host.zombie) &#123;</div><div class="line">       return;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   SomeArgs args = SomeArgs.obtain();</div><div class="line">   args.arg1 = widget.host;</div><div class="line">   args.arg2 = widget.host.callbacks; //callbacks 是host的跨进程调用接口，来自于startListening</div><div class="line"></div><div class="line">   args.arg3 = updateViews;</div><div class="line">   args.argi1 = widget.appWidgetId;</div><div class="line"></div><div class="line">   mCallbackHandler.obtainMessage(</div><div class="line">           CallbackHandler.MSG_NOTIFY_UPDATE_APP_WIDGET,</div><div class="line">           args).sendToTarget();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>使用mCallbackHandler发送一条MSG_NOTIFY_UPDATE_APP_WIDGET的消息，mCallbackHandler是AppWidgetServiceImpl.CallbackHandler的实例。如果处理，具体就到CallbackHandler的handleMessage方法中，就是一个Handler机制，让代码运行在主线程：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">@Override</div><div class="line">public void handleMessage(Message message) &#123;</div><div class="line">   switch (message.what) &#123;</div><div class="line">       case MSG_NOTIFY_UPDATE_APP_WIDGET: &#123;</div><div class="line">           SomeArgs args = (SomeArgs) message.obj;</div><div class="line">           Host host = (Host) args.arg1;</div><div class="line">           IAppWidgetHost callbacks = (IAppWidgetHost) args.arg2;</div><div class="line">           RemoteViews views = (RemoteViews) args.arg3;</div><div class="line">           final int appWidgetId = args.argi1;</div><div class="line">           args.recycle();</div><div class="line"></div><div class="line">           handleNotifyUpdateAppWidget(host, callbacks, appWidgetId, views);</div><div class="line">       &#125; break;</div><div class="line"></div><div class="line">       ...</div><div class="line"></div><div class="line">   &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>handleNotifyUpdateAppWidget方法：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">private void handleNotifyUpdateAppWidget(Host host, IAppWidgetHost callbacks,</div><div class="line">       int appWidgetId, RemoteViews views) &#123;</div><div class="line">   try &#123;</div><div class="line">       callbacks.updateAppWidget(appWidgetId, views); //通知AppWidgtHost</div><div class="line">   &#125; catch (RemoteException re) &#123;</div><div class="line">       synchronized (mLock) &#123;</div><div class="line">           Slog.e(TAG, &quot;Widget host dead: &quot; + host.id, re);</div><div class="line">           host.callbacks = null;</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里实际上就是调用IAppWidgetHost类型的updateAppWidget，进行跨进程调用。而callbacks就是在AppWidgetServiceImpl的startListening设置的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">@Override</div><div class="line">public int[] startListening(IAppWidgetHost callbacks, String callingPackage,</div><div class="line">       int hostId, List&lt;RemoteViews&gt; updatedViews) &#123;</div><div class="line">   final int userId = UserHandle.getCallingUserId();</div><div class="line"></div><div class="line">   if (DEBUG) &#123;</div><div class="line">       Slog.i(TAG, &quot;startListening() &quot; + userId);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   // Make sure the package runs under the caller uid.</div><div class="line">   mSecurityPolicy.enforceCallFromPackage(callingPackage);</div><div class="line"></div><div class="line">   synchronized (mLock) &#123;</div><div class="line">       ensureGroupStateLoadedLocked(userId);</div><div class="line"></div><div class="line">       // NOTE: The lookup is enforcing security across users by making</div><div class="line">       // sure the caller can only access hosts it owns.</div><div class="line">       HostId id = new HostId(Binder.getCallingUid(), hostId, callingPackage);</div><div class="line">       Host host = lookupOrAddHostLocked(id);</div><div class="line"></div><div class="line">       host.callbacks = callbacks; //设置callbacks</div><div class="line"></div><div class="line">       updatedViews.clear();</div><div class="line"></div><div class="line">       ArrayList&lt;Widget&gt; instances = host.widgets;</div><div class="line">       int N = instances.size();</div><div class="line">       int[] updatedIds = new int[N];</div><div class="line">       for (int i = 0; i &lt; N; i++) &#123;</div><div class="line">           Widget widget = instances.get(i);</div><div class="line">           updatedIds[i] = widget.appWidgetId;</div><div class="line">           updatedViews.add(cloneIfLocalBinder(widget.views));</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       return updatedIds;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>最终updateAppWidget的实现代码是：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">static class Callbacks extends IAppWidgetHost.Stub &#123;</div><div class="line">   private final WeakReference&lt;Handler&gt; mWeakHandler;</div><div class="line"></div><div class="line">   public Callbacks(Handler handler) &#123;</div><div class="line">       mWeakHandler = new WeakReference&lt;&gt;(handler);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   public void updateAppWidget(int appWidgetId, RemoteViews views) &#123;</div><div class="line">       if (isLocalBinder() &amp;&amp; views != null) &#123;</div><div class="line">           views = views.clone();</div><div class="line">       &#125;</div><div class="line">       Handler handler = mWeakHandler.get();</div><div class="line">       if (handler == null) &#123;</div><div class="line">           return;</div><div class="line">       &#125;</div><div class="line">       Message msg = handler.obtainMessage(HANDLE_UPDATE, appWidgetId, 0, views);</div><div class="line">       msg.sendToTarget();</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>最后使用Handler发送消息给主线程，然后在handleMessage中有具体的处理程序：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">class UpdateHandler extends Handler &#123;</div><div class="line">   public UpdateHandler(Looper looper) &#123;</div><div class="line">       super(looper);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   public void handleMessage(Message msg) &#123;</div><div class="line">       switch (msg.what) &#123;</div><div class="line">           case HANDLE_UPDATE: &#123;</div><div class="line">               updateAppWidgetView(msg.arg1, (RemoteViews)msg.obj);</div><div class="line">               break;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>然后调用AppWidgetHost的updateAppWidgetView方法：</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">void updateAppWidgetView(int appWidgetId, RemoteViews views) &#123;</div><div class="line">   AppWidgetHostView v;</div><div class="line">   synchronized (mViews) &#123;</div><div class="line">       v = mViews.get(appWidgetId);</div><div class="line">   &#125;</div><div class="line">   if (v != null) &#123;</div><div class="line">       v.updateAppWidget(views);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>根据appWidgetId找到对应的AppWidgetHostView，然后调用AppWidgetHostView的updateAppWidget来根据RemoteView来更新AppWidgetHostView：</li>
+</ol>
+<p>﻿</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">/**</div><div class="line">* Process a set of &#123;@link RemoteViews&#125; coming in as an update from the</div><div class="line">* AppWidget provider. Will animate into these new views as needed</div><div class="line">*/</div><div class="line">public void updateAppWidget(RemoteViews remoteViews) &#123;</div><div class="line"></div><div class="line">   boolean recycled = false;</div><div class="line">   View content = null;</div><div class="line">   Exception exception = null;</div><div class="line"></div><div class="line">   // Capture the old view into a bitmap so we can do the crossfade.</div><div class="line">    ... 省去old view to bitmap</div><div class="line"></div><div class="line">   if (remoteViews == null) &#123;</div><div class="line">       if (mViewMode == VIEW_MODE_DEFAULT) &#123;</div><div class="line">           // We&apos;ve already done this -- nothing to do.</div><div class="line">           return;</div><div class="line">       &#125;</div><div class="line">       content = getDefaultView();  // 默认的View</div><div class="line">       mLayoutId = -1;</div><div class="line">       mViewMode = VIEW_MODE_DEFAULT;</div><div class="line">   &#125; else &#123;</div><div class="line">       // Prepare a local reference to the remote Context so we&apos;re ready to</div><div class="line">       // inflate any requested LayoutParams.</div><div class="line">       mRemoteContext = getRemoteContext();</div><div class="line">       int layoutId = remoteViews.getLayoutId();</div><div class="line"></div><div class="line">       // If our stale view has been prepared to match active, and the new</div><div class="line">       // layout matches, try recycling it</div><div class="line">       if (content == null &amp;&amp; layoutId == mLayoutId) &#123;</div><div class="line">           try &#123;</div><div class="line">               remoteViews.reapply(mContext, mView, mOnClickHandler);</div><div class="line">               content = mView;</div><div class="line">               recycled = true;</div><div class="line">               if (LOGD) Log.d(TAG, &quot;was able to recycled existing layout&quot;);</div><div class="line">           &#125; catch (RuntimeException e) &#123;</div><div class="line">               exception = e;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       // Try normal RemoteView inflation</div><div class="line">       if (content == null) &#123;</div><div class="line">           try &#123;</div><div class="line">               content = remoteViews.apply(mContext, this, mOnClickHandler);</div><div class="line">               if (LOGD) Log.d(TAG, &quot;had to inflate new layout&quot;);</div><div class="line">           &#125; catch (RuntimeException e) &#123;</div><div class="line">               exception = e;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">       mLayoutId = layoutId;</div><div class="line">       mViewMode = VIEW_MODE_CONTENT;</div><div class="line">   &#125;</div><div class="line">   if (content == null) &#123;</div><div class="line">       if (mViewMode == VIEW_MODE_ERROR) &#123;</div><div class="line">           // We&apos;ve already done this -- nothing to do.</div><div class="line">           return ;</div><div class="line">       &#125;</div><div class="line">       Log.w(TAG, &quot;updateAppWidget couldn&apos;t find any view, using error view&quot;, exception);</div><div class="line">       content = getErrorView();  // 在失败的情况下，会使用ErrorView。</div><div class="line">       mViewMode = VIEW_MODE_ERROR;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   if (!recycled) &#123;</div><div class="line">       prepareView(content);</div><div class="line">       addView(content);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   if (mView != content) &#123;</div><div class="line">       removeView(mView);</div><div class="line">       mView = content;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   if (CROSSFADE) &#123;</div><div class="line">       if (mFadeStartTime &lt; 0) &#123;</div><div class="line">           // if there is already an animation in progress, don&apos;t do anything --</div><div class="line">           // the new view will pop in on top of the old one during the cross fade,</div><div class="line">           // and that looks okay.</div><div class="line">           mFadeStartTime = SystemClock.uptimeMillis();</div><div class="line">           invalidate();</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>代码有点长，但我觉得值得认真一看，可以从源码中发现当我们的AppWidget在桌面显示异常时究竟可能是什么原因。更新view的整个策略主要就是：</p>
+<ol>
+<li><p>如果remoteView为空，则看是否已经使用了默认视图，如果已经使用了直接返回，如果没有则使用默认的视图。</p>
+</li>
+<li><p>如果remoteView不为空，则看layoutid是否跟现在已经使用的视图的layoutid一致，一致则重用旧的视图，调用remoteView.reapply方法重用视图，并且设置视图内容。</p>
+</li>
+<li><p>如果layoutid跟现使用的视图不一致，则调用remoteView.apply方法得到新的视图。</p>
+</li>
+<li><p>如果上面的步骤都没有得到视图，则使用错误视图。</p>
+</li>
+<li><p>如果新的视图与旧的视图不一致，则添加新的视图，删除旧的视图。</p>
+</li>
+</ol>
+<p>其实这里更新视图的策略非常简单，尽量重用已有的视图。里面会有三种视图，一种是我们自己设置的，一种是默认的，一种是有错误的情况的。当我们在桌面上看到我们的AppWidget显示异常时，应该还是有两种不同的表现的，一种是错误情况，一种是是用来额默认的视图，如果remoteView为null的时候会使用默认视图，如果是从remoteView中读取视图失败时，则会使用错误视图。</p>
+<p>所以看到错误视图时，我们可能需要考虑remoteView里面的View设置是否合理。如果看到的是默认视图，我们应该想想是否在AppWidgetProvider中调用了AppWidgetManager.updateAppWidget方法，是否remoteView参数为null？可能有的手机两种视图是一样的。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>整个updateAppWidget的分析就到这里了，AppWidget其他的更新也是一样的，整个更新过程跨越了三个进程，而RemoteView作为一种View跨进程传递的媒介。另外我觉得从AppWidget去理解Binder机制的使用可能也是一个非常好的切入点。因为这部分我们在应用开发当中经常使用，而且是View，能够看到效果。接下来我想写一篇关于Binder多线程的理解。我看AppWidget这部分的源码，也是项目中的AppWidget存在问题，熟悉AppWidget才能解决好问题，预测代码中可能潜在的问题。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/08/09/android-appwidget-api-source-code/" rel="next" title="AppWidget源码分析---接口类">
+                <i class="fa fa-chevron-left"></i> AppWidget源码分析---接口类
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/10/05/hugo-sourcecode-analysis/" rel="prev" title="Hugo源码分析">
+                Hugo源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#流程"><span class="nav-number">1.</span> <span class="nav-text">流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#updateAppWidgetIds过程分析"><span class="nav-number">2.</span> <span class="nav-text">updateAppWidgetIds过程分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

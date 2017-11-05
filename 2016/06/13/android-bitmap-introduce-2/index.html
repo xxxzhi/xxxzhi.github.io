@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="这一篇主要介绍Bitmap相关的一些优化技术，包括加载图片，图片内存管理,图片缓存。 加载图片图片缩放我们在加载图片的时候，经常会遇到OOM的问题，也许我们测试的时候图片比较小，但是实际上使用的图片可能 会很大，我最好的方式就是在加载的时候就把图片缩小。Options提供了inJustDecodeBounds来先获取图片的大小， 如下代码: 123456789101112BitmapFactory">
+<meta name="keywords" content="Android">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android Bitmap深入介绍（二）--- 优化技术">
+<meta property="og:url" content="http://yoursite.com/2016/06/13/android-bitmap-introduce-2/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="这一篇主要介绍Bitmap相关的一些优化技术，包括加载图片，图片内存管理,图片缓存。 加载图片图片缩放我们在加载图片的时候，经常会遇到OOM的问题，也许我们测试的时候图片比较小，但是实际上使用的图片可能 会很大，我最好的方式就是在加载的时候就把图片缩小。Options提供了inJustDecodeBounds来先获取图片的大小， 如下代码: 123456789101112BitmapFactory">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android Bitmap深入介绍（二）--- 优化技术">
+<meta name="twitter:description" content="这一篇主要介绍Bitmap相关的一些优化技术，包括加载图片，图片内存管理,图片缓存。 加载图片图片缩放我们在加载图片的时候，经常会遇到OOM的问题，也许我们测试的时候图片比较小，但是实际上使用的图片可能 会很大，我最好的方式就是在加载的时候就把图片缩小。Options提供了inJustDecodeBounds来先获取图片的大小， 如下代码: 123456789101112BitmapFactory">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/06/13/android-bitmap-introduce-2/"/>
+
+
+
+
+
+  <title>Android Bitmap深入介绍（二）--- 优化技术 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/06/13/android-bitmap-introduce-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android Bitmap深入介绍（二）--- 优化技术</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-13T00:00:00+08:00">
+                2016-06-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>这一篇主要介绍Bitmap相关的一些优化技术，包括加载图片，图片内存管理,图片缓存。</p>
+<h3 id="加载图片"><a href="#加载图片" class="headerlink" title="加载图片"></a>加载图片</h3><h4 id="图片缩放"><a href="#图片缩放" class="headerlink" title="图片缩放"></a>图片缩放</h4><p>我们在加载图片的时候，经常会遇到OOM的问题，也许我们测试的时候图片比较小，但是实际上使用的图片可能</p>
+<p>会很大，我最好的方式就是在加载的时候就把图片缩小。Options提供了inJustDecodeBounds来先获取图片的大小，</p>
+<p>如下代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line"></div><div class="line">options.inJustDecodeBounds = true;</div><div class="line"></div><div class="line">BitmapFactory.decodeResource(getResources(), R.id.myimage, options);</div><div class="line"></div><div class="line">int imageHeight = options.outHeight;</div><div class="line"></div><div class="line">int imageWidth = options.outWidth;</div><div class="line"></div><div class="line">String imageType = options.outMimeType; // 图片的mimeType</div></pre></td></tr></table></figure>
+<p>options.outHeight和options.outWidth会获取图片的宽和高，通过获取到图片的宽和高，就可以使用options的inSample来缩放图片，</p>
+<p>在加载图片显示到屏幕的时候，我们最好跟屏幕的密度一致，所以可以通过inSample来设置最终要缩放到多少，另外一方面我们有时候只需要缩略图，也需要进行缩放。下面是Android提供的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">int calculateInSampleSize(BitmapFactory.Options options,  int reqWidth, int reqHeight)&#123;</div><div class="line"></div><div class="line">    final int height = options.outHeight;</div><div class="line"></div><div class="line">    final int width  = options.outWidth;</div><div class="line"></div><div class="line">    int inSampleSize = 1 ;</div><div class="line"></div><div class="line">    if(reqWidth &lt; width || reqHeight &lt;height)&#123;</div><div class="line"></div><div class="line">        final int halfWidth = width / 2;</div><div class="line"></div><div class="line">        final int halfHeight = height / 2;</div><div class="line"></div><div class="line">           // Calculate the largest inSampleSize value that is a power of 2 and keeps both        // height and width larger than the requested height and width.   </div><div class="line"></div><div class="line">        while( (halfWidth / inSampleSize &gt; reqWidth &amp;&amp; halfHeight / inSampleSize &gt; reqHeight)&#123;</div><div class="line"></div><div class="line">            inSampleSize *= 2;</div><div class="line"></div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>通过这个方法得到inSampleSize，然后通过将options的inJustDecodeBounds设置为false就可以利用BitmapFactory加载图片了，得到的图片是经过缩放了的。</p>
+<h4 id="Bitmap-Config"><a href="#Bitmap-Config" class="headerlink" title="Bitmap.Config"></a>Bitmap.Config</h4><p>除了根据屏幕的情况，图片在屏幕中显示的大小来缩放图片，另外也可以通过options的inPreferredConfig设置图片的Config，使用RGB_565的图片肯定比RGB_8888占用的内存要小的。</p>
+<h4 id="PNG-or-JPG"><a href="#PNG-or-JPG" class="headerlink" title="PNG or JPG"></a>PNG or JPG</h4><p>另外还需要考虑的一个问题是图片的格式，使用png图片还是jpg图片，jpg压缩率要高意味着解码的时候消耗的时间肯能会更高，它没有alpha通道，但是对于内置在apk里面的图片，如果图片小，那么apk的大小也会变小。另外如果图片的色值丰富的话，用可能有好点，色值单调可能用png好点（比如我们的icon）。</p>
+<h3 id="图片内存管理"><a href="#图片内存管理" class="headerlink" title="图片内存管理"></a>图片内存管理</h3><p>在前面一篇有介绍过Android中图片的存储相关知识，在Android 2.3以及之前图片会存储在native内存中，Android推荐在Bitmap不再使用的时候，使用recycle方法回收Bitmap，因为图片存储在native内存当中，所以需要手动回收，另外也可以使用引用计数的方式在Bitmap的计数为0时，调用Bitmap的recycle方法。</p>
+<p>下面是<a href="https://developer.android.com/training/displaying-bitmaps/manage-memory.html#recycle" target="_blank" rel="external">Android提供的一段引用计数的代码</a>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">private int mCacheRefCount = 0;</div><div class="line">private int mDisplayRefCount = 0;</div><div class="line">...</div><div class="line">// Notify the drawable that the displayed state has changed.</div><div class="line">// Keep a count to determine when the drawable is no longer displayed.</div><div class="line">public void setIsDisplayed(boolean isDisplayed) &#123;</div><div class="line">    synchronized (this) &#123;</div><div class="line">        if (isDisplayed) &#123;</div><div class="line">            mDisplayRefCount++;</div><div class="line">            mHasBeenDisplayed = true;</div><div class="line">        &#125; else &#123;</div><div class="line">            mDisplayRefCount--;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    // Check to see if recycle() can be called.</div><div class="line">    checkState();</div><div class="line">&#125;</div><div class="line"></div><div class="line">// Notify the drawable that the cache state has changed.</div><div class="line">// Keep a count to determine when the drawable is no longer being cached.</div><div class="line">public void setIsCached(boolean isCached) &#123;</div><div class="line">    synchronized (this) &#123;</div><div class="line">        if (isCached) &#123;</div><div class="line">            mCacheRefCount++;</div><div class="line">        &#125; else &#123;</div><div class="line">            mCacheRefCount--;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    // Check to see if recycle() can be called.</div><div class="line">    checkState();</div><div class="line">&#125;</div><div class="line"></div><div class="line">private synchronized void checkState() &#123;</div><div class="line">    // If the drawable cache and display ref counts = 0, and this drawable</div><div class="line">    // has been displayed, then recycle.</div><div class="line">    if (mCacheRefCount &lt;= 0 &amp;&amp; mDisplayRefCount &lt;= 0 &amp;&amp; mHasBeenDisplayed</div><div class="line">            &amp;&amp; hasValidBitmap()) &#123;</div><div class="line">        getBitmap().recycle();</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">private synchronized boolean hasValidBitmap() &#123;</div><div class="line">    Bitmap bitmap = getBitmap();</div><div class="line">    return bitmap != null &amp;&amp; !bitmap.isRecycled();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>另外一方面也可以考虑使用inPurgeable，inPurgeable让Android在需要的时候可以回收像素，减少OOM。需要重新绘制的时候，又重新解码。其实这会导致更多的计算消耗。</p>
+<p>在3.0之后开始放到Java层内存中，在3.0之后也增加了inBitmap。inBitmap的使用方式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">Bitmap inBitmap ; //已经使用了的Bitmap</div><div class="line"></div><div class="line">BitmapFactory.Options optiosn = new BitmapFactory.Options();</div><div class="line"></div><div class="line">options.inBitmap = inBitmap ;</div><div class="line"></div><div class="line">Bitmap newBitmap = BitmapFactory.Options.decodeFile(filename, options);</div></pre></td></tr></table></figure>
+<p>需要注意的时候在4.4之前不支持不同大小的图片使用inBitmap，4.4才开始支持不同的大小，只要inBitmap比需要新加载的图片更大。另外inBitmap其实可以与下一节介绍的缓存一起使用，可以使用缓存了的图片作为inBitmap来加载新的图片。<a href="https://developer.android.com/training/displaying-bitmaps/manage-memory.html#inBitmap" target="_blank" rel="external">这里</a>也有例子。</p>
+<h3 id="缓存方式"><a href="#缓存方式" class="headerlink" title="缓存方式"></a>缓存方式</h3><p>如果都是每次使用BitmapFactory从sdcard读取Bitmap，那么将会非常浪费时间，因为从磁盘读取图片是非常慢的，而且有的图片需要经常使用，如果把图片缓存在内存当中将能够很好地节省图片读取的时间。这样图片缓存就出现了。</p>
+<h4 id="LruCache"><a href="#LruCache" class="headerlink" title="LruCache"></a>LruCache</h4><p>LruCache是一个非常适合缓存图片的类，它是基于LinkedHashMap实现的。把最近经常使用的对象保存在LinkedHashMap里面，把最近没使用的从LinkedHashMap中移除。LinkedHashMap是一个LinkedList和HashMap一起实现的。需要注意一点的是在以前经常使用SoftReference或WeakReference来引用Bitmap来缓存，但是在2.3后，Android虚拟机的垃圾回收机制回收Soft和Weak引用更加积极了，也就是说它会很快就回收软引用和弱引用对象。</p>
+<p>Android可以通过Runtime.getRuntime().getMaxMemory()获取最大内存，Android提供了一段小代码来使用LruCache:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">// Get max available VM memory, exceeding this amount will throw an</div><div class="line">// OutOfMemory exception. Stored in kilobytes as LruCache takes an</div><div class="line">// int in its constructor.</div><div class="line">final int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);</div><div class="line"></div><div class="line">// Use 1/8th of the available memory for this memory cache.</div><div class="line">final int cacheSize = maxMemory / 8;</div><div class="line"></div><div class="line">mMemoryCache = new LruCache&lt;String, Bitmap&gt;(cacheSize) &#123;</div><div class="line">    @Override</div><div class="line">    protected int sizeOf(String key, Bitmap bitmap) &#123;</div><div class="line">        // The cache size will be measured in kilobytes rather than</div><div class="line">        // number of items.</div><div class="line">        return bitmap.getByteCount() / 1024;</div><div class="line">    &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
+<h4 id="DiskLruCache"><a href="#DiskLruCache" class="headerlink" title="DiskLruCache"></a>DiskLruCache</h4><p>我们的图片可能是从网络中下载下来的，但是我们的应用中可能也没办法把图片全部放进内存，我们需要把图片保存在Disk中，另外一方面我们也不想要每次都从网络中下载图片。LruDiskCache就提供了一种磁盘缓存。当然如果图片访问非常频繁，使用ContentProvider的话将会更好。</p>
+<h4 id="Ashmem"><a href="#Ashmem" class="headerlink" title="Ashmem"></a>Ashmem</h4><p>除了一般的缓存方式，强大的Fresco在5.0之前利用ashmem来缓存图片，将图片保存在ashmem当中，这样就不会占用太多Java堆内存而导致出现OOM的情况。下面是一段简单的将图片存在ashmem中并且读取出来的例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">   private void testBitmapMemoryFile()&#123;</div><div class="line">//        Log.i(LOGTAG,&quot;&quot;+bitmap.getConfig().name());</div><div class="line">       InputStream is = getResources().openRawResource(R.raw.test4);</div><div class="line">       byte[] imgArr = new byte[10 * 1024 * 1024];</div><div class="line">       int imgBytes = 0;</div><div class="line">       try &#123;</div><div class="line">           while (is.available() &gt; 0) &#123;</div><div class="line">               int bytes = is.read(imgArr, imgBytes, 1024);</div><div class="line">               imgBytes += bytes;</div><div class="line">               Log.i(LOGTAG, &quot;bytes read:&quot; + bytes);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            is.close();</div><div class="line">            Log.i(LOGTAG, &quot;bytes : &quot; + imgBytes);</div><div class="line">     ﻿      memoryFile = new MemoryFile(null, imgBytes);</div><div class="line">            OutputStream os = memoryFile.getOutputStream();</div><div class="line">    ﻿       os.write(imgArr, 0, imgBytes);</div><div class="line">            imgArr = null;</div><div class="line">            os.flush();</div><div class="line">    ﻿       os.close();</div><div class="line">    ﻿       </div><div class="line">            BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line">            options.inPurgeable = true;</div><div class="line">            fd = getMemoryFileFd(memoryFile,null,options);</div><div class="line">            </div><div class="line">            if (fd == null) &#123;</div><div class="line">               memoryFile.close();</div><div class="line">               Log.e(LOGTAG, &quot;fd read error&quot;);</div><div class="line">               return;</div><div class="line">            &#125;</div><div class="line">            Log.i(LOGTAG, &quot;fd read ok&quot;);</div><div class="line">            bitmap =  BitmapFactory.decodeFileDescriptor(fd);</div><div class="line"></div><div class="line">            iv.setImageBitmap(bitmap);</div><div class="line">            memoryFile.close();</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">           e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>上面的代码是将一张raw目录下面的图片保存到AshmemFile当中，然后再利用BitmapFactory读取图片。并且使用inPurgeable标志。AshmemFile和inPurgeable合起来使用。</p>
+<h4 id="配置改变时缓存"><a href="#配置改变时缓存" class="headerlink" title="配置改变时缓存"></a>配置改变时缓存</h4><p>Activity可能会经常遇到旋转屏幕的情况，会被重新加载，另外在跳转的时候也可能会被finish掉，返回来又得重新加载。这种时候如果对于已经加载了的东西都全部重新加载那会非常耗费时间，这种时候保存Cache，不重新加载将会是一个非常的方式，比如在Fragment中使用了Cache，可以使用setRetainInstance(true)，避免重新创建Fragment，这样也能避免加载Fragment中的Cache。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>这篇文章主要介绍了图片加载过程中的相关配置，比如利用Options的参数配置输出图片的大小，Bitmap.Config配置解码图片像素格式，以及如何使用PNG和JPG图片。另外介绍了图片缓存（LRUCache和AshmemFile）以及图片存储管理。</p>
+<hr>
+<p>参考</p>
+<ol>
+<li><a href="https://developer.android.com/training/displaying-bitmaps/index.html" target="_blank" rel="external">https://developer.android.com/training/displaying-bitmaps/index.html</a></li>
+<li><a href="https://mp.weixin.qq.com/s?__biz=MzA3NTYzODYzMg==&amp;mid=403263974&amp;idx=1&amp;sn=b0315addbc47f3c38e65d9c633a12cd6&amp;scene=0&amp;key=41ecb04b051110037b72d05bba1495f596e848534fc51afe877d63329a16dc24dc1d3606aaaba3745a05bfdb8c624a74&amp;ascene=0&amp;uin=Mjc3OTU3Nzk1&amp;devicetype=iMac+MacBookPro10%2C1+OSX+OSX+10.10.5+build%2814F27%29&amp;version=11020201&amp;pass_ticket=kK4%2F6316QveG8O0vFtthPfBeKkNjyaL4HapsUAokHL5mUKCgI5hKTIKMc3D8uyqk" target="_blank" rel="external">https://mp.weixin.qq.com/s?__biz=MzA3NTYzODYzMg==&amp;mid=403263974&amp;idx=1&amp;sn=b0315addbc47f3c38e65d9c633a12cd6&amp;scene=0&amp;key=41ecb04b051110037b72d05bba1495f596e848534fc51afe877d63329a16dc24dc1d3606aaaba3745a05bfdb8c624a74&amp;ascene=0&amp;uin=Mjc3OTU3Nzk1&amp;devicetype=iMac+MacBookPro10%2C1+OSX+OSX+10.10.5+build%2814F27%29&amp;version=11020201&amp;pass_ticket=kK4%2F6316QveG8O0vFtthPfBeKkNjyaL4HapsUAokHL5mUKCgI5hKTIKMc3D8uyqk</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/06/07/android-bitmap-introduce-1/" rel="next" title="Android Bitmap深入介绍（一）---基础">
+                <i class="fa fa-chevron-left"></i> Android Bitmap深入介绍（一）---基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/19/android-bitmap-introduce-3/" rel="prev" title="Android Bitmap深入介绍（三）--- 开源加载框架简述">
+                Android Bitmap深入介绍（三）--- 开源加载框架简述 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#加载图片"><span class="nav-number">1.</span> <span class="nav-text">加载图片</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#图片缩放"><span class="nav-number">1.1.</span> <span class="nav-text">图片缩放</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Bitmap-Config"><span class="nav-number">1.2.</span> <span class="nav-text">Bitmap.Config</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PNG-or-JPG"><span class="nav-number">1.3.</span> <span class="nav-text">PNG or JPG</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#图片内存管理"><span class="nav-number">2.</span> <span class="nav-text">图片内存管理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缓存方式"><span class="nav-number">3.</span> <span class="nav-text">缓存方式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#LruCache"><span class="nav-number">3.1.</span> <span class="nav-text">LruCache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DiskLruCache"><span class="nav-number">3.2.</span> <span class="nav-text">DiskLruCache</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Ashmem"><span class="nav-number">3.3.</span> <span class="nav-text">Ashmem</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#配置改变时缓存"><span class="nav-number">3.4.</span> <span class="nav-text">配置改变时缓存</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

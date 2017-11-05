@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="java," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="FutureTask是JDK1.6新增的内容，间接实现了Future, Runnable接口。前面已经介绍过了Future的get方法会阻塞在那，等待执行完成，获取结果，那么FutureTask是怎么实现这一功能的呢？ 相关类简介LockSupportLockSupport是用来创建锁及其他同步类的基本线程阻塞元素，它的park和 unpark能够分别阻塞线程和解除线程阻塞。它提供了可以指定阻塞时">
+<meta name="keywords" content="java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="FutureTask源码分析">
+<meta property="og:url" content="http://yoursite.com/2016/05/19/feature-source-code/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="FutureTask是JDK1.6新增的内容，间接实现了Future, Runnable接口。前面已经介绍过了Future的get方法会阻塞在那，等待执行完成，获取结果，那么FutureTask是怎么实现这一功能的呢？ 相关类简介LockSupportLockSupport是用来创建锁及其他同步类的基本线程阻塞元素，它的park和 unpark能够分别阻塞线程和解除线程阻塞。它提供了可以指定阻塞时">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="FutureTask源码分析">
+<meta name="twitter:description" content="FutureTask是JDK1.6新增的内容，间接实现了Future, Runnable接口。前面已经介绍过了Future的get方法会阻塞在那，等待执行完成，获取结果，那么FutureTask是怎么实现这一功能的呢？ 相关类简介LockSupportLockSupport是用来创建锁及其他同步类的基本线程阻塞元素，它的park和 unpark能够分别阻塞线程和解除线程阻塞。它提供了可以指定阻塞时">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/05/19/feature-source-code/"/>
+
+
+
+
+
+  <title>FutureTask源码分析 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/19/feature-source-code/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">FutureTask源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-05-19T00:00:00+08:00">
+                2016-05-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>FutureTask是JDK1.6新增的内容，间接实现了Future, Runnable接口。前面已经介绍过了Future的get方法会阻塞在那，等待执行完成，获取结果，那么FutureTask是怎么实现这一功能的呢？</p>
+<h2 id="相关类简介"><a href="#相关类简介" class="headerlink" title="相关类简介"></a>相关类简介</h2><h3 id="LockSupport"><a href="#LockSupport" class="headerlink" title="LockSupport"></a>LockSupport</h3><p>LockSupport是用来创建锁及其他同步类的基本线程阻塞元素，它的park和 unpark能够分别阻塞线程和解除线程阻塞。它提供了可以指定阻塞时长的park方法。park和unpark的基本接口为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public static void park() &#123;</div><div class="line">    unsafe.park(false, 0L);</div><div class="line">&#125;</div><div class="line">public static void unpark(Thread thread) &#123;</div><div class="line">    if (thread != null)</div><div class="line">        unsafe.unpark(thread);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>unpark需要指定对应的线程，而park是将当前线程阻塞。其实这里也提供阻塞线程新的方式，我们已经或者用忙等待，或者用中断睡眠的方式阻塞唤醒线程，这里可以通过LockSupport实现。FutureTask就是用这种方式实现的。下面看一下unsafe，它是一个Unsafe类</p>
+<h3 id="Unsafe"><a href="#Unsafe" class="headerlink" title="Unsafe"></a>Unsafe</h3><p>Java不能够直接访问操作系统底层，而是通过本地方法来访问。Unsafe提供了硬件级别的原子访问，主要提供一下功能：</p>
+<ol>
+<li>分配释放内存</li>
+<li>定位某个字段的内存位置</li>
+<li>挂起一个线程和恢复，更多的是通过LockSupport来访问。park和unpark</li>
+<li>CAS操作，比较一个对象的某个位置的内存值是否与期望值一致，一致则更新对应值，此更新是不可中断的。主要方法是compareAndSwap*。</li>
+</ol>
+<h2 id="FutureTask源码"><a href="#FutureTask源码" class="headerlink" title="FutureTask源码"></a>FutureTask源码</h2><p>FutureTask主要是通过这两个类来实现的，调用get的时候如果异步线程还没有执行完，就是先park当前线程，如果超时则返回，这个时候如果异步线程还是没有执行完成，则返回失败。如果异步线程执行完成了，则会调用LockSupport的unpark方法，将主线程（与异步线程对应）解除阻塞，而主线程解除阻塞后就会获取执行的结果，get函数返回结果。下面看一下get方法的源码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">public V get(long timeout, TimeUnit unit)</div><div class="line">    throws InterruptedException, ExecutionException, TimeoutException &#123;</div><div class="line">    if (unit == null)</div><div class="line">        throw new NullPointerException();</div><div class="line">    int s = state;</div><div class="line">    if (s &lt;= COMPLETING &amp;&amp;</div><div class="line">        (s = awaitDone(true, unit.toNanos(timeout))) &lt;= COMPLETING)</div><div class="line">        throw new TimeoutException();</div><div class="line">    return report(s);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>它实际实现wait的是awaitDone方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">private int awaitDone(boolean timed, long nanos)</div><div class="line">    throws InterruptedException &#123;</div><div class="line">    final long deadline = timed ? System.nanoTime() + nanos : 0L;</div><div class="line">    WaitNode q = null;</div><div class="line">    boolean queued = false;</div><div class="line">    for (;;) &#123;</div><div class="line">        if (Thread.interrupted()) &#123;</div><div class="line">            removeWaiter(q);</div><div class="line">            throw new InterruptedException();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        int s = state;</div><div class="line">        if (s &gt; COMPLETING) &#123;</div><div class="line">            if (q != null)</div><div class="line">                q.thread = null;</div><div class="line">            return s;</div><div class="line">        &#125;</div><div class="line">        else if (s == COMPLETING) // cannot time out yet, 已经完成了，但是状态还在COMPLETING，yield一下下次再判断。</div><div class="line">            Thread.yield();</div><div class="line">        else if (q == null)　//如果队列还是为创建一个等待节点</div><div class="line">            q = new WaitNode();</div><div class="line">        else if (!queued) //如果还没有加入waiters队列，则先将waiters赋值给q.next，然后判断waiters是否已经是q.next，如果是，则将q赋值给waiters(waitersOffset对应waiters在FutureTask中的偏移量)。关键在于此一系列操作能保证一致性。</div><div class="line">            queued = UNSAFE.compareAndSwapObject(this, waitersOffset,</div><div class="line">                                                 q.next = waiters, q);</div><div class="line">        else if (timed) &#123; //如果是需要判断超时，则使用parkNanos</div><div class="line">            nanos = deadline - System.nanoTime();</div><div class="line">            if (nanos &lt;= 0L) &#123;</div><div class="line">                removeWaiter(q);</div><div class="line">                return state;</div><div class="line">            &#125;</div><div class="line">            LockSupport.parkNanos(this, nanos);</div><div class="line">        &#125;</div><div class="line">        else </div><div class="line">            LockSupport.park(this);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>waitDone就是将当前线程加入等待队列(WaitNode有当前Thread的Thread变量)，然后用LockSupport将自己阻塞，等待超时或者被解除阻塞后，判断是否已经完成(state为&gt;= COMPLETING)，如果未完成(state&lt; COMPLETING)抛出超时异常，如果已完成则稍等或者直接返回结果。</p>
+<p>下面看看异步线程如何唤醒当前线程，从run方法开始：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">public void run() &#123;</div><div class="line">    if (state != NEW ||</div><div class="line">        !UNSAFE.compareAndSwapObject(this, runnerOffset,</div><div class="line">                                     null, Thread.currentThread())) //给runner赋值</div><div class="line">        return;</div><div class="line">    try &#123;</div><div class="line">        Callable&lt;V&gt; c = callable;</div><div class="line">        if (c != null &amp;&amp; state == NEW) &#123;</div><div class="line">            V result;</div><div class="line">            boolean ran;</div><div class="line">            try &#123;</div><div class="line">                result = c.call();</div><div class="line">                ran = true;</div><div class="line">            &#125; catch (Throwable ex) &#123;</div><div class="line">                result = null;</div><div class="line">                ran = false;</div><div class="line">                setException(ex);</div><div class="line">            &#125;</div><div class="line">            if (ran)　//已经运行完则设置结果，前面一段是调用Callable运行需要做的操作</div><div class="line">                set(result);</div><div class="line">        &#125;</div><div class="line">    &#125; finally &#123;</div><div class="line">       ...</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>set方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">protected void set(V v) &#123;</div><div class="line">        if (UNSAFE.compareAndSwapInt(this, stateOffset, NEW, COMPLETING)) &#123; //原子操作state</div><div class="line">            outcome = v;</div><div class="line">            UNSAFE.putOrderedInt(this, stateOffset, NORMAL); // final state</div><div class="line">            finishCompletion();//通知线程</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>finishCompletion:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">private void finishCompletion() &#123;</div><div class="line">    // assert state &gt; COMPLETING;</div><div class="line">    for (WaitNode q; (q = waiters) != null;) &#123;</div><div class="line">        if (UNSAFE.compareAndSwapObject(this, waitersOffset, q, null)) &#123;//如果已经赋值给q ,则对waiter置null</div><div class="line">            for (;;) &#123;　//一个一个地unpark。</div><div class="line">                Thread t = q.thread;</div><div class="line">                if (t != null) &#123;</div><div class="line">                    q.thread = null;</div><div class="line">                    LockSupport.unpark(t);</div><div class="line">                &#125;</div><div class="line">                WaitNode next = q.next;</div><div class="line">                if (next == null)</div><div class="line">                    break;</div><div class="line">                q.next = null; // unlink to help gc</div><div class="line">                q = next;</div><div class="line">            &#125;</div><div class="line">            break;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    done(); //默认实现什么也不做</div><div class="line"></div><div class="line">    callable = null;        // to reduce footprint</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>上面的代码就是遍历waiters,然后解除他们的阻塞。这样整个流程就算完了</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在整个FeatureTask中没有直接使用锁机制，而是通过LockSupport来阻塞线程，唤醒线程。对于多线程访问FeatureTask的waiters,state，都是采用Unsafe来操作，避免使用锁（毕竟锁其实很耗时），改为直接原子操作对应的变量。FeatureTask是一个非常好的Unsafe和LockSupport例子。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/16/java-callable-future/" rel="next" title="Callable, Future和FutureTask简述">
+                <i class="fa fa-chevron-left"></i> Callable, Future和FutureTask简述
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/20/xposed-source-read-summary/" rel="prev" title="Xposed源码阅读小结">
+                Xposed源码阅读小结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#相关类简介"><span class="nav-number">1.</span> <span class="nav-text">相关类简介</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#LockSupport"><span class="nav-number">1.1.</span> <span class="nav-text">LockSupport</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Unsafe"><span class="nav-number">1.2.</span> <span class="nav-text">Unsafe</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FutureTask源码"><span class="nav-number">2.</span> <span class="nav-text">FutureTask源码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

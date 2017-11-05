@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="language," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="之前看《深入理解Java虚拟机》看了虚拟机类加载机制那一章，那时候就想到了Java类成员的加载顺序。看完那本书好像也没有多久，才几个月而已，很多东西就全部都忘了，之前看的书，还做了一些笔记，这本书没做笔记，结果就想从来没看过一样。所以还是记下一些学到的，领悟到的东西。 我们在最开始学Java的时候，应该就有接触javac，很多人估计在之后很长一段时间都没有再继续使用Javac了。我现在开始真正体">
+<meta name="keywords" content="language">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java类加载">
+<meta property="og:url" content="http://yoursite.com/2014/07/19/java-classload-sequnce/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="之前看《深入理解Java虚拟机》看了虚拟机类加载机制那一章，那时候就想到了Java类成员的加载顺序。看完那本书好像也没有多久，才几个月而已，很多东西就全部都忘了，之前看的书，还做了一些笔记，这本书没做笔记，结果就想从来没看过一样。所以还是记下一些学到的，领悟到的东西。 我们在最开始学Java的时候，应该就有接触javac，很多人估计在之后很长一段时间都没有再继续使用Javac了。我现在开始真正体">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="java类加载">
+<meta name="twitter:description" content="之前看《深入理解Java虚拟机》看了虚拟机类加载机制那一章，那时候就想到了Java类成员的加载顺序。看完那本书好像也没有多久，才几个月而已，很多东西就全部都忘了，之前看的书，还做了一些笔记，这本书没做笔记，结果就想从来没看过一样。所以还是记下一些学到的，领悟到的东西。 我们在最开始学Java的时候，应该就有接触javac，很多人估计在之后很长一段时间都没有再继续使用Javac了。我现在开始真正体">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/07/19/java-classload-sequnce/"/>
+
+
+
+
+
+  <title>java类加载 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/07/19/java-classload-sequnce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">java类加载</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-07-19T00:00:00+08:00">
+                2014-07-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p>之前看《深入理解Java虚拟机》看了虚拟机类加载机制那一章，那时候就想到了Java类成员的加载顺序。看完那本书好像也没有多久，才几个月而已，很多东西就全部都忘了，之前看的书，还做了一些笔记，这本书没做笔记，结果就想从来没看过一样。所以还是记下一些学到的，领悟到的东西。</p>
+<p>我们在最开始学Java的时候，应该就有接触javac，很多人估计在之后很长一段时间都没有再继续使用Javac了。我现在开始真正体会到那时候老师最开始讲Java的时候，要让我们用命令行javac来编译了。我们用javac编译出来的东西是class文件，然后虚拟机再加载class文件，将其转换成虚拟机可以直接使用的Java类型。class文件是有一定格式的，其实你也可以去修改class文件。在这里我主要分享一下虚拟机类加载过程。</p>
+<p>类从被加载到虚拟机内存中开始，到卸载出内存为止，它的整个生命周期包括：加载（Loading）、验证（Verification），准备（Preparation）、解析（Resolution）、初始化（Initialization）、使用（Using）和卸载（Unloading）这几个阶段。</p>
+<h5 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h5><p>加载应该是有一个时间点，什么时候加载？虚拟机规范中没有强制约束。但是类的初始化是有规定的，而加载、验证、准备、解析是要在类初始化之前的。在介绍类的初始化的时候，详细描述。</p>
+<p>加载需要完成以下三件事情：</p>
+<ol>
+<li>通过类的全限定名获取类的二进制字节流</li>
+<li>将这个字节流所代表的静态存储结果转化为方法去的运行时数据结构</li>
+<li>在java堆中生成代表这个类的java.lang.Class对象，作为方法去的这些数据的访问入口</li>
+</ol>
+<p>第一件事，从类的全限定名获取类的二进制字节流。这里描述并没有说是是从一个.class文件，在这里可以发挥想象，这个字节流完全可以从网络上获取，甚至可以自己直接在代码内部用一个String来表示。然后用ClassLoader去加载，在动态加载的时候，一般使用自己重定义ClassLoader（继承ClassLoader）的方式去加载。这个地方可以发挥很多的想象力，其实现有的一些东西，比如jar包，Applet，JSP等等，都有利用到这一点。加载其实是很开放的。</p>
+<p>另外虚拟机将class文件的数据加载，放到虚拟机中的存储格式也是虚拟机实现自定义的，所以不同的虚拟机存储的数据格式是可以不同的。它是开发的，你可以发挥想象力，去实现一些看似很难实现的东西。</p>
+<h5 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h5><p>虚拟机将类加载完了后，类正不正确，还不知道。所以需要验证。其实我们编译出的class文件是可以修改的，这里有一个应用—插桩。我之前做过一个统计测试覆盖率的，就是通过这种插桩的方式的。</p>
+<p>验证的类别总共有一下几种：</p>
+<ol>
+<li>文件格式验证</li>
+<li>元数据验证</li>
+<li>字节码验证</li>
+<li>符号引用验证：如private、protected是否可以被当前类访问</li>
+</ol>
+<p>其实验证是有跟加载交杂在一起的部分的，因为有部分验证是跟加载一起的进行的。</p>
+<h5 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h5><p>这是正事为类变量分配内存并设置变量初始值的阶段。这个时候分配的仅是类变量，不包括实例变量。另外，这些值分配的是类型的零值。比如下面这个</p>
+<pre><code>public static int value = 321;
+</code></pre><p>这里在准备阶段分配的是0。而不是321。之后会在<cinit()>函数中，初始化为321。</cinit()></p>
+<p>但是对于一些常量如：</p>
+<pre><code>public static int final value = 321;
+</code></pre><p>在准备阶段会被直接分配为321.</p>
+<h5 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h5><p>解析阶段是虚拟机将常量池内的符号引用替换为直接引用的过程。解析动作主要针对类或接口、字段、类方法、接口方法四类符号引用进行。</p>
+<p>####初始化<br>这是初始化的最后一步了。在之前，除了加载可以在程序中定义ClassLoader ，其他的基本都是由虚拟机控制的。初始化就跟我们平时使用类的时候有很多关联了。初始化阶段是执行类构造器<clinit>()方法的过程。</clinit></p>
+<ul>
+<li><clinit>()方法是由编译器自动收集类中的所有类变量的复制动作和静态语句块（static{}块）中的语句合并产生的，编译器收集的顺序是由语句在源文件中出现的顺序所决定的，因此静态语句块中只能访问到定义在静态语句块之前的变量，定义在它之后的变量，在前面的静态语句块中可以赋值，但是不能访问。</clinit></li>
+<li><clinit>()方法与类的构造函数不同，它不需要要显示地调用父类构造，虚拟机会保证在子类的<clinit>方法执行之前，父类的<clinit>()方法已经执行完毕。so,虚拟机中第一个被执行的<clinit>()方法的类一定是java.lang.Object。ps:其实我一直以为Object是抽象类。其实不是的。看看下面这段代码：</clinit></clinit></clinit></clinit></li>
+<li><clinit>()方法对于类或接口来说并不是必须的。如果一个类中没有静态语句块，也没有对变量的赋值操作，那么编译器可以不为这个类生成<clinit>()方法。</clinit></clinit></li>
+<li>接口中不能使用静态语句块，但仍然有变量初始化的赋值操作，因此接口与类一样都会生成<clinit>()方法，但是预制不同的是，执行接口的<clinit>()方法不需要先执行父接口的<clinit>()方法。只有当父接口中定义的变量被使用的时候，父接口才会被初始化。另外，接口的实现类在初始化时也一样不会执行接口的<clinit>()方法。</clinit></clinit></clinit></clinit></li>
+<li>虚拟机会保证一个类的<clinit>()方法在多个线程中被正确地加锁和同步，如果多个线程同时去初始化一个类，那么只会有一个线程去执行这个类的<clinit>()方法，其他的线程都需要阻塞等待，知道活动线程执行<clinit>()方法完毕，如果一个类的<clinit>()方法中有耗时很长的操作，那就可能造成多个进程阻塞。在实际中这种阻塞往往是很隐藏的。</clinit></clinit></clinit></clinit></li>
+</ul>
+<p>上面就是类加载过程中主要的过程。</p>
+<hr>
+<p>心乱如麻</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/language/" rel="tag"># language</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/07/15/deep-learning-record/" rel="next" title="深度学习学习">
+                <i class="fa fa-chevron-left"></i> 深度学习学习
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/08/12/introduce-Astro-Boy/" rel="prev" title="少侠请小心介绍">
+                少侠请小心介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#加载"><span class="nav-number">1.</span> <span class="nav-text">加载</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#验证"><span class="nav-number">2.</span> <span class="nav-text">验证</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#准备"><span class="nav-number">3.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#解析"><span class="nav-number">4.</span> <span class="nav-text">解析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

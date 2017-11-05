@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="python,编程语言," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="python 简单入门教程的学习笔记">
+<meta name="keywords" content="python,编程语言">
+<meta property="og:type" content="article">
+<meta property="og:title" content="python 学习笔记">
+<meta property="og:url" content="http://yoursite.com/2014/03/04/learn-python-note/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="python 简单入门教程的学习笔记">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="python 学习笔记">
+<meta name="twitter:description" content="python 简单入门教程的学习笔记">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/03/04/learn-python-note/"/>
+
+
+
+
+
+  <title>python 学习笔记 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/03/04/learn-python-note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">python 学习笔记</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-03-04T00:00:00+08:00">
+                2014-03-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">in</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/python/" itemprop="url" rel="index">
+                    <span itemprop="name">python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+              <div class="post-description">
+                  python 简单入门教程的学习笔记
+              </div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>一直计划着学习了解一下python，前几天稍稍看了一下python相关的东西。</p>
+<h3 id="语言特点"><a href="#语言特点" class="headerlink" title="语言特点"></a>语言特点</h3><p>在《python programming》中作者O’Reilly Media, Inc 强调了Python 四个概念：</p>
+<blockquote>
+<p>Software quality<br>Developer productivity<br>Program portability<br>Component integration</p>
+</blockquote>
+<p>软件质量:首先在python语言设计结构上面，会使软件质量提高，比如缩进，这一特性也让很多程序员抓狂。另外一方面，python 在不断地改善，python的社区很大。代码容易被理解。<br>开发效率:你很难在python中发现诸如类型声明、存储设计、内存管理等等东西，python优化了开发速度。有很多的开源库，可以调用c++,java。python类似于<strong>可执行的伪代码</strong><br>程序可移植性:<br>组件交互:与其他语言的交互。control language and customization tool</p>
+<p>另外适合用python编程的主要有一下几个部分：</p>
+<blockquote>
+<p>System utilities<br>Internet scripting<br>GUI<br>component iteraction<br>Database access<br>Distributed programming<br>Rapid-prototying/development<br>Language-based modules<br>…</p>
+</blockquote>
+<p>而python不适合的地方主要还是在有关速度方面，虽然有时候python的速度能够做到跟c++ 一样快，但是总的来说，是比不过那种语言的。</p>
+<p>O’Reilly Media, Inc 也有讲到python也有它的弱点：</p>
+<blockquote>
+<p>大量的调用，以及语言本身的一些特性，导致排错比较麻烦<br>有时候会导致你很难用python实现你自己的意图，可能写着写着，就没有按照你的意思做了。</p>
+</blockquote>
+<h3 id="语法特性"><a href="#语法特性" class="headerlink" title="语法特性"></a>语法特性</h3><h4 id="变量类型"><a href="#变量类型" class="headerlink" title="变量类型"></a>变量类型</h4><p>看了一个[1] 中的教程，感觉python有点像javascript，不过我对javascript也不熟，相对于其他的诸如c++,c,java 等语言，python简单了很多。<br>没有了类型，声明一个变量只是如下操作：</p>
+<pre><code>a = 3
+b = 4
+print (a +b )
+print (a ** b )   #这个是指数 a 的b 次方
+print (a // b )   #floor division 去除余数，将结构只保留整数部分
+</code></pre><p>这样就输出7,81,0了。 不知发现了没有，python中貌似没有分号</p>
+<h4 id="if"><a href="#if" class="headerlink" title="if"></a>if</h4><p>另外python使用缩进来取代花括号了。如if语句是这样的：</p>
+<pre><code>a = 1
+if a &gt; 2 :
+    print(&quot; a &gt; 2&quot; )
+else :
+    print(&quot; a &gt; 2 is false&quot;)
+print(&quot;end&quot;)
+</code></pre><p>输出的结果就是</p>
+<pre><code>a &gt; 2 is false
+end
+</code></pre><h4 id="while-for"><a href="#while-for" class="headerlink" title="while for"></a>while for</h4><p>python中没有do while while 的使用如下<br>    a = 1<br>    while a &lt;3<br>        a+=1<br>    print(“end” + a)</p>
+<p>结果是：<br>    end3</p>
+<p>for 的使用如下:<br>    a = [1,2,3]<br>    for i in a<br>        print(i)</p>
+<h4 id="函数的定义如下"><a href="#函数的定义如下" class="headerlink" title="函数的定义如下"></a>函数的定义如下</h4><pre><code>def myFunction(a,b):
+    return a + b
+print(myFunction(1,2))
+</code></pre><h4 id="python中有三种数据结构"><a href="#python中有三种数据结构" class="headerlink" title="python中有三种数据结构"></a>python中有三种数据结构</h4><p>python中的三种数据结构是 dict（相当于map),list, tuples(不可修改的list，不能够做insert append ，delete 操作）</p>
+<p>其实Strings 也是一个类。其中也包含了很多函数操作 python 中的数组序列是从0 开始的，但是它有-1 ，是指从最后一个元素起减1 ，另外python中的数组序列是包含起始位置，不包含结束位置的。如下面代码的输出<br>    a = [1,2,3,4]<br>    print(a[0:3]) # 结果会是[1,2,3]</p>
+<p>python中用int ，str 强制类型转换，以及各式化，如：<br>    print( ‘who are you %f’ % 123.33) #结果是 who are you 123.330000</p>
+<h4 id="python中的异常，读写文件和类"><a href="#python中的异常，读写文件和类" class="headerlink" title="python中的异常，读写文件和类"></a>python中的异常，读写文件和类</h4><p>读写文件的例子如下：<br>    f = open(“test.txt”, “r”) #opens file with name of “test.txt”<br>    print(f.read(1))<br>    print(f.read())<br>    print(f.readline())<br>    f.close()</p>
+<p>结果类似于c++ 中的<br>    f = open(“test.txt”,”w”) #opens file with name of “test.txt”<br>    f.write(“I am a test file.”)<br>    f.write(“Maybe someday, he will promote me to a real file.”)<br>    f.write(“Man, I long to be a real file”)<br>    f.write(“and hang out with all my new real file friends.”)<br>    f.close()</p>
+<p>类：</p>
+<pre><code>#ClassOne.py
+class Calculator(object):
+    #define class to simulate a simple calculator
+    def __init__ (self):
+        #start with zero
+        self.current = 0
+    def add(self, amount):
+        #add number to current
+        self.current += amount
+    def getCurrent(self):
+        return self.current
+</code></pre><p>使用：<br>    from ClassOne import * #get classes from ClassOne file<br>    myBuddy = Calculator() # make myBuddy into a Calculator object<br>    myBuddy.add(2) #use myBuddy’s new add method derived from the Calculator class<br>    print(myBuddy.getCurrent()) #print myBuddy’s current instance variable</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/python/" rel="tag"># python</a>
+          
+            <a href="/tags/编程语言/" rel="tag"># 编程语言</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/03/01/android-xml-paraser/" rel="next" title="android xml 解析">
+                <i class="fa fa-chevron-left"></i> android xml 解析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/03/15/android-soft-keyboard-summary/" rel="prev" title="android 软键盘使用总结">
+                android 软键盘使用总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#语言特点"><span class="nav-number">1.</span> <span class="nav-text">语言特点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#语法特性"><span class="nav-number">2.</span> <span class="nav-text">语法特性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#变量类型"><span class="nav-number">2.1.</span> <span class="nav-text">变量类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#if"><span class="nav-number">2.2.</span> <span class="nav-text">if</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#while-for"><span class="nav-number">2.3.</span> <span class="nav-text">while for</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#函数的定义如下"><span class="nav-number">2.4.</span> <span class="nav-text">函数的定义如下</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#python中有三种数据结构"><span class="nav-number">2.5.</span> <span class="nav-text">python中有三种数据结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#python中的异常，读写文件和类"><span class="nav-number">2.6.</span> <span class="nav-text">python中的异常，读写文件和类</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="机器学习," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="K-Means算法K-Means算法是一种聚类算法，把n个对象根据他们的属性分成k个分类，并且使这K个分割的内部相似度最大，而分割之间的相似度最小。其主要的算法流程如下：  从n个对象中任意选K个对象，作为每个聚类的中心 根据K个中心，按照每个对象离K个中心的最小距离（离那个中心近，就划分到哪个中心），将n个对象划分成K个分割（聚类） 然后计算分割的中心（分割中的所有对象的均值），将这些中心作">
+<meta name="keywords" content="机器学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习十大算法简介">
+<meta property="og:url" content="http://yoursite.com/2014/12/16/machine-learning-10-best/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="K-Means算法K-Means算法是一种聚类算法，把n个对象根据他们的属性分成k个分类，并且使这K个分割的内部相似度最大，而分割之间的相似度最小。其主要的算法流程如下：  从n个对象中任意选K个对象，作为每个聚类的中心 根据K个中心，按照每个对象离K个中心的最小距离（离那个中心近，就划分到哪个中心），将n个对象划分成K个分割（聚类） 然后计算分割的中心（分割中的所有对象的均值），将这些中心作">
+<meta property="og:image" content="http://xxxzhi.github.io/images/machine_learning.jpg">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="机器学习十大算法简介">
+<meta name="twitter:description" content="K-Means算法K-Means算法是一种聚类算法，把n个对象根据他们的属性分成k个分类，并且使这K个分割的内部相似度最大，而分割之间的相似度最小。其主要的算法流程如下：  从n个对象中任意选K个对象，作为每个聚类的中心 根据K个中心，按照每个对象离K个中心的最小距离（离那个中心近，就划分到哪个中心），将n个对象划分成K个分割（聚类） 然后计算分割的中心（分割中的所有对象的均值），将这些中心作">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/machine_learning.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/12/16/machine-learning-10-best/"/>
+
+
+
+
+
+  <title>机器学习十大算法简介 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/12/16/machine-learning-10-best/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">机器学习十大算法简介</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-12-16T00:00:00+08:00">
+                2014-12-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p><img src="http://xxxzhi.github.io/images/machine_learning.jpg" alt="图片"></p>
+<h2 id="K-Means算法"><a href="#K-Means算法" class="headerlink" title="K-Means算法"></a>K-Means算法</h2><p>K-Means算法是一种聚类算法，把n个对象根据他们的属性分成k个分类，并且使这K个分割的内部相似度最大，而分割之间的相似度最小。<br>其主要的算法流程如下：</p>
+<ol>
+<li>从n个对象中任意选K个对象，作为每个聚类的中心</li>
+<li>根据K个中心，按照每个对象离K个中心的最小距离（离那个中心近，就划分到哪个中心），将n个对象划分成K个分割（聚类）</li>
+<li>然后计算分割的中心（分割中的所有对象的均值），将这些中心作为聚类新的中心。</li>
+<li>计算标准测度函数，当计算函数满足一定的条件，如收敛了，则程序结束，否则返回第2步。</li>
+</ol>
+<p>它是一种基于样本间相似度的聚类算法，是一种非监督算法。是一种较典型的逐点修改迭代的动态聚类算法。</p>
+<h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>K-Means算法简单</li>
+<li>对于处理大数据时，该算法是相对可伸缩和高效率的。其算法是O（nkt）的，依赖于t</li>
+<li>当样本间每个簇相差较大时，分来效果较好。</li>
+</ul>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li>K-means要求用户事先得给出要生成的簇的数目K</li>
+<li>对初值比较敏感</li>
+<li>不适合发现大小差别很大的簇</li>
+<li>对于噪声和孤立点敏感</li>
+</ul>
+<h3 id="适用情况"><a href="#适用情况" class="headerlink" title="适用情况"></a>适用情况</h3><p>这个适用，基本也在优缺点里面讲述了。</p>
+<h2 id="朴素贝叶斯算法"><a href="#朴素贝叶斯算法" class="headerlink" title="朴素贝叶斯算法"></a>朴素贝叶斯算法</h2><p>朴素贝叶斯算法是基于一个简单假设：在给定的目标值时，各个属性是相互独立的。贝叶斯是依据贝叶斯定理来的。计算极大后验概率。其具体原理如下：</p>
+<p>$$<br>\begin{aligned}<br>V<em>{map} &amp; =argmax\mathbf{P}(h</em>{i}|a<em>{0},a</em>{1},…,a_{n})\<br>&amp;=argmax\frac{\mathbf{P}(a_0,a_1,…,a<em>n|h</em>{i})<em>\mathbf{P}(h_{i})}<br>{\mathbf{P}(a_0,a_1,…,a<em>n)}\<br>&amp;=argmax</em>{}\mathbf{P}(a<em>{0},a</em>{1},…a<em>{n}|h</em>{i})</em>\mathbf{P}(h<em>{i})\<br>&amp;=argmax(\prod</em>{j=0}^{n}\mathbf{P}(a<em>{j}|h</em>{i}))*\mathbf{P}(h_{i})<br>\end{aligned}<br>$$</p>
+<p>其中\(h\)是目标类别。\(a\)是属性<br>原理就是上面这个式子，基于给定目标值时，各个属性相互独立，通过将后验概率转换成先验概率。其中$$\mathbf{P}(h_{i})$$与$$\mathbf{P}(a_j|h_i)$$可有训练数据的频率估算出。</p>
+<h3 id="优点-1"><a href="#优点-1" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>实用性高</li>
+<li>模型简单</li>
+</ul>
+<h3 id="缺点-1"><a href="#缺点-1" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li>独立性假设</li>
+<li>有限的数据集不可能具有完备的数据，当某个属性值出现的概率很小时，估计变得很差</li>
+</ul>
+<h3 id="适用范围"><a href="#适用范围" class="headerlink" title="适用范围"></a>适用范围</h3><p>适用于属性之间独立性较强的问题</p>
+<h2 id="PageRank"><a href="#PageRank" class="headerlink" title="PageRank"></a>PageRank</h2><p>PageRank是来源与google搜索最初的算法模型。PageRank的核心思想是通过一些方法计算当前网络的积分，通过积分来给每个网页排序。每个网络的PageRank值总是递归地由其他网页的PageRank值决定的。</p>
+<p>它由两个假设：</p>
+<ul>
+<li>数量：每个网页接受其他网页页面指向的入页数量越多，该网页的pageRank值越高</li>
+<li>质量：质量高的网页通过链接向其他网页传递更多的权重。</li>
+</ul>
+<p>它通过马尔科夫链来计算PageRank值，有个公式如下：</p>
+<p>\begin{equation}<br>\mathbf{P}_{i}=\sum\frac{\mathbf{P}(j)}{\mathbf{O}(j)}<br>\end{equation}</p>
+<p>其中\(i,j \in E\),  \(O(j)\)表示节点j出页的数量.</p>
+<p>另外它也需要解决下面三个问题：</p>
+<ol>
+<li>只有入边没有出边的节点</li>
+<li>不是非周期性</li>
+<li>不是不可约的</li>
+</ol>
+<h3 id="优点-2"><a href="#优点-2" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>是一个与主题无关的算法</li>
+<li>所有的计算是在离线情况下做的</li>
+<li>响应时间快</li>
+</ul>
+<h3 id="缺点-2"><a href="#缺点-2" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li>忽略了主题相关性</li>
+<li>旧的页面等级会比新的页面高，旧的页面会比新的页面具有更多的上游页面</li>
+</ul>
+<h3 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h3><ul>
+<li>排序（论文）</li>
+<li>网络爬虫（重要性的页面数量抓取多一点）</li>
+<li>关键词与句子的抽取</li>
+</ul>
+<h2 id="KNN"><a href="#KNN" class="headerlink" title="KNN"></a>KNN</h2><p>KNN即最近邻分类器，它是通过与样本数据中进行比较，离哪个样本类近就是哪个。<br>KNN算法步骤如下：</p>
+<ol>
+<li>计算，计算节点K个最近的邻居。通过计算得出</li>
+<li>分类，根据K个邻居的主要类别来对测试对象进行分类</li>
+</ol>
+<p>KNN使用查找K邻居的算法是KD树</p>
+<h3 id="优点-3"><a href="#优点-3" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>算法简单</li>
+<li>重新训练代价低</li>
+<li>算法适用于样本较大的类域分类</li>
+<li>对类域交叉较多的样本，KNN相对比较适用</li>
+</ul>
+<h3 id="缺点-3"><a href="#缺点-3" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li>KNN可以说是一种慵懒的算法。</li>
+<li>样本类别数量不平衡时，效果可能不佳</li>
+<li>类别评分不规范，不像概率评分</li>
+<li>计算量大</li>
+</ul>
+<h3 id="适用范围-1"><a href="#适用范围-1" class="headerlink" title="适用范围"></a>适用范围</h3><ul>
+<li>海量数据分类可能适合，基本就是跟优缺点差不多</li>
+</ul>
+<h2 id="Apriori算法"><a href="#Apriori算法" class="headerlink" title="Apriori算法"></a>Apriori算法</h2><p>Apriori算法是一种数据挖掘算法。Apriori算法是一种最有影响力的挖掘布尔关系频繁项集的算法。其核心是基于两阶段频繁项集思想的递推算法。这里的频繁项集是指支持度大于最小支持度的项集。其算法步骤如下：</p>
+<ol>
+<li>根据支持度找出所有频繁项集（频度）</li>
+<li>根据置信度找出强关联规则（强度）</li>
+</ol>
+<h3 id="优点-4"><a href="#优点-4" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>使用Apriori性质生成候选集的办法，大大地压缩了候选集，取得很好的性能</li>
+</ul>
+<h3 id="缺点-4"><a href="#缺点-4" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li>产生大量的频繁项集</li>
+<li>频繁地查询事物数据库</li>
+</ul>
+<h3 id="适用范围-2"><a href="#适用范围-2" class="headerlink" title="适用范围"></a>适用范围</h3><p>Apriori（先验的，推测的）算法应用广泛，可用于消费市场价格分析，猜测顾客的消费习惯；网络安全领域中的入侵检测技术；可用在用于高校管理中，根据挖掘规则可以有效地辅助学校管理部门有针对性的开展贫困助学工作；也可用在移动通信领域中，指导运营商的业务运营和辅助业务提供商的决策制定。</p>
+<h2 id="Adaboost"><a href="#Adaboost" class="headerlink" title="Adaboost"></a>Adaboost</h2><p>Adaboost是一种集成学习算法。boosting跟bagging都是集成学习的一种。Adaboost其实也是将多个若分类器，按照权重的方式组合起来，构成一个强分类器。Adaboost将不同的训练集，训练同一个模型，得到若干个若分类器，然后再将这些若分类器组合起来，构成一个强分类器。理论上证明，如果这些若分类器的效果比随机性要好，那么当若分类器的数量趋向于无穷个时，强分类器的错误率将趋于0。</p>
+<p>其抽象算法描述如下：</p>
+<ol>
+<li>AdaBoost算法中不同的训练集是通过调整每个样本对应的权重实现的。最开始的时候，每个样本对应的权重是相同的，在此样本分布下训练出一个基本分类器\(h_i(x)\) (i=1)。</li>
+<li>对于\(h_i(x)\)错分的样本，则增加其对应样本的权重；而对于正确分类的样本，则降低其权重。这样可以使得错分的样本突出出来，并得到一个新的样本分布。同时，根据错分的情况赋予\(h_i(x)\)一个权重，表示该基本分类器的重要程度，错分得越少权重越大。</li>
+<li>在新的样本分布下，再次对基本分类器进行训练，得到基本分类器\(h_{i+1}(x)\)及其权重。</li>
+<li>\(i=i+1\)，如果i不超过T，则返回第2步。超过则经过T次这样的循环，就得到了T个基本分类器，以及T个对应的权重。最后把这T个基本分类器按一定权重累加起来，就得到了最终所期望的强分类器。结束</li>
+</ol>
+<h3 id="优点-5"><a href="#优点-5" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>能够将若分类器的性能增加，是一个精度很高的分类器</li>
+<li>提供的是一个框架，可以使用不同的若分类器算法</li>
+<li>易于执行</li>
+</ul>
+<h3 id="缺点-5"><a href="#缺点-5" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li>受若分类器选择影响</li>
+<li>易受噪声数据的影响</li>
+</ul>
+<h3 id="适用情况-1"><a href="#适用情况-1" class="headerlink" title="适用情况"></a>适用情况</h3><ul>
+<li>在人脸检测，目标检测都取得了不错的效果。</li>
+</ul>
+<h2 id="C4-5算法"><a href="#C4-5算法" class="headerlink" title="C4.5算法"></a>C4.5算法</h2><p>C4.5是改进于ID3算法的，所以也是一种分类决策树算法。主要的算法流程是</p>
+<ol>
+<li>建立一个节点N</li>
+<li>通过一些判断，选择样本集中，能最优地分开样本的属性（信息增益比），按照每个属性值对树进行分支。每个分支是一种属性值。</li>
+<li>对每个属性值按照类似的方式进行分支，直到某个分支都是同一种类别，或者其他类别的数量少于阀值。将这个分支集合中数量最多的类别作为这个分支的分类。这个节点不再往下扩展。</li>
+<li>在简历树的过程中和建立树结束后，可以对树进行剪纸</li>
+</ol>
+<p>上面是决策树算法的通用算法。</p>
+<h3 id="优点-6"><a href="#优点-6" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>结构相对简单</li>
+<li>相对于ID3来讲，能够处理非离散问题</li>
+</ul>
+<p>###缺点</p>
+<ul>
+<li>属性种类多的总是会被优先选择作为节点属性。</li>
+<li>忽略了属性集间的相关性</li>
+<li>构造的树不够小，存在过拟合问题</li>
+<li>一般情况下，C4.5 只适合能够驻留于内存的数据集</li>
+</ul>
+<h3 id="适用范围-3"><a href="#适用范围-3" class="headerlink" title="适用范围"></a>适用范围</h3><p>主要是在数据挖掘上面进行一些适用。不是很适合直接在很大数据上面的适用。擅长处理非数值性问题</p>
+<h2 id="CART算法"><a href="#CART算法" class="headerlink" title="CART算法"></a>CART算法</h2><p>分类与回归树算法，其实是一个二叉分类树。算法本身跟决策树是差不多的，但是算法在每个节点分叉的时候，只有两个分支。它使用的进行属性选择的方式是用GINI指数。</p>
+<h3 id="优点-7"><a href="#优点-7" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>相对于c4.5来讲，它能够避免属性值种类多的节点被优先选择的问题</li>
+<li>计算量不大</li>
+<li>能够处理连续字段</li>
+<li>能够清晰地显示哪些字段比较重要</li>
+<li>可以生产可以理解的规则</li>
+<li>灵活</li>
+</ul>
+<h3 id="缺点-6"><a href="#缺点-6" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li>当类别太多的时候，错误率可能会增加地比较快</li>
+<li>有时间顺序的数据，需要很多预处理工作</li>
+<li>对连续性的字段比较难预测</li>
+</ul>
+<h3 id="适用范围-4"><a href="#适用范围-4" class="headerlink" title="适用范围"></a>适用范围</h3><p>目前有人使用分类与回归树进行信誉评估，以及故障检测方面。节点属性类别太多，可能不是很适合。</p>
+<h2 id="EM算法"><a href="#EM算法" class="headerlink" title="EM算法"></a>EM算法</h2><p>极大似然估计算法：对于已经出现的现象，假定这个现象或事件出现的概率是最大的。依据于此，来通过迭代地计算概率期望，最大化概率。也就是迭代地进行E步和M步。直到算法收敛。</p>
+<p>Exception:根据参数{\( \theta_i \)} 得到每个观察数据的期望<br>Maximization: 根据期望，重新计算参数，使得似然函数最大。</p>
+<h3 id="优点-8"><a href="#优点-8" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>能够根据已知现象，计算参数。</li>
+</ul>
+<h3 id="缺点-7"><a href="#缺点-7" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li>依赖于初始参数的设置</li>
+<li>EM算法收敛速度较慢</li>
+</ul>
+<h3 id="适用情况-2"><a href="#适用情况-2" class="headerlink" title="适用情况"></a>适用情况</h3><ul>
+<li>高斯模型参数的估计</li>
+<li>隐马尔科夫模型参数的估计</li>
+<li>基于概率模型的聚类</li>
+</ul>
+<h2 id="SVM算法"><a href="#SVM算法" class="headerlink" title="SVM算法"></a>SVM算法</h2><p>支持向量机分类器，其主要思想是通过在样本数据中，找到一些支持向量，让这些支持向量构造一个超平面，这个超平面到两个类别的支持向量间的距离最小。用这个超平面来划分处于超平面两边的类别。其中，它可以通过构造高维空间来对非线性数据进行分类。它主要下面几种核函数：</p>
+<ul>
+<li>线性</li>
+<li>径向基（高斯）</li>
+<li>多项式</li>
+<li>傅里叶</li>
+</ul>
+<h3 id="优点-9"><a href="#优点-9" class="headerlink" title="优点"></a>优点</h3><ul>
+<li>能够对小样本分类效果很好</li>
+<li>能够处理非线性分类</li>
+<li>能够处理高维问题</li>
+<li>避免局部最小点</li>
+<li>泛化能力较好</li>
+</ul>
+<h3 id="缺点-8"><a href="#缺点-8" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li>对于大数据，直接分类效果可能不加，速度慢</li>
+<li>对于非线性的，处理效果不够好，没有通用的解决办法</li>
+<li>对于缺失数据敏感</li>
+</ul>
+<hr>
+<p>耐心勿急，事了拂衣去，深藏身与名</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/机器学习/" rel="tag"># 机器学习</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/11/20/download-android-sourcecode/" rel="next" title="目前还可以使用的android源码下载方式">
+                <i class="fa fa-chevron-left"></i> 目前还可以使用的android源码下载方式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/01/27/apache-proxy-intranet-through/" rel="prev" title="利用apache负载均衡热备份给内网穿透接口备份">
+                利用apache负载均衡热备份给内网穿透接口备份 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#K-Means算法"><span class="nav-number">1.</span> <span class="nav-text">K-Means算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优点"><span class="nav-number">1.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺点"><span class="nav-number">1.2.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适用情况"><span class="nav-number">1.3.</span> <span class="nav-text">适用情况</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#朴素贝叶斯算法"><span class="nav-number">2.</span> <span class="nav-text">朴素贝叶斯算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优点-1"><span class="nav-number">2.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺点-1"><span class="nav-number">2.2.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适用范围"><span class="nav-number">2.3.</span> <span class="nav-text">适用范围</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PageRank"><span class="nav-number">3.</span> <span class="nav-text">PageRank</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优点-2"><span class="nav-number">3.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺点-2"><span class="nav-number">3.2.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应用场景"><span class="nav-number">3.3.</span> <span class="nav-text">应用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#KNN"><span class="nav-number">4.</span> <span class="nav-text">KNN</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优点-3"><span class="nav-number">4.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺点-3"><span class="nav-number">4.2.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适用范围-1"><span class="nav-number">4.3.</span> <span class="nav-text">适用范围</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Apriori算法"><span class="nav-number">5.</span> <span class="nav-text">Apriori算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优点-4"><span class="nav-number">5.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺点-4"><span class="nav-number">5.2.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适用范围-2"><span class="nav-number">5.3.</span> <span class="nav-text">适用范围</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Adaboost"><span class="nav-number">6.</span> <span class="nav-text">Adaboost</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优点-5"><span class="nav-number">6.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺点-5"><span class="nav-number">6.2.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适用情况-1"><span class="nav-number">6.3.</span> <span class="nav-text">适用情况</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#C4-5算法"><span class="nav-number">7.</span> <span class="nav-text">C4.5算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优点-6"><span class="nav-number">7.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适用范围-3"><span class="nav-number">7.2.</span> <span class="nav-text">适用范围</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CART算法"><span class="nav-number">8.</span> <span class="nav-text">CART算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优点-7"><span class="nav-number">8.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺点-6"><span class="nav-number">8.2.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适用范围-4"><span class="nav-number">8.3.</span> <span class="nav-text">适用范围</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EM算法"><span class="nav-number">9.</span> <span class="nav-text">EM算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优点-8"><span class="nav-number">9.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺点-7"><span class="nav-number">9.2.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#适用情况-2"><span class="nav-number">9.3.</span> <span class="nav-text">适用情况</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SVM算法"><span class="nav-number">10.</span> <span class="nav-text">SVM算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优点-9"><span class="nav-number">10.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺点-8"><span class="nav-number">10.2.</span> <span class="nav-text">缺点</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

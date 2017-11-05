@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Java,JVM," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="内存区域Java的内存区域主要包括虚拟机栈，本地方法栈，程序计数器，堆，方法区。 虚拟机栈是对应于每个线程运行时候的东西，JVM会给每个线程分配一个栈，线程运行就是执行栈里面的东西。这个栈又包含了帧，帧对应着线程函数。栈里面只能够出帧和入帧，对应着每个函数的运行和运行完成。 本地方法栈是每个线程native代码对应的部分。与虚拟机栈很相似，但是本地方法栈执行的是Java Native方法。 程序">
+<meta name="keywords" content="Java,JVM">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM内存管理">
+<meta property="og:url" content="http://yoursite.com/2015/09/10/jvm-memory-manager/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="内存区域Java的内存区域主要包括虚拟机栈，本地方法栈，程序计数器，堆，方法区。 虚拟机栈是对应于每个线程运行时候的东西，JVM会给每个线程分配一个栈，线程运行就是执行栈里面的东西。这个栈又包含了帧，帧对应着线程函数。栈里面只能够出帧和入帧，对应着每个函数的运行和运行完成。 本地方法栈是每个线程native代码对应的部分。与虚拟机栈很相似，但是本地方法栈执行的是Java Native方法。 程序">
+<meta property="og:image" content="http://xxxzhi.github.io/images/beautiful4.jpg">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JVM内存管理">
+<meta name="twitter:description" content="内存区域Java的内存区域主要包括虚拟机栈，本地方法栈，程序计数器，堆，方法区。 虚拟机栈是对应于每个线程运行时候的东西，JVM会给每个线程分配一个栈，线程运行就是执行栈里面的东西。这个栈又包含了帧，帧对应着线程函数。栈里面只能够出帧和入帧，对应着每个函数的运行和运行完成。 本地方法栈是每个线程native代码对应的部分。与虚拟机栈很相似，但是本地方法栈执行的是Java Native方法。 程序">
+<meta name="twitter:image" content="http://xxxzhi.github.io/images/beautiful4.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/09/10/jvm-memory-manager/"/>
+
+
+
+
+
+  <title>JVM内存管理 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/09/10/jvm-memory-manager/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JVM内存管理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2015-09-10T00:00:00+08:00">
+                2015-09-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="http://xxxzhi.github.io/images/beautiful4.jpg" alt="图片"></p>
+<h2 id="内存区域"><a href="#内存区域" class="headerlink" title="内存区域"></a>内存区域</h2><p>Java的内存区域主要包括虚拟机栈，本地方法栈，程序计数器，堆，方法区。</p>
+<p><strong><em>虚拟机栈</em></strong>是对应于每个线程运行时候的东西，JVM会给每个线程分配一个栈，线程运行就是执行栈里面的东西。这个栈又包含了帧，帧对应着线程函数。栈里面只能够出帧和入帧，对应着每个函数的运行和运行完成。</p>
+<p><strong><em>本地方法栈</em></strong>是每个线程native代码对应的部分。与虚拟机栈很相似，但是本地方法栈执行的是Java Native方法。</p>
+<p><strong><em>程序计数器</em></strong>可以看作是当前线程执行字节码的行号指示器。字节码解释器可以通过改变程序计数器的值来选取下一条需要执行的指令。分支，循环，跳转都需要这个计数器来实现。</p>
+<p><strong><em>JAVA堆</em></strong>是所有线程共享的，每次new的时候，JVM就会在Java堆里面划一块区域。平时的内存溢出也基本都是这块区域超出了。</p>
+<p><strong><em>JAVA方法区</em></strong>是存储着已经加载的类，常量，静态变量等数据。方法区，也常被称作永久代，方法区很少进行垃圾回收，回收也非常严苛。如果这个区域出现异常，则一般会提示PermGen space。</p>
+<h2 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h2><p>Java中有四种引用，强引用，软引用，弱引用，虚引用。JVM对每种类型的回收是不一致的。</p>
+<p><strong>强引用</strong>是Java中最常见的，一般我们使用的<code>Object object = new Object</code>就是强引用。一个对象只要存在强引用，对象就不会被回收，如果内存不够，就抛出OutOfMemory异常。</p>
+<p><strong>软引用</strong>是如果一个对象只有软引用，那么在内存足够的时候对象不会回收该对象，如果内存不够的时候对象就会被回收。软引用适合作高速缓存。</p>
+<p>软引用可以和引用队列一起使用，当引用对象被回收的时候，会被虚拟机加入到引用队列里面去。</p>
+<pre><code>SoftReference&lt;Object&gt; softObject = new SoftReference(new Object(),new ReferenceQueue&lt;Object&gt;())
+</code></pre><p><strong>弱引用</strong>是一个对象如果只有弱引用，那么对象在下次垃圾回收的时候，不管内存足不足够都会被回收。它比软引用的周期更短，不过垃圾回收是一个优先级非常低的线程，对象实际上被回收也不会那么快。它也可以跟一个引用队列一起使用。</p>
+<p><strong>虚引用</strong>是一个更加弱小的引用，只有虚引用的对象不知道对象什么时候会被回收。它主要用来跟踪对象被垃圾回收的活动。它一定要跟一个引用队列一起使用。</p>
+<h2 id="垃圾回收"><a href="#垃圾回收" class="headerlink" title="垃圾回收"></a>垃圾回收</h2><p>Java会有一个单独垃圾回收进程，对虚拟机在程序新建的但已经没有用的对象进行回收。对于如何判断对象是否还在使用，这里面有两种常见的方式是引用计数法跟可达性分析法。<strong>引用计数法</strong>通过给每个对象的引用进行计数，这种方式很简单，并且效率高。但是在解决循环引用的时候效果并不好。而主流的编程语言都是采用<strong>可达性分析法</strong>来进行对象是否还有用的判断的，可达性分析法通过一系列的“GC ROOT”对象，通过其引用的对象以及这些对象的引用不断地循环扩展，构成一颗引用树，那些没有在这颗树上的对象就是没有用的，可以被回收的对象了。</p>
+<p>垃圾收集算法有很多，像标记清除算法，复制算法，标记整理算法，分代收集算法等等。</p>
+<h2 id="内存分配策略"><a href="#内存分配策略" class="headerlink" title="内存分配策略"></a>内存分配策略</h2><p>JVM在内存分配的时候遵循着一些规则：</p>
+<ol>
+<li><p>对象优先分配在Eden区</p>
+</li>
+<li><p>大对象直接分配在老年代，老年代的回收是非常少的，老年代的回收是一次Full GC。</p>
+</li>
+<li><p>长期存活的对象进入老年代</p>
+</li>
+<li><p>动态对对象年龄的判断，如果Eden区有相同年龄的对象内存之和超过新生代空间一半，则将年龄超过这些年龄相同对象的对象都移到老年区</p>
+</li>
+<li><p>空间分配担保，在进行minor GC前，虚拟机会先检查老年代最大可用的连续空间是否大于新生代所有对象的总空间，如果大于则直接GC，如果不大于，则要根据之前新生代到老年代的对象的平均大小来判断，如果老年代连续可用空间比平均大小大，则继续minor GC，如果不大，则进行一次Full GC。<br>内存代，新生代，老年代，永久代</p>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+            <a href="/tags/JVM/" rel="tag"># JVM</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/06/21/android-childautomovi-layout/" rel="next" title="子View按规则自动移动Layout">
+                <i class="fa fa-chevron-left"></i> 子View按规则自动移动Layout
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2015/09/10/http-protocol/" rel="prev" title="Http协议">
+                Http协议 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#内存区域"><span class="nav-number">1.</span> <span class="nav-text">内存区域</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引用"><span class="nav-number">2.</span> <span class="nav-text">引用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#垃圾回收"><span class="nav-number">3.</span> <span class="nav-text">垃圾回收</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内存分配策略"><span class="nav-number">4.</span> <span class="nav-text">内存分配策略</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

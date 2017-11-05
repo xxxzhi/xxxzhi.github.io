@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="ios,object-c," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="一直都想学学ios，这东东一直被说的很好，总是没有亲自去体验体验。最近用虚拟机试了下，虚拟机简单地跑起来还不算太卡，在承受范围之内。看了一半apple官方的关于ios的指导(https://developer.apple.com/library/ios/referencelibrary/GettingStarted/RoadMapiOSCh/chapters/Introduction.html)">
+<meta name="keywords" content="ios,object-c">
+<meta property="og:type" content="article">
+<meta property="og:title" content="学习ios笔记（一）">
+<meta property="og:url" content="http://yoursite.com/2014/02/19/start-develop-ios-1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一直都想学学ios，这东东一直被说的很好，总是没有亲自去体验体验。最近用虚拟机试了下，虚拟机简单地跑起来还不算太卡，在承受范围之内。看了一半apple官方的关于ios的指导(https://developer.apple.com/library/ios/referencelibrary/GettingStarted/RoadMapiOSCh/chapters/Introduction.html)">
+<meta property="og:image" content="https://developer.apple.com/library/ios/referencelibrary/GettingStarted/RoadMapiOSCh/chapters/WriteObjective-CCode/Art/blocks_2x.png">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="学习ios笔记（一）">
+<meta name="twitter:description" content="一直都想学学ios，这东东一直被说的很好，总是没有亲自去体验体验。最近用虚拟机试了下，虚拟机简单地跑起来还不算太卡，在承受范围之内。看了一半apple官方的关于ios的指导(https://developer.apple.com/library/ios/referencelibrary/GettingStarted/RoadMapiOSCh/chapters/Introduction.html)">
+<meta name="twitter:image" content="https://developer.apple.com/library/ios/referencelibrary/GettingStarted/RoadMapiOSCh/chapters/WriteObjective-CCode/Art/blocks_2x.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2014/02/19/start-develop-ios-1/"/>
+
+
+
+
+
+  <title>学习ios笔记（一） | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2014/02/19/start-develop-ios-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">学习ios笔记（一）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2014-02-19T00:00:00+08:00">
+                2014-02-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">in</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ios/" itemprop="url" rel="index">
+                    <span itemprop="name">ios</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p>一直都想学学ios，这东东一直被说的很好，总是没有亲自去体验体验。最近用虚拟机试了下，虚拟机简单地跑起来还不算太卡，在承受范围之内。看了一半apple官方的关于ios的指导(<a href="https://developer.apple.com/library/ios/referencelibrary/GettingStarted/RoadMapiOSCh/chapters/Introduction.html" title="https://developer.apple.com/library/ios/referencelibrary/GettingStarted/RoadMapiOSCh/chapters/Introduction.html" target="_blank" rel="external">https://developer.apple.com/library/ios/referencelibrary/GettingStarted/RoadMapiOSCh/chapters/Introduction.html</a>)，感觉收获颇多。即使是无意做ios开发，但是看看这开发文档，会让自己有个不小的提升。</p>
+<h2 id="编程语言特性"><a href="#编程语言特性" class="headerlink" title="编程语言特性"></a>编程语言特性</h2><p>说实话object-c 跟其他的面向对象编程语言语法上还是有一些区别的。但是对于一个熟悉java，c++ ,c 的开发者来说，可以很快的开始入手。也可以很快地通晓这门语言的特点。有时候也能被这门语言的一些特性给深深地吸引住。它官方的开发文档上面说这门语言非常优秀，似乎没有吹牛。</p>
+<h3 id="C语言的超集"><a href="#C语言的超集" class="headerlink" title="C语言的超集"></a>C语言的超集</h3><p>object-c 是c语言的超集，它比ANSI c语言多出了一下语法和功能：</p>
+<ul>
+<li>定义新的类</li>
+<li>类和实例方法</li>
+<li>方法调用(称为发消息）</li>
+<li>属性声明(以及通过它们自动合成存取方法）</li>
+<li>静态和动态类型化</li>
+<li>块（block），已封装的、可在任何时候执行的多段代码</li>
+<li>基本语言的扩展，例如协议和类别</li>
+</ul>
+<h3 id="类和对象以及方法"><a href="#类和对象以及方法" class="headerlink" title="类和对象以及方法"></a>类和对象以及方法</h3><p>这是面向对象语言基本通有的特性。object-c 的类和对象，以及实例，类方法等等概念，与其他面向对象语言基本类似。具体可直接看开发文档中的说明。由于object-c是c的超集，所以肯定值支持c的，它也支持C++ 代码。关于文件扩展名，其对应如下：</p>
+<div>&nbsp;</div><br><div>扩展名 | 源类型 <br><br>:–|:– <br><br>.h | 头文件。包含类，类型，函数，常量的声明<br>.m | 实现文件，包含扩展名的，可以同时包含object-c 和c 代码<br>.mm | 实现文件。除了可包含object-c和c 代码外，还可以包含C++ 代码。<strong>只当您实际引用您的Object-c代码中的C++类或者功能时，才使用此扩展名。</strong><br><br></div>
+
+<p>头文件中放的是类的声明。一个简单的例子如下：</p>
+<pre><code>@interface MyCLass ：NSObject
+{
+    int count;
+    id data;
+    NSString * name;
+}
+-(id)initWithString:(NSString*)aName   //-表示实例方法 + 表示类方法。
++（MyClass*) createMyClassWithString:(NSString*) aName withCount: (int) count;
+@end
+</code></pre><p>这是.h 头文件中的声明，类的属性也可以在实现文件中声明，但是在实现文件中声明的属性，都是private 的。这个是与其他语言的不同之处，当然也可以在上面的什么中指定可见性 比如</p>
+<pre><code>@public int count;
+</code></pre><p>最后一个类方法的方法声明方式，让我非常喜欢，在Object-c中，多个参数分成多个部分，每个参数多有一个名称，一个一个地来。比如上面那个例子，可以直接度过来，创建MyClass 用一个String ，用一个Count。这样声明，感觉语言更加可读了。当然对于一个习惯了其他方式的多个参数的人来说，可能没有那种感觉。但是我喜欢。</p>
+<p>另外一个比较有特点的是，编译器自动帮你把属性添加了get和setter 方法。</p>
+<pre><code>@property (nonatomic,copy) NSString *userName;
+</code></pre><p>括号中的东西时用来自定选项来配置属性。其他的选项还有weak，readonly， copy 等等。</p>
+<p>方法中属性的使用是跟java中类似的： 实例.属性名</p>
+<p>对于类的方法，使用的方式是通过下面这样的</p>
+<pre><code>MyClass * myClass = [MyClass createMyClassWithString:@&quot;hello&quot; withCount:3];
+</code></pre><h3 id="块"><a href="#块" class="headerlink" title="块"></a>块</h3><p>这是一个在c++ 和 java 中不曾出现的特性。文档上面如是说的：<strong>块</strong> 是封装工作单元的对象，即可在任何时间执行的代码段。它们在本质上是可一直的匿名函数，可作为方法和函数的参数传入，或可从方法和函数中返回。块本身具有一个已类型的参数列表，且可能具有推断或声明的返回类型。您还可以将块赋值给变量。然后就像调用函数一样调用它。</p>
+<pre><code>int (^myBlock)(int) = ^(int num){ return num * multiplier;};
+</code></pre><p>^是块的语法标记，我个人看法是形式上类似于匿名类。可以看出是一个变量，也可以是传参数。比匿名类还多了一个点是，还有返回值。这是一个很重要的概念。在我看的后面东西当中，这个也会涉及到。比如说出现循环引用。出现了一些未曾见过的东西，有时候让人有点兴奋。看ios开发文档，这个block确实让我特感兴趣。下面是ios开发文档上面一幅图。</p>
+<p><img src="https://developer.apple.com/library/ios/referencelibrary/GettingStarted/RoadMapiOSCh/chapters/WriteObjective-CCode/Art/blocks_2x.png" alt=""></p>
+<p>这幅图会让你对对block的特性有一个直接性的认识。</p>
+<p>&gt;</p>
+<blockquote>
+<p>块共享局部词法作用范围内的数据。块的这项特征非常有用，因为如果您实现一个方法，并且该方法定义一个块，则该块可以访问该方法的局部变量和参数（包括堆栈变量），以及函数和全局变量（包括实例变量）。这种访问是只读的，但如果使用 __block 修饰符声明变量，则可在块内更改其值。即使包含有块的方法或函数已返回，并且其局部作用范围已销毁，但是只要存在对该块的引用，局部变量仍作为块对象的一部分继续存在。</p>
+<p>作为方法或函数参数时，块可用作回调。被调用时，方法或函数执行部分工作，并在适当时刻，通过块回调正在调用的代码，以从中请求附加信息，或获取程序特定行为。块使调用方在调用时能够提供回调代码。块从相同的词法作用范围内采集数据（就像宿主方法或函数所做的那样），而非将所需数据打包在“关联”结构中。由于块代码无需在单独的方法或函数中实现，您的实施代码会更简单且更容易理解。</p>
+</blockquote>
+<p>Object-C 框架具有很多包含块参数的方法。</p>
+<h3 id="协议和类别"><a href="#协议和类别" class="headerlink" title="协议和类别"></a>协议和类别</h3><p>Object-C中只能够单继承。也就是说一个类只能有一个父类，但是却可以声明实现多个协议。协议和类别很像java中的接口</p>
+<p>一个简单的协议的声明如下：</p>
+<pre><code>@protocol MyProtocol
+-（void)myProtocolMethod;
+@end
+</code></pre><p>类别</p>
+<pre><code>@interface NSDate (NSDateCreation)
+</code></pre><p>这行代码通过使用圆括号将类别名称括起来的语法约定，声明了该类别。</p>
+<blockquote>
+<p>类别是Object-C语言中一项功能，可让您扩展类的接口，而无需对类进行子类化。类别中的方法成为类类型的一部分（在程序作用范围内），而这些方法由类的所有子类继承。您可以将消息发送给类（或其子类）的任何实例，以调用在类别中定义的方法。</p>
+</blockquote>
+<h3 id="已定义的类型和编码策略"><a href="#已定义的类型和编码策略" class="headerlink" title="已定义的类型和编码策略"></a>已定义的类型和编码策略</h3><ul>
+<li>id  动态对象类型。动态类型化的对象和静态类型化的对象的否定字面常量，都是 nil。</li>
+<li>Class   动态类类型。其否定字面常量是 Nil。</li>
+<li>SEL  选择器的数据类型 (typedef)；此数据类型表示运行时的方法签名。其否定字面常量是 NULL。</li>
+<li>BOOL  Boolean 类型。字面常量值是 YES 和 NO。</li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ios/" rel="tag"># ios</a>
+          
+            <a href="/tags/object-c/" rel="tag"># object-c</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2014/01/17/random-adjust-data-set-by-percent/" rel="next" title="按照比例将大数据按照类型比例，随机提取测试数据">
+                <i class="fa fa-chevron-left"></i> 按照比例将大数据按照类型比例，随机提取测试数据
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2014/02/23/android-xml-compare-with-json/" rel="prev" title="xml 与json 的比较">
+                xml 与json 的比较 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#编程语言特性"><span class="nav-number">1.</span> <span class="nav-text">编程语言特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#C语言的超集"><span class="nav-number">1.1.</span> <span class="nav-text">C语言的超集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类和对象以及方法"><span class="nav-number">1.2.</span> <span class="nav-text">类和对象以及方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#块"><span class="nav-number">1.3.</span> <span class="nav-text">块</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#协议和类别"><span class="nav-number">1.4.</span> <span class="nav-text">协议和类别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#已定义的类型和编码策略"><span class="nav-number">1.5.</span> <span class="nav-text">已定义的类型和编码策略</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Android,源码分析," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Android应用开发中离不开Handler，而Handler实际上最终是将Message交给MessageQueue。MessageQueue是Android消息机制的核心，熟悉MessageQueue能够帮助我们更清楚详细地理解Android的消息机制。这篇文章会介绍MessageQueue消息的插入(enqueueMessage)和读取(next)，native层的消息机制，以及IdleHa">
+<meta name="keywords" content="Android,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android MessageQueue源码分析">
+<meta property="og:url" content="http://yoursite.com/2016/10/17/android-messagequeue-sourcecode-analysis/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Android应用开发中离不开Handler，而Handler实际上最终是将Message交给MessageQueue。MessageQueue是Android消息机制的核心，熟悉MessageQueue能够帮助我们更清楚详细地理解Android的消息机制。这篇文章会介绍MessageQueue消息的插入(enqueueMessage)和读取(next)，native层的消息机制，以及IdleHa">
+<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android MessageQueue源码分析">
+<meta name="twitter:description" content="Android应用开发中离不开Handler，而Handler实际上最终是将Message交给MessageQueue。MessageQueue是Android消息机制的核心，熟悉MessageQueue能够帮助我们更清楚详细地理解Android的消息机制。这篇文章会介绍MessageQueue消息的插入(enqueueMessage)和读取(next)，native层的消息机制，以及IdleHa">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/10/17/android-messagequeue-sourcecode-analysis/"/>
+
+
+
+
+
+  <title>Android MessageQueue源码分析 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/10/17/android-messagequeue-sourcecode-analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android MessageQueue源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-10-17T00:00:00+08:00">
+                2016-10-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Android应用开发中离不开Handler，而Handler实际上最终是将Message交给MessageQueue。MessageQueue是Android消息机制的核心，熟悉MessageQueue能够帮助我们更清楚详细地理解Android的消息机制。这篇文章会介绍MessageQueue消息的插入(enqueueMessage)和读取(next)，native层的消息机制，以及IdleHandler和SyncBarrier的逻辑原理。源码是基于6.0。</p>
+<h3 id="MessageQueue的next与enqueueMessage方法"><a href="#MessageQueue的next与enqueueMessage方法" class="headerlink" title="MessageQueue的next与enqueueMessage方法"></a>MessageQueue的next与enqueueMessage方法</h3><h4 id="MessageQueue-enqueueMessage"><a href="#MessageQueue-enqueueMessage" class="headerlink" title="MessageQueue enqueueMessage"></a>MessageQueue enqueueMessage</h4><p>每次使用Handler发送一个Message的时候，最终会先调用MessageQueue的enqueueMessage方法将Message方法放入到MessageQueue里面。先看Handler的sendMessage方法，其他发送Message的内容也是一样的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">public final boolean sendMessage(Message msg)</div><div class="line">&#123;</div><div class="line">   return sendMessageDelayed(msg, 0); // 调用下面这个方法</div><div class="line">&#125;</div><div class="line"></div><div class="line">public final boolean sendMessageDelayed(Message msg, long delayMillis)</div><div class="line">&#123;</div><div class="line">   if (delayMillis &lt; 0) &#123;</div><div class="line">       delayMillis = 0;</div><div class="line">   &#125;</div><div class="line">   return sendMessageAtTime(msg, SystemClock.uptimeMillis() + delayMillis); // 调用下面方法</div><div class="line">&#125;</div><div class="line"></div><div class="line">public boolean sendMessageAtTime(Message msg, long uptimeMillis) &#123;</div><div class="line">   MessageQueue queue = mQueue; //Handler中的mQueue</div><div class="line">   if (queue == null) &#123;</div><div class="line">       RuntimeException e = new RuntimeException(</div><div class="line">               this + &quot; sendMessageAtTime() called with no mQueue&quot;);</div><div class="line">       Log.w(&quot;Looper&quot;, e.getMessage(), e);</div><div class="line">       return false;</div><div class="line">   &#125;</div><div class="line">   return enqueueMessage(queue, msg, uptimeMillis); // 下面方法</div><div class="line">&#125;</div><div class="line"></div><div class="line">private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) &#123;</div><div class="line">   msg.target = this;</div><div class="line">   if (mAsynchronous) &#123;</div><div class="line">       msg.setAsynchronous(true);</div><div class="line">   &#125;</div><div class="line">   return queue.enqueueMessage(msg, uptimeMillis); //调用MessageQueue的enqueueMessage</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最后会调用Handler的mQueue的enqueueMessage方法，而Handler的mQueue是从哪里来的呢？在Handler的构造函数中设置的，看默认的情况:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">public Handler() &#123;</div><div class="line">   this(null, false);</div><div class="line">&#125;</div><div class="line">public Handler(Callback callback, boolean async) &#123;</div><div class="line">   if (FIND_POTENTIAL_LEAKS) &#123;</div><div class="line">       final Class&lt;? extends Handler&gt; klass = getClass();</div><div class="line">       if ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &amp;&amp;</div><div class="line">               (klass.getModifiers() &amp; Modifier.STATIC) == 0) &#123;</div><div class="line">           Log.w(TAG, &quot;The following Handler class should be static or leaks might occur: &quot; +</div><div class="line">               klass.getCanonicalName());</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   mLooper = Looper.myLooper();</div><div class="line">   if (mLooper == null) &#123;</div><div class="line">       throw new RuntimeException(</div><div class="line">           &quot;Can&apos;t create handler inside thread that has not called Looper.prepare()&quot;);</div><div class="line">   &#125;</div><div class="line">   mQueue = mLooper.mQueue;</div><div class="line">   mCallback = callback;</div><div class="line">   mAsynchronous = async;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>无参Handler构造函数对应的是当前调用无参Handler构造函数线程的Looper，Looper是一个ThreadLocal变量，也就是说但是每个线程独有的，每个线程调用了Looper.prepare方法后，就会给当前线程设置一个Looper:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">public static void prepare() &#123;</div><div class="line">   prepare(true);</div><div class="line">&#125;</div><div class="line"></div><div class="line">private static void prepare(boolean quitAllowed) &#123;</div><div class="line">   if (sThreadLocal.get() != null) &#123;</div><div class="line">       throw new RuntimeException(&quot;Only one Looper may be created per thread&quot;);</div><div class="line">   &#125;</div><div class="line">   sThreadLocal.set(new Looper(quitAllowed));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>Looper里面包含了一个MessageQueue,  在Handler的构造函数中，会将当前关联的Looper的MessageQueue赋值给Handler的成员变量mQueue，enqueueMessage的时候就是调用该mQueue的enqueueMessage。关于Handler与Looper可以理解为每个Handler会关联一个Looper，每个线程最多只有一个Looper。Looper创建的时候会创建一个MessageQueue，而发送消息的时候，Handler就会通过调用mQueue.enqueueMessage方法将Message放入它关联的Looper的MessageQueue里面。介绍了Handler与Looper，然后继续看看MessageQueue的enqueueMessage方法:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line">boolean enqueueMessage(Message msg, long when) &#123;</div><div class="line">   if (msg.target == null) &#123;</div><div class="line">       throw new IllegalArgumentException(&quot;Message must have a target.&quot;);</div><div class="line">   &#125;</div><div class="line">   if (msg.isInUse()) &#123;</div><div class="line">       throw new IllegalStateException(msg + &quot; This message is already in use.&quot;);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   synchronized (this) &#123;</div><div class="line">       if (mQuitting) &#123;</div><div class="line">           IllegalStateException e = new IllegalStateException(</div><div class="line">                   msg.target + &quot; sending message to a Handler on a dead thread&quot;);</div><div class="line">           Log.w(TAG, e.getMessage(), e);</div><div class="line">           msg.recycle();</div><div class="line">           return false;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       msg.markInUse();</div><div class="line">       msg.when = when;</div><div class="line">       Message p = mMessages;</div><div class="line">       boolean needWake;</div><div class="line">       if (p == null || when == 0 || when &lt; p.when) &#123;</div><div class="line">           // New head, wake up the event queue if blocked.</div><div class="line">           msg.next = p;</div><div class="line">           mMessages = msg;</div><div class="line">           needWake = mBlocked;</div><div class="line">       &#125; else &#123;</div><div class="line">           // Inserted within the middle of the queue.  Usually we don&apos;t have to wake</div><div class="line">           // up the event queue unless there is a barrier at the head of the queue</div><div class="line">           // and the message is the earliest asynchronous message in the queue.</div><div class="line">           needWake = mBlocked &amp;&amp; p.target == null &amp;&amp; msg.isAsynchronous();</div><div class="line">           Message prev;</div><div class="line">           for (;;) &#123;</div><div class="line">               prev = p;</div><div class="line">               p = p.next;</div><div class="line">               if (p == null || when &lt; p.when) &#123;</div><div class="line">                   break;</div><div class="line">               &#125;</div><div class="line">               if (needWake &amp;&amp; p.isAsynchronous()) &#123;</div><div class="line">                   needWake = false;</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">           msg.next = p; // invariant: p == prev.next</div><div class="line">           prev.next = msg;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       // We can assume mPtr != 0 because mQuitting is false.</div><div class="line">       if (needWake) &#123;</div><div class="line">           nativeWake(mPtr);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">   return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>整个enqueueMessage方法的过程就是先持有MessageQueue.this锁，然后将Message放入队列中，放入队列的过程是：</p>
+<ol>
+<li>如果队列为空，或者当前处理的时间点为0（when的数值，when表示Message将要执行的时间点），或者当前Message需要处理的时间点先于队列中的首节点，那么就将Message放入队列首部，否则进行第2步。</li>
+<li>遍历队列中Message，找到when比当前Message的when大的Message，将Message插入到该Message之前，如果没找到则将Message插入到队列最后。</li>
+<li>判断是否需要唤醒，一般是当前队列为空的情况下，next那边会进入睡眠，需要enqueue这边唤醒next函数。后面会详细介绍</li>
+</ol>
+<p>执行完后，会释放持有的MessageQueue.this的锁。这样整个enqueueMessage方法算是完了，然后看看读取Message的MessageQueue的next方法。</p>
+<h4 id="MessageQueue的next方法"><a href="#MessageQueue的next方法" class="headerlink" title="MessageQueue的next方法"></a>MessageQueue的next方法</h4><p>MessageQueue的next方法是从哪里调用的呢？先看一个线程对Looper的标准用法是:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">class LoopThread extends Thread&#123;</div><div class="line">public Handler mHandler;</div><div class="line">    public void run()&#123;</div><div class="line">        Looper.prepare();</div><div class="line">        mHandler = new Handler() &#123;</div><div class="line">              public void handleMessage(Message msg) &#123;</div><div class="line">                  // process incoming messages here</div><div class="line">              &#125;</div><div class="line">          &#125;;        </div><div class="line">        Looper.loop();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>prepare方法我们前面已经看过了，就是初始化ThreadLocal变量Looper。loop()方法就是循环读取MessageQueue中Message，然后处理每一个Message。我们看看Looper.loop方法源码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">public static void loop() &#123;</div><div class="line">   final Looper me = myLooper();</div><div class="line">   if (me == null) &#123;</div><div class="line">       throw new RuntimeException(&quot;No Looper; Looper.prepare() wasn&apos;t called on this thread.&quot;);</div><div class="line">   &#125;</div><div class="line">   final MessageQueue queue = me.mQueue;</div><div class="line"></div><div class="line">   // Make sure the identity of this thread is that of the local process,</div><div class="line">   // and keep track of what that identity token actually is.</div><div class="line">   Binder.clearCallingIdentity();</div><div class="line">   final long ident = Binder.clearCallingIdentity();</div><div class="line"></div><div class="line">   for (;;) &#123;</div><div class="line">       Message msg = queue.next(); // might block 此处就是next方法调用的地方</div><div class="line">       if (msg == null) &#123;</div><div class="line">           // No message indicates that the message queue is quitting.</div><div class="line">           return;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       // This must be in a local variable, in case a UI event sets the logger</div><div class="line">       Printer logging = me.mLogging;</div><div class="line">       if (logging != null) &#123;</div><div class="line">           logging.println(&quot;&gt;&gt;&gt;&gt;&gt; Dispatching to &quot; + msg.target + &quot; &quot; +</div><div class="line">                   msg.callback + &quot;: &quot; + msg.what);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       msg.target.dispatchMessage(msg);</div><div class="line"></div><div class="line">       if (logging != null) &#123;</div><div class="line">           logging.println(&quot;&lt;&lt;&lt;&lt;&lt; Finished to &quot; + msg.target + &quot; &quot; + msg.callback);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       // Make sure that during the course of dispatching the</div><div class="line">       // identity of the thread wasn&apos;t corrupted.</div><div class="line">       final long newIdent = Binder.clearCallingIdentity();</div><div class="line">       if (ident != newIdent) &#123;</div><div class="line">           Log.wtf(TAG, &quot;Thread identity changed from 0x&quot;</div><div class="line">                   + Long.toHexString(ident) + &quot; to 0x&quot;</div><div class="line">                   + Long.toHexString(newIdent) + &quot; while dispatching to &quot;</div><div class="line">                   + msg.target.getClass().getName() + &quot; &quot;</div><div class="line">                   + msg.callback + &quot; what=&quot; + msg.what);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       msg.recycleUnchecked();</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>整个loop函数大概的过程就是先调用MessageQueue.next方法获取一个Message，然后调用Message的target的dispatchMessage方法来处理Message，Message的target就是发送这个Message的Handler。处理的过程是先看Message的callback有没有实现，如果有，则使用调用callback的run方法，如果没有则看Handler的callback是否为空，如果非空，则使用handler的callback的handleMessage方法来处理Message，如果为空，则调用Handler的handleMessage方法处理。</p>
+<p>我们主要看next，从注释来看，next方法可能会阻塞，先看next方法的源码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">Message next() &#123;</div><div class="line">   // Return here if the message loop has already quit and been disposed.</div><div class="line">   // This can happen if the application tries to restart a looper after quit</div><div class="line">   // which is not supported.</div><div class="line">   final long ptr = mPtr;  //mPrt是native层的MessageQueue的指针</div><div class="line">   if (ptr == 0) &#123;</div><div class="line">       return null;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   int pendingIdleHandlerCount = -1; // -1 only during first iteration</div><div class="line">   int nextPollTimeoutMillis = 0;</div><div class="line">   for (;;) &#123;</div><div class="line">       if (nextPollTimeoutMillis != 0) &#123;</div><div class="line">           Binder.flushPendingCommands();</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       nativePollOnce(ptr, nextPollTimeoutMillis); // jni函数</div><div class="line"></div><div class="line">       synchronized (this) &#123;</div><div class="line">           // Try to retrieve the next message.  Return if found.</div><div class="line">           final long now = SystemClock.uptimeMillis();</div><div class="line">           Message prevMsg = null;</div><div class="line">           Message msg = mMessages;</div><div class="line">           if (msg != null &amp;&amp; msg.target == null) &#123; //target 正常情况下都不会为null，在postBarrier会出现target为null的Message</div><div class="line">               // Stalled by a barrier.  Find the next asynchronous message in the queue.</div><div class="line">               do &#123;</div><div class="line">                   prevMsg = msg;</div><div class="line">                   msg = msg.next;</div><div class="line">               &#125; while (msg != null &amp;&amp; !msg.isAsynchronous());</div><div class="line">           &#125;</div><div class="line">           if (msg != null) &#123;</div><div class="line">               if (now &lt; msg.when) &#123;</div><div class="line">                   // Next message is not ready.  Set a timeout to wake up when it is ready.</div><div class="line">                   nextPollTimeoutMillis = (int) Math.min(msg.when - now, Integer.MAX_VALUE);</div><div class="line">               &#125; else &#123;</div><div class="line">                   // Got a message.</div><div class="line">                   mBlocked = false;</div><div class="line">                   if (prevMsg != null) &#123;</div><div class="line">                       prevMsg.next = msg.next;</div><div class="line">                   &#125; else &#123;</div><div class="line">                       mMessages = msg.next;</div><div class="line">                   &#125;</div><div class="line">                   msg.next = null;</div><div class="line">                   if (DEBUG) Log.v(TAG, &quot;Returning message: &quot; + msg);</div><div class="line">                   msg.markInUse();</div><div class="line">                   return msg;</div><div class="line">               &#125;</div><div class="line">           &#125; else &#123;</div><div class="line">               // No more messages.</div><div class="line">               nextPollTimeoutMillis = -1; // 等待时间无限长</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           // Process the quit message now that all pending messages have been handled.</div><div class="line">           if (mQuitting) &#123;</div><div class="line">               dispose();</div><div class="line">               return null;</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           // If first time idle, then get the number of idlers to run.</div><div class="line">           // Idle handles only run if the queue is empty or if the first message</div><div class="line">           // in the queue (possibly a barrier) is due to be handled in the future.</div><div class="line">           if (pendingIdleHandlerCount &lt; 0</div><div class="line">                   &amp;&amp; (mMessages == null || now &lt; mMessages.when)) &#123;</div><div class="line">               pendingIdleHandlerCount = mIdleHandlers.size();</div><div class="line">           &#125;</div><div class="line">           if (pendingIdleHandlerCount &lt;= 0) &#123;</div><div class="line">               // No idle handlers to run.  Loop and wait some more.</div><div class="line">               mBlocked = true;</div><div class="line">               continue;</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           if (mPendingIdleHandlers == null) &#123;</div><div class="line">               mPendingIdleHandlers = new IdleHandler[Math.max(pendingIdleHandlerCount, 4)];</div><div class="line">           &#125;</div><div class="line">           mPendingIdleHandlers = mIdleHandlers.toArray(mPendingIdleHandlers);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       // Run the idle handlers.</div><div class="line">       // We only ever reach this code block during the first iteration.</div><div class="line">       for (int i = 0; i &lt; pendingIdleHandlerCount; i++) &#123; //运行idle</div><div class="line">           final IdleHandler idler = mPendingIdleHandlers[i];</div><div class="line">           mPendingIdleHandlers[i] = null; // release the reference to the handler</div><div class="line"></div><div class="line">           boolean keep = false;</div><div class="line">           try &#123;</div><div class="line">               keep = idler.queueIdle();</div><div class="line">           &#125; catch (Throwable t) &#123;</div><div class="line">               Log.wtf(TAG, &quot;IdleHandler threw exception&quot;, t);</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           if (!keep) &#123;</div><div class="line">               synchronized (this) &#123;</div><div class="line">                   mIdleHandlers.remove(idler);</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       // Reset the idle handler count to 0 so we do not run them again.</div><div class="line">       pendingIdleHandlerCount = 0;</div><div class="line"></div><div class="line">       // While calling an idle handler, a new message could have been delivered</div><div class="line">       // so go back and look again for a pending message without waiting.</div><div class="line">       nextPollTimeoutMillis = 0;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>整个next函数的主要是执行步骤是:</p>
+<ul>
+<li>step1: 初始化操作，如果mPtr为null，则直接返回null，设置nextPollTimeoutMillis为0，进入下一步。</li>
+<li>step2: 调用nativePollOnce, nativePollOnce有两个参数,第一个为mPtr表示native层MessageQueue的指针，nextPollTimeoutMillis表示超时返回时间，调用这个nativePollOnce会等待wake，如果超过nextPollTimeoutMillis时间，则不管有没有被唤醒都会返回。-1表示一直等待，0表示立刻返回。下一小节单独介绍这个函数。</li>
+<li>step3: 获取队列的头Message(msg)，如果头Message的target为null，则查找一个异步Message来进行下一步处理。当队列中添加了同步Barrier的时候target会为null。</li>
+<li>step4: 判断上一步获取的msg是否为null，为null说明当前队列中没有msg，设置等待时间nextPollTimeoutMillis为-1。实际上是等待enqueueMessage的nativeWake来唤醒，执行step4。如果非null，则下一步</li>
+<li>step5: 判断msg的执行时间(when)是否比当前时间(now)的大，如果小，则将msg从队列中移除，并且返回msg，结束。如果大则设置等待时间nextPollTimeoutMillis为(int) Math.min(msg.when - now, Integer.MAX_VALUE)，执行时间与当前时间的差与MAX_VALUE的较小值。执行下一步</li>
+<li>step6: 判断是否MessageQueue是否已经取消，如果取消的话则返回null，否则下一步</li>
+<li>step7: 运行idle Handle，idle表示当前有空闲时间的时候执行，而运行到这一步的时候，表示消息队列处理已经是出于空闲时间了（队列中没有Message，或者头部Message的执行时间(when)在当前时间之后）。如果没有idle，则继续step2，如果有则执行idleHandler的queueIdle方法，我们可以自己添加IdleHandler到MessageQueue里面（addIdleHandler方法），执行完后，回到step2。</li>
+</ul>
+<p>需要说的时候，我们平常只是使用Message，但是实际上IdleHandler如果使用的好，应该会达到意想不到的效果，它表示MessageQueue有空闲时间的时候执行一下。然后介绍一下nativePollOnce与nativeWake方法</p>
+<h3 id="native层机制"><a href="#native层机制" class="headerlink" title="native层机制"></a>native层机制</h3><p>nativePollOnce与nativeWake是两个jni方法，这两个方法jni实现方法在frameworks/base/core/jni/android_os_MessageQueue.cpp。这个是MessageQueue的native层内容。native层的NativeMessageQueue初始化是在nativeInit方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">static jlong android_os_MessageQueue_nativeInit(JNIEnv* env, jclass clazz) &#123;</div><div class="line">   NativeMessageQueue* nativeMessageQueue = new NativeMessageQueue();</div><div class="line">   if (!nativeMessageQueue) &#123;</div><div class="line">       jniThrowRuntimeException(env, &quot;Unable to allocate native queue&quot;);</div><div class="line">       return 0;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   nativeMessageQueue-&gt;incStrong(env);</div><div class="line">   return reinterpret_cast&lt;jlong&gt;(nativeMessageQueue);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>对应的java层方法是nativeInit，在MessageQueue构造函数的时候调用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">MessageQueue(boolean quitAllowed) &#123;</div><div class="line">   mQuitAllowed = quitAllowed;</div><div class="line">   mPtr = nativeInit();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>而NativeMessageQueue的构造函数是:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">NativeMessageQueue::NativeMessageQueue() :</div><div class="line">       mPollEnv(NULL), mPollObj(NULL), mExceptionObj(NULL) &#123;</div><div class="line">   mLooper = Looper::getForThread();</div><div class="line">   if (mLooper == NULL) &#123;</div><div class="line">       mLooper = new Looper(false);</div><div class="line">       Looper::setForThread(mLooper);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>创建了一个native层的Looper。Looper的源码在system/core/libutils/Looper.cpp。Looper通过epoll_create创建了一个mEpollFd作为epoll的fd，并且创建了一个mWakeEventFd，用来监听java层的wake，同时可以通过Looper的addFd方法来添加新的fd监听。</p>
+<h4 id="nativePollOnce"><a href="#nativePollOnce" class="headerlink" title="nativePollOnce"></a>nativePollOnce</h4><p>nativePollOnce是每次调用next方法获取消息的时候调用的:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">static void android_os_MessageQueue_nativePollOnce(JNIEnv* env, jobject obj,</div><div class="line">       jlong ptr, jint timeoutMillis) &#123;</div><div class="line">   NativeMessageQueue* nativeMessageQueue = reinterpret_cast&lt;NativeMessageQueue*&gt;(ptr);</div><div class="line">   nativeMessageQueue-&gt;pollOnce(env, obj, timeoutMillis);</div><div class="line">&#125;</div><div class="line"></div><div class="line">void NativeMessageQueue::pollOnce(JNIEnv* env, jobject pollObj, int timeoutMillis) &#123;</div><div class="line">   mPollEnv = env;</div><div class="line">   mPollObj = pollObj;</div><div class="line">   mLooper-&gt;pollOnce(timeoutMillis);</div><div class="line">   mPollObj = NULL;</div><div class="line">   mPollEnv = NULL;</div><div class="line"></div><div class="line">   if (mExceptionObj) &#123;</div><div class="line">       env-&gt;Throw(mExceptionObj);</div><div class="line">       env-&gt;DeleteLocalRef(mExceptionObj);</div><div class="line">       mExceptionObj = NULL;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这个方法的native层方法最终会调用Looper的pollOnce:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div><div class="line">165</div><div class="line">166</div><div class="line">167</div><div class="line">168</div><div class="line">169</div><div class="line">170</div><div class="line">171</div><div class="line">172</div><div class="line">173</div><div class="line">174</div><div class="line">175</div><div class="line">176</div><div class="line">177</div><div class="line">178</div><div class="line">179</div><div class="line">180</div><div class="line">181</div><div class="line">182</div><div class="line">183</div><div class="line">184</div><div class="line">185</div><div class="line">186</div><div class="line">187</div><div class="line">188</div><div class="line">189</div><div class="line">190</div><div class="line">191</div><div class="line">192</div><div class="line">193</div></pre></td><td class="code"><pre><div class="line">int Looper::pollOnce(int timeoutMillis, int* outFd, int* outEvents, void** outData) &#123;</div><div class="line">   int result = 0;</div><div class="line">   for (;;) &#123;</div><div class="line">       while (mResponseIndex &lt; mResponses.size()) &#123;</div><div class="line">           const Response&amp; response = mResponses.itemAt(mResponseIndex++);</div><div class="line">           int ident = response.request.ident;</div><div class="line">           if (ident &gt;= 0) &#123;</div><div class="line">               int fd = response.request.fd;</div><div class="line">               int events = response.events;</div><div class="line">               void* data = response.request.data;</div><div class="line">#if DEBUG_POLL_AND_WAKE</div><div class="line">               ALOGD(&quot;%p ~ pollOnce - returning signalled identifier %d: &quot;</div><div class="line">                       &quot;fd=%d, events=0x%x, data=%p&quot;,</div><div class="line">                       this, ident, fd, events, data);</div><div class="line">#endif</div><div class="line">               if (outFd != NULL) *outFd = fd;</div><div class="line">               if (outEvents != NULL) *outEvents = events;</div><div class="line">               if (outData != NULL) *outData = data;</div><div class="line">               return ident;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       if (result != 0) &#123;</div><div class="line">#if DEBUG_POLL_AND_WAKE</div><div class="line">           ALOGD(&quot;%p ~ pollOnce - returning result %d&quot;, this, result);</div><div class="line">#endif</div><div class="line">           if (outFd != NULL) *outFd = 0;</div><div class="line">           if (outEvents != NULL) *outEvents = 0;</div><div class="line">           if (outData != NULL) *outData = NULL;</div><div class="line">           return result;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       result = pollInner(timeoutMillis);</div><div class="line">   &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int Looper::pollInner(int timeoutMillis) &#123;</div><div class="line">#if DEBUG_POLL_AND_WAKE</div><div class="line">   ALOGD(&quot;%p ~ pollOnce - waiting: timeoutMillis=%d&quot;, this, timeoutMillis);</div><div class="line">#endif</div><div class="line"></div><div class="line">   // Adjust the timeout based on when the next message is due.</div><div class="line">   if (timeoutMillis != 0 &amp;&amp; mNextMessageUptime != LLONG_MAX) &#123;</div><div class="line">       nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);</div><div class="line">       int messageTimeoutMillis = toMillisecondTimeoutDelay(now, mNextMessageUptime);</div><div class="line">       if (messageTimeoutMillis &gt;= 0</div><div class="line">               &amp;&amp; (timeoutMillis &lt; 0 || messageTimeoutMillis &lt; timeoutMillis)) &#123;</div><div class="line">           timeoutMillis = messageTimeoutMillis;</div><div class="line">       &#125;</div><div class="line">#if DEBUG_POLL_AND_WAKE</div><div class="line">       ALOGD(&quot;%p ~ pollOnce - next message in %&quot; PRId64 &quot;ns, adjusted timeout: timeoutMillis=%d&quot;,</div><div class="line">               this, mNextMessageUptime - now, timeoutMillis);</div><div class="line">#endif</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   // Poll.</div><div class="line">   int result = POLL_WAKE;</div><div class="line">   mResponses.clear();</div><div class="line">   mResponseIndex = 0;</div><div class="line"></div><div class="line">   // We are about to idle.</div><div class="line">   mPolling = true;</div><div class="line"></div><div class="line">   struct epoll_event eventItems[EPOLL_MAX_EVENTS];</div><div class="line">   int eventCount = epoll_wait(mEpollFd, eventItems, EPOLL_MAX_EVENTS, timeoutMillis);</div><div class="line"></div><div class="line">   // No longer idling.</div><div class="line">   mPolling = false;</div><div class="line"></div><div class="line">   // Acquire lock.</div><div class="line">   mLock.lock();</div><div class="line"></div><div class="line">   // Rebuild epoll set if needed.</div><div class="line">   if (mEpollRebuildRequired) &#123;</div><div class="line">       mEpollRebuildRequired = false;</div><div class="line">       rebuildEpollLocked();</div><div class="line">       goto Done;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   // Check for poll error.</div><div class="line">   if (eventCount &lt; 0) &#123;</div><div class="line">       if (errno == EINTR) &#123;</div><div class="line">           goto Done;</div><div class="line">       &#125;</div><div class="line">       ALOGW(&quot;Poll failed with an unexpected error, errno=%d&quot;, errno);</div><div class="line">       result = POLL_ERROR;</div><div class="line">       goto Done;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   // Check for poll timeout.</div><div class="line">   if (eventCount == 0) &#123;</div><div class="line">#if DEBUG_POLL_AND_WAKE</div><div class="line">       ALOGD(&quot;%p ~ pollOnce - timeout&quot;, this);</div><div class="line">#endif</div><div class="line">       result = POLL_TIMEOUT;</div><div class="line">       goto Done;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   // Handle all events.</div><div class="line">#if DEBUG_POLL_AND_WAKE</div><div class="line">   ALOGD(&quot;%p ~ pollOnce - handling events from %d fds&quot;, this, eventCount);</div><div class="line">#endif</div><div class="line"></div><div class="line">   for (int i = 0; i &lt; eventCount; i++) &#123;</div><div class="line">       int fd = eventItems[i].data.fd;</div><div class="line">       uint32_t epollEvents = eventItems[i].events;</div><div class="line">       if (fd == mWakeEventFd) &#123;</div><div class="line">           if (epollEvents &amp; EPOLLIN) &#123;</div><div class="line">               awoken();</div><div class="line">           &#125; else &#123;</div><div class="line">               ALOGW(&quot;Ignoring unexpected epoll events 0x%x on wake event fd.&quot;, epollEvents);</div><div class="line">           &#125;</div><div class="line">       &#125; else &#123;</div><div class="line">           ssize_t requestIndex = mRequests.indexOfKey(fd);</div><div class="line">           if (requestIndex &gt;= 0) &#123;</div><div class="line">               int events = 0;</div><div class="line">               if (epollEvents &amp; EPOLLIN) events |= EVENT_INPUT;</div><div class="line">               if (epollEvents &amp; EPOLLOUT) events |= EVENT_OUTPUT;</div><div class="line">               if (epollEvents &amp; EPOLLERR) events |= EVENT_ERROR;</div><div class="line">               if (epollEvents &amp; EPOLLHUP) events |= EVENT_HANGUP;</div><div class="line">               pushResponse(events, mRequests.valueAt(requestIndex));</div><div class="line">           &#125; else &#123;</div><div class="line">               ALOGW(&quot;Ignoring unexpected epoll events 0x%x on fd %d that is &quot;</div><div class="line">                       &quot;no longer registered.&quot;, epollEvents, fd);</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">Done: ;</div><div class="line"></div><div class="line">   // Invoke pending message callbacks.</div><div class="line">   mNextMessageUptime = LLONG_MAX;</div><div class="line">   while (mMessageEnvelopes.size() != 0) &#123;</div><div class="line">       nsecs_t now = systemTime(SYSTEM_TIME_MONOTONIC);</div><div class="line">       const MessageEnvelope&amp; messageEnvelope = mMessageEnvelopes.itemAt(0);</div><div class="line">       if (messageEnvelope.uptime &lt;= now) &#123;</div><div class="line">           // Remove the envelope from the list.</div><div class="line">           // We keep a strong reference to the handler until the call to handleMessage</div><div class="line">           // finishes.  Then we drop it so that the handler can be deleted *before*</div><div class="line">           // we reacquire our lock.</div><div class="line">           &#123; // obtain handler</div><div class="line">               sp&lt;MessageHandler&gt; handler = messageEnvelope.handler;</div><div class="line">               Message message = messageEnvelope.message;</div><div class="line">               mMessageEnvelopes.removeAt(0);</div><div class="line">               mSendingMessage = true;</div><div class="line">               mLock.unlock();</div><div class="line"></div><div class="line">#if DEBUG_POLL_AND_WAKE || DEBUG_CALLBACKS</div><div class="line">               ALOGD(&quot;%p ~ pollOnce - sending message: handler=%p, what=%d&quot;,</div><div class="line">                       this, handler.get(), message.what);</div><div class="line">#endif</div><div class="line">               handler-&gt;handleMessage(message);</div><div class="line">           &#125; // release handler</div><div class="line"></div><div class="line">           mLock.lock();</div><div class="line">           mSendingMessage = false;</div><div class="line">           result = POLL_CALLBACK;</div><div class="line">       &#125; else &#123;</div><div class="line">           // The last message left at the head of the queue determines the next wakeup time.</div><div class="line">           mNextMessageUptime = messageEnvelope.uptime;</div><div class="line">           break;</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   // Release lock.</div><div class="line">   mLock.unlock();</div><div class="line"></div><div class="line">   // Invoke all response callbacks.</div><div class="line">   for (size_t i = 0; i &lt; mResponses.size(); i++) &#123;</div><div class="line">       Response&amp; response = mResponses.editItemAt(i);</div><div class="line">       if (response.request.ident == POLL_CALLBACK) &#123;</div><div class="line">           int fd = response.request.fd;</div><div class="line">           int events = response.events;</div><div class="line">           void* data = response.request.data;</div><div class="line">#if DEBUG_POLL_AND_WAKE || DEBUG_CALLBACKS</div><div class="line">           ALOGD(&quot;%p ~ pollOnce - invoking fd event callback %p: fd=%d, events=0x%x, data=%p&quot;,</div><div class="line">                   this, response.request.callback.get(), fd, events, data);</div><div class="line">#endif</div><div class="line">           // Invoke the callback.  Note that the file descriptor may be closed by</div><div class="line">           // the callback (and potentially even reused) before the function returns so</div><div class="line">           // we need to be a little careful when removing the file descriptor afterwards.</div><div class="line">           int callbackResult = response.request.callback-&gt;handleEvent(fd, events, data);</div><div class="line">           if (callbackResult == 0) &#123;</div><div class="line">               removeFd(fd, response.request.seq);</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           // Clear the callback reference in the response structure promptly because we</div><div class="line">           // will not clear the response vector itself until the next poll.</div><div class="line">           response.request.callback.clear();</div><div class="line">           result = POLL_CALLBACK;</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">   return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个方法超长，但实际上Looper的pollOnce方法主要有5步：</p>
+<ol>
+<li>调用epoll_wait方法等待所监听的fd的写入，其方法原型如下:<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">int epoll_wait(int epfd, struct epoll_event * events, intmaxevents, int timeout)</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>调用的方法参数为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">int eventCount = epoll_wait(mEpollFd, eventItems, EPOLL_MAX_EVENTS, timeoutMillis);</div></pre></td></tr></table></figure></p>
+<p>eventItems里面就包含了mWakeEvent和通过addFd添加fd时加入的Event。该方法会阻塞，当timeoutMillis(对应java层的nextPollTimeoutMillis)到了时间，该方法会返回，或者eventItems有事件来了，该方法会返回。返回之后就是干下一件事</p>
+<ol>
+<li>判断有没有event，因为可能是timeoutMillis到了返回的，如果没有直接进行4.</li>
+<li>读取eventItems的内容，如果eventItem的fd是mWakeEventFd，则调用awoken方法，读取Looper.wake写入的内容，如果是其他的fd，则使用pushResponse来读取，并且将内容放入Response当中。</li>
+<li>处理NativeMessageQueue的消息，这些消息是native层的消息</li>
+<li>处理pushResponse写入的内容。</li>
+</ol>
+<p>里面主要是干了三件事处理wakeEventFd的输入内容，其他fd的输入内容，以及NativeMessageQueue里面的Message。 </p>
+<h4 id="nativeWake"><a href="#nativeWake" class="headerlink" title="nativeWake"></a>nativeWake</h4><p>实际上最后就是调用了Looper的wake方法:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">//android_os_MessageQueue.cpp</div><div class="line">static void android_os_MessageQueue_nativeWake(JNIEnv* env, jclass clazz, jlong ptr) &#123;</div><div class="line">   NativeMessageQueue* nativeMessageQueue = reinterpret_cast&lt;NativeMessageQueue*&gt;(ptr);</div><div class="line">   nativeMessageQueue-&gt;wake();</div><div class="line">&#125;</div><div class="line">void NativeMessageQueue::wake() &#123;</div><div class="line">   mLooper-&gt;wake();</div><div class="line">&#125;</div><div class="line"></div><div class="line">//Looper.cpp</div><div class="line">void Looper::wake() &#123;</div><div class="line">#if DEBUG_POLL_AND_WAKE</div><div class="line">   ALOGD(&quot;%p ~ wake&quot;, this);</div><div class="line">#endif</div><div class="line"></div><div class="line">   uint64_t inc = 1;</div><div class="line">   ssize_t nWrite = TEMP_FAILURE_RETRY(write(mWakeEventFd, &amp;inc, sizeof(uint64_t)));</div><div class="line">   if (nWrite != sizeof(uint64_t)) &#123;</div><div class="line">       if (errno != EAGAIN) &#123;</div><div class="line">           ALOGW(&quot;Could not write wake signal, errno=%d&quot;, errno);</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这样native层的消息队列就算是完了。</p>
+<h3 id="SyncBarrier"><a href="#SyncBarrier" class="headerlink" title="SyncBarrier"></a>SyncBarrier</h3><p>我们在next方法里面看到有这么一段代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">if (msg != null &amp;&amp; msg.target == null) &#123; //target 正常情况下都不会为null，在postBarrier会出现target为null的Message</div><div class="line">               // Stalled by a barrier.  Find the next asynchronous message in the queue.</div><div class="line">               do &#123;</div><div class="line">                   prevMsg = msg;</div><div class="line">                   msg = msg.next;</div><div class="line">               &#125; while (msg != null &amp;&amp; !msg.isAsynchronous());</div><div class="line">           &#125;</div></pre></td></tr></table></figure>
+<p>什么时候msg.target会为null呢？有sync barrier消息的时候，实际上msg.target为null表示sync barrier(同步消息屏障)。MessageQueue有一个postSyncBarrier方法:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">public int postSyncBarrier() &#123;</div><div class="line">   return postSyncBarrier(SystemClock.uptimeMillis());</div><div class="line">&#125;</div><div class="line"></div><div class="line">private int postSyncBarrier(long when) &#123;</div><div class="line">   // Enqueue a new sync barrier token.</div><div class="line">   // We don&apos;t need to wake the queue because the purpose of a barrier is to stall it.</div><div class="line">   synchronized (this) &#123;</div><div class="line">       final int token = mNextBarrierToken++;</div><div class="line">       final Message msg = Message.obtain();</div><div class="line">       msg.markInUse();</div><div class="line">       msg.when = when;</div><div class="line">       msg.arg1 = token;</div><div class="line"></div><div class="line">       Message prev = null;</div><div class="line">       Message p = mMessages;</div><div class="line">       if (when != 0) &#123;</div><div class="line">           while (p != null &amp;&amp; p.when &lt;= when) &#123;</div><div class="line">               prev = p;</div><div class="line">               p = p.next;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">       if (prev != null) &#123; // invariant: p == prev.next</div><div class="line">           msg.next = p;</div><div class="line">           prev.next = msg;</div><div class="line">       &#125; else &#123;</div><div class="line">           msg.next = p;</div><div class="line">           mMessages = msg;</div><div class="line">       &#125;</div><div class="line">       return token;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>对应有removeSyncBarrier方法:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">public void removeSyncBarrier(int token) &#123;</div><div class="line">   // Remove a sync barrier token from the queue.</div><div class="line">   // If the queue is no longer stalled by a barrier then wake it.</div><div class="line">   synchronized (this) &#123;</div><div class="line">       Message prev = null;</div><div class="line">       Message p = mMessages;</div><div class="line">       while (p != null &amp;&amp; (p.target != null || p.arg1 != token)) &#123;</div><div class="line">           prev = p;</div><div class="line">           p = p.next;</div><div class="line">       &#125;</div><div class="line">       if (p == null) &#123;</div><div class="line">           throw new IllegalStateException(&quot;The specified message queue synchronization &quot;</div><div class="line">                   + &quot; barrier token has not been posted or has already been removed.&quot;);</div><div class="line">       &#125;</div><div class="line">       final boolean needWake;</div><div class="line">       if (prev != null) &#123;</div><div class="line">           prev.next = p.next;</div><div class="line">           needWake = false;</div><div class="line">       &#125; else &#123;</div><div class="line">           mMessages = p.next;</div><div class="line">           needWake = mMessages == null || mMessages.target != null;</div><div class="line">       &#125;</div><div class="line">       p.recycleUnchecked();</div><div class="line"></div><div class="line">       // If the loop is quitting then it is already awake.</div><div class="line">       // We can assume mPtr != 0 when mQuitting is false.</div><div class="line">       if (needWake &amp;&amp; !mQuitting) &#123;</div><div class="line">           nativeWake(mPtr);  // 需要唤醒，因为队首元素是SyncBarrier，队列中有消息但是没有异步消息的时候，next方法同样会阻塞等待。</div><div class="line">       &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>看next方法的源码，每次消息队列中有barrier的时候，next会寻找队列中的异步消息来处理。如果没有异步消息，设置nextPollTimeoutMillis = -1，进入阻塞等待新消息的到来。异步消息主要是系统发送的，而系统中的异步消息主要有触摸事件，按键事件的消息。系统中调用postSyncBarrier和removeSyncBarrier主要实在ViewRootImpl的scheduleTraversals和unscheduleTraversals，以及doTraversals方法中。从源码可以猜到每次调用postSyncBarrier后都会调用removeSyncBarrier，不然同步消息就没法执行了（看next源码理解这一点）。可以看一下scheduleTraversal方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">//ViewRootImpl.java</div><div class="line">void scheduleTraversals() &#123;</div><div class="line">   if (!mTraversalScheduled) &#123;</div><div class="line">       mTraversalScheduled = true;</div><div class="line">       mTraversalBarrier = mHandler.getLooper().getQueue().postSyncBarrier();</div><div class="line">       mChoreographer.postCallback(</div><div class="line">               Choreographer.CALLBACK_TRAVERSAL, mTraversalRunnable, null);</div><div class="line">       if (!mUnbufferedInputDispatch) &#123;</div><div class="line">           scheduleConsumeBatchedInput();</div><div class="line">       &#125;</div><div class="line">       notifyRendererOfFramePending();</div><div class="line">       pokeDrawLockIfNeeded();</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>实际上MessageQueue的源码一直在变化的，2.3才加入了native层的Message，在4.0.1还没有SyncBarrier，4.1才开始加入SyncBarrier的，而且MessageQueue没有postSyncBarrier方法，只有enqueueSyncBarrier方法，Looper里面有个postSyncBarrier方法。</p>
+<h4 id="SyncBarrier的意义"><a href="#SyncBarrier的意义" class="headerlink" title="SyncBarrier的意义"></a>SyncBarrier的意义</h4><p>前面介绍了一下每个版本的特点，我想介绍一种SyncBarrier的意义，我们介绍了使用SyncBarrier主要是ViewRootImpl中的scheduleTraversal的时候，那是跟UI事件相关的，像派发消息会通过发送Message发到主线程：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">public void dispatchInputEvent(InputEvent event, InputEventReceiver receiver) &#123;</div><div class="line">   SomeArgs args = SomeArgs.obtain();</div><div class="line">   args.arg1 = event;</div><div class="line">   args.arg2 = receiver;</div><div class="line">   Message msg = mHandler.obtainMessage(MSG_DISPATCH_INPUT_EVENT, args);</div><div class="line">   msg.setAsynchronous(true);</div><div class="line">   mHandler.sendMessage(msg);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>注意它这里就是使用的异步Message，使用了<code>msg.setAsyncronous(true)</code>。 而SyncBarrier有什么用处呢？我们刚刚介绍的时候，当消息队列的第一个Message的target的时候，表示它是一个SyncBarrier，它会阻拦同步消息，而选择队列中第一个异步消息处理，如果没有则会阻塞。这表示什么呢？这是表示第一个Message是SyncBarrier的时候，会只处理异步消息。而我们前面介绍了InputEvent的时候，它就是异步消息，在有SyncBarrier的时候就会被优先处理。所以在调用了scheduleTraversal的时候，就会只处理触摸事件这些消息了，保证用户体验。保证了触摸事件及时处理，实际上这也能减少ANR。如果这个时候MessageQueue中有很多Message，也能够及时处理那些触摸事件的Message了。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>MessageQueue是Android消息消息机制的内部核心，理解好MessageQueue更能理解好Android应用层的消息逻辑。另外MessageQueue的代码一直在不断地变化，对照不同版本的代码，真的能领略代码改变时的目的，从演变中学习。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/10/05/hugo-sourcecode-analysis/" rel="next" title="Hugo源码分析">
+                <i class="fa fa-chevron-left"></i> Hugo源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/05/2013-12-1-repair-ubuntu/" rel="prev" title="修复ubuntu系统的思考">
+                修复ubuntu系统的思考 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">74</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">Kategorien</span>
+                
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">Tags</span>
+                
+              </div>
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#MessageQueue的next与enqueueMessage方法"><span class="nav-number">1.</span> <span class="nav-text">MessageQueue的next与enqueueMessage方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MessageQueue-enqueueMessage"><span class="nav-number">1.1.</span> <span class="nav-text">MessageQueue enqueueMessage</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MessageQueue的next方法"><span class="nav-number">1.2.</span> <span class="nav-text">MessageQueue的next方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#native层机制"><span class="nav-number">2.</span> <span class="nav-text">native层机制</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#nativePollOnce"><span class="nav-number">2.1.</span> <span class="nav-text">nativePollOnce</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#nativeWake"><span class="nav-number">2.2.</span> <span class="nav-text">nativeWake</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SyncBarrier"><span class="nav-number">3.</span> <span class="nav-text">SyncBarrier</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#SyncBarrier的意义"><span class="nav-number">3.1.</span> <span class="nav-text">SyncBarrier的意义</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
