@@ -84,15 +84,15 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="AppWidget源码分析（2）---updateAppWidget过程分析">
 <meta property="og:url" content="http://houzhi.me/2016/08/13/android-appwidget-sourcecode2/index.html">
-<meta property="og:site_name" content="Creative ,Challenging and Cogitative">
+<meta property="og:site_name" content="Creative, Challenging and Cogitative">
 <meta property="og:description" content="前面一篇文章，分析了AppWidgetProvider和RemoteView的源码，从中我们可以知道它们的实现原理，AppWidgetProvider是一个BroadcastReceiver，所以它是通过广播接收通知的，收到更新通知后，AppWidgetProvider需要去提供View供远程进程显示，而提供的View则是使用RemoteView来代替，通过RemoteView（是一个Parcel">
-<meta property="og:image" content="http://img.blog.csdn.net/20160813013648728">
-<meta property="og:image" content="http://img.blog.csdn.net/20160813013708416">
-<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta property="og:image" content="http://img-blog.csdn.net/20160813013648728">
+<meta property="og:image" content="http://img-blog.csdn.net/20160813013708416">
+<meta property="og:updated_time" content="2018-12-17T15:09:21.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AppWidget源码分析（2）---updateAppWidget过程分析">
 <meta name="twitter:description" content="前面一篇文章，分析了AppWidgetProvider和RemoteView的源码，从中我们可以知道它们的实现原理，AppWidgetProvider是一个BroadcastReceiver，所以它是通过广播接收通知的，收到更新通知后，AppWidgetProvider需要去提供View供远程进程显示，而提供的View则是使用RemoteView来代替，通过RemoteView（是一个Parcel">
-<meta name="twitter:image" content="http://img.blog.csdn.net/20160813013648728">
+<meta name="twitter:image" content="http://img-blog.csdn.net/20160813013648728">
 
 
 
@@ -128,7 +128,7 @@
 
 
 
-  <title>AppWidget源码分析（2）---updateAppWidget过程分析 | Creative ,Challenging and Cogitative</title>
+  <title>AppWidget源码分析（2）---updateAppWidget过程分析 | Creative, Challenging and Cogitative</title>
   
 
 
@@ -158,7 +158,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Creative ,Challenging and Cogitative</span>
+        <span class="site-title">Creative, Challenging and Cogitative</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -188,7 +188,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            HOME
           </a>
         </li>
       
@@ -198,7 +198,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            ARCHIVE
           </a>
         </li>
       
@@ -244,7 +244,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Creative ,Challenging and Cogitative">
+      <meta itemprop="name" content="Creative, Challenging and Cogitative">
     </span>
 
     
@@ -262,7 +262,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-13T00:00:00+08:00">
                 2016-08-13
@@ -304,11 +304,11 @@
       
         <p>前面一篇文章，分析了AppWidgetProvider和RemoteView的源码，从中我们可以知道它们的实现原理，AppWidgetProvider是一个BroadcastReceiver，所以它是通过广播接收通知的，收到更新通知后，AppWidgetProvider需要去提供View供远程进程显示，而提供的View则是使用RemoteView来代替，通过RemoteView（是一个Parcelable，可跨进程传输数据类型）来作为媒介去传递给远程进程。由远程进程解析RemoteView，然后显示RemoteView表示的真正的View。在这篇文章将分析这个传输过程。</p>
 <h2 id="流程"><a href="#流程" class="headerlink" title="流程"></a>流程</h2><p>还是先看一下上一篇给出的一个过程图示：</p>
-<p><img src="http://img.blog.csdn.net/20160813013648728" alt="这里写图片描述"></p>
+<p><img src="http://img-blog.csdn.net/20160813013648728" alt="这里写图片描述"></p>
 <p>实际上，AppWidgetProvider是通过AppWidgetManager来更新View的，而AppWidgetManager里面是有一个IAppWidgetService，一看就知道这是一个idle生成的，是一个Binder通信。关于Binder通信我之前也写过一篇文章叫<a href="http://blog.houzhi.me/2016/04/23/android-sourcecode-proxy-binder" target="_blank" rel="external">Android源码代理模式—Binder</a>，可以参考一下。而服务端的AppWidgetService是AppWidgetServiceImpl，AppWidgetServiceImpl又会通过一个IAppWidgetHost来跨进程通知AppWidgetHost，AppWidgetHost内部的IAppWidgetHost是AppWidgetHost.Callback。这样就到了显示我们的AppWidget的进程（大部分是Launcher应用）。</p>
 <p>分清楚每个部分是在什么进程运行的对于理解整个流程是非常有帮助的，AppWidgetProvider是在我们自己的应用程序进程当中，而AppWidgetService是运行在SystemServer进程，AppWidgetHost则是运行在显示AppWidget的进程中，比如Launcher应用（桌面）。整个流程相当于是跨越了三个进程。</p>
 <h2 id="updateAppWidgetIds过程分析"><a href="#updateAppWidgetIds过程分析" class="headerlink" title="updateAppWidgetIds过程分析"></a>updateAppWidgetIds过程分析</h2><p>这是AppWidgetManager的一个接口函数，根据id来更新AppWidget。先把整个更新过程的时序图拿出来看一下：</p>
-<p><img src="http://img.blog.csdn.net/20160813013708416" alt="这里写图片描述"></p>
+<p><img src="http://img-blog.csdn.net/20160813013708416" alt="这里写图片描述"></p>
 <p>从我们普通的调用AppWidgetManager的updateAppWidget看起吧：</p>
 <pre><code>appWidgetManager.updateAppWidget(appwidgetids,remoteViews);
 </code></pre><ol>
@@ -490,10 +490,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
+            Inhaltsverzeichnis
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
+            Übersicht
           </li>
         </ul>
       
@@ -514,7 +514,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -525,7 +525,7 @@
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">categories</span>
+                  <span class="site-state-item-name">Kategorien</span>
                 
               </div>
             
@@ -536,7 +536,7 @@
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">tags</span>
+                  <span class="site-state-item-name">Tags</span>
                 
               </div>
             
@@ -600,7 +600,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

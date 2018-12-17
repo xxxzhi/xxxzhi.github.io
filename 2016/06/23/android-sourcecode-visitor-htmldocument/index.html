@@ -84,15 +84,15 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android源码访问者模式---HtmlDocument">
 <meta property="og:url" content="http://houzhi.me/2016/06/23/android-sourcecode-visitor-htmldocument/index.html">
-<meta property="og:site_name" content="Creative ,Challenging and Cogitative">
+<meta property="og:site_name" content="Creative, Challenging and Cogitative">
 <meta property="og:description" content="访问者模式是设计模式中相对比较复杂的设计模式，在Android源码中的UnifiedEmail项目中的HtmlDocument就使用了访问者模式，Email中的内容可以是Html文档，而Html文档需要解析保存，HtmlDocument就是html节点的一个容器，本文将介绍HtmlDocument与访问者模式。文中对访问者模式介绍的会相对简单，如果想理解好，建议去看一下Gof的描述，更侧重于与An">
-<meta property="og:image" content="http://houzhi.me/photo/uploads/big/708fc91d287fc3f86d78c9b843b4e131.png">
-<meta property="og:image" content="http://houzhi.me/photo/uploads/big/e0c184b635d5991bfba5146e5aadd843.png">
-<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta property="og:image" content="https://img-blog.csdn.net/20160623231414542">
+<meta property="og:image" content="https://img-blog.csdn.net/20160623231447064">
+<meta property="og:updated_time" content="2018-12-17T15:09:11.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android源码访问者模式---HtmlDocument">
 <meta name="twitter:description" content="访问者模式是设计模式中相对比较复杂的设计模式，在Android源码中的UnifiedEmail项目中的HtmlDocument就使用了访问者模式，Email中的内容可以是Html文档，而Html文档需要解析保存，HtmlDocument就是html节点的一个容器，本文将介绍HtmlDocument与访问者模式。文中对访问者模式介绍的会相对简单，如果想理解好，建议去看一下Gof的描述，更侧重于与An">
-<meta name="twitter:image" content="http://houzhi.me/photo/uploads/big/708fc91d287fc3f86d78c9b843b4e131.png">
+<meta name="twitter:image" content="https://img-blog.csdn.net/20160623231414542">
 
 
 
@@ -128,7 +128,7 @@
 
 
 
-  <title>Android源码访问者模式---HtmlDocument | Creative ,Challenging and Cogitative</title>
+  <title>Android源码访问者模式---HtmlDocument | Creative, Challenging and Cogitative</title>
   
 
 
@@ -158,7 +158,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Creative ,Challenging and Cogitative</span>
+        <span class="site-title">Creative, Challenging and Cogitative</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -188,7 +188,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            HOME
           </a>
         </li>
       
@@ -198,7 +198,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            ARCHIVE
           </a>
         </li>
       
@@ -244,7 +244,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Creative ,Challenging and Cogitative">
+      <meta itemprop="name" content="Creative, Challenging and Cogitative">
     </span>
 
     
@@ -262,7 +262,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-06-23T00:00:00+08:00">
                 2016-06-23
@@ -305,11 +305,11 @@
         <p>访问者模式是设计模式中相对比较复杂的设计模式，在Android源码中的UnifiedEmail项目中的HtmlDocument就使用了访问者模式，Email中的内容可以是Html文档，而Html文档需要解析保存，HtmlDocument就是html节点的一个容器，本文将介绍HtmlDocument与访问者模式。文中对访问者模式介绍的会相对简单，如果想理解好，建议去看一下Gof的描述，更侧重于与Android源码的结合（源码基于6.0.1_r30）。</p>
 <h2 id="访问者模式"><a href="#访问者模式" class="headerlink" title="访问者模式"></a>访问者模式</h2><p>首先看一下访问者模式相关内容。</p>
 <h3 id="意图"><a href="#意图" class="headerlink" title="意图"></a>意图</h3><p>表示一个作用于对象内部结构中的各元素的操作。它使你可以在不改变各元素的类的前提下定义作用于这些元素的新操作。</p>
-<h3 id="UML图"><a href="#UML图" class="headerlink" title="UML图"></a>UML图</h3><p><img src="http://houzhi.me/photo/uploads/big/708fc91d287fc3f86d78c9b843b4e131.png" alt="http://houzhi.me/photo/uploads/big/708fc91d287fc3f86d78c9b843b4e131.png"></p>
+<h3 id="UML图"><a href="#UML图" class="headerlink" title="UML图"></a>UML图</h3><p><img src="https://img-blog.csdn.net/20160623231414542" alt=""></p>
 <p>上面就是访问者模式的简单UML图，通过定义一个外在的Visitor来访问ObjectStructor对象结构中的Element，这样可以变化访问者来访问对象结构中的元素，但又不会影响元素内部结构。</p>
-<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line">abstract class Visitor&#123;</div><div class="line">      public abstract void visitorElement1(ConcreteElement1 element);</div><div class="line">      public abstract void visitorElement2(ConcreteElement2 element);</div><div class="line">&#125;</div><div class="line"></div><div class="line">class ConcreteVisitor1 extends Visitor&#123; </div><div class="line">      public abstract void visitorElement1(ConcreteElement1 element)&#123;</div><div class="line">           element.operate1();</div><div class="line">           // do other things.</div><div class="line">      &#125;</div><div class="line">      public abstract void visitorElement2(ConcreteElement2 element)&#123;</div><div class="line">           element.operate2();</div><div class="line">           // do other things.</div><div class="line">      &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">abstract class Element&#123;</div><div class="line">    public abstract void accept(Visitor visitor);</div><div class="line">&#125;</div><div class="line"></div><div class="line">class ConcreteElement1 extends Element&#123;</div><div class="line">    public void accept(Visitor visitor)&#123;</div><div class="line">        visitor.visitorElement1(this);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">class ConcreteElement2 extends Element&#123;</div><div class="line">    public void accept(Visitor visitor)&#123;</div><div class="line">        visitor.visitorElement2(this);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public class ObjectStructor&#123;</div><div class="line">    List&lt;Element&gt; elements = new ArrayList&lt;Element&gt;();</div><div class="line"></div><div class="line">    elements.add(new ConcreteElement1());</div><div class="line">    elements.add(new ConcreteElement2());</div><div class="line"></div><div class="line">    public void accept(Visitor visitor)&#123;</div><div class="line">        for(Element element: elements)&#123;</div><div class="line">             element.accept(visitor);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String [] args)&#123;</div><div class="line">         ConcreteVisitor1 visitor = new ConcreteVisitor1();</div><div class="line">         ObjectStructor stru = new ObjectStructor();</div><div class="line">         stru.accept(visitor);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line">abstract class Visitor&#123;</div><div class="line">      public abstract void visitorElement1(ConcreteElement1 element);</div><div class="line">      public abstract void visitorElement2(ConcreteElement2 element);</div><div class="line">&#125;</div><div class="line"></div><div class="line">class ConcreteVisitor1 extends Visitor&#123;</div><div class="line">      public abstract void visitorElement1(ConcreteElement1 element)&#123;</div><div class="line">           element.operate1();</div><div class="line">           // do other things.</div><div class="line">      &#125;</div><div class="line">      public abstract void visitorElement2(ConcreteElement2 element)&#123;</div><div class="line">           element.operate2();</div><div class="line">           // do other things.</div><div class="line">      &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">abstract class Element&#123;</div><div class="line">    public abstract void accept(Visitor visitor);</div><div class="line">&#125;</div><div class="line"></div><div class="line">class ConcreteElement1 extends Element&#123;</div><div class="line">    public void accept(Visitor visitor)&#123;</div><div class="line">        visitor.visitorElement1(this);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">class ConcreteElement2 extends Element&#123;</div><div class="line">    public void accept(Visitor visitor)&#123;</div><div class="line">        visitor.visitorElement2(this);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public class ObjectStructor&#123;</div><div class="line">    List&lt;Element&gt; elements = new ArrayList&lt;Element&gt;();</div><div class="line"></div><div class="line">    elements.add(new ConcreteElement1());</div><div class="line">    elements.add(new ConcreteElement2());</div><div class="line"></div><div class="line">    public void accept(Visitor visitor)&#123;</div><div class="line">        for(Element element: elements)&#123;</div><div class="line">             element.accept(visitor);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String [] args)&#123;</div><div class="line">         ConcreteVisitor1 visitor = new ConcreteVisitor1();</div><div class="line">         ObjectStructor stru = new ObjectStructor();</div><div class="line">         stru.accept(visitor);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>上面就是一段简单的访问者模式的代码，访问者模式有几个特点：对象结构内部的元素不会变化，如果变化了，那么Visitor又得变了；对象结构内部元素有不同的接口；需要对对象内部元素有不同的不相关访问，而放在元素内部，又会”污染“元素。</p>
-<h3 id="UnifiedEmail-中的HtmlDocument"><a href="#UnifiedEmail-中的HtmlDocument" class="headerlink" title="UnifiedEmail 中的HtmlDocument"></a>UnifiedEmail 中的HtmlDocument</h3><p><img src="http://houzhi.me/photo/uploads/big/e0c184b635d5991bfba5146e5aadd843.png" alt="http://houzhi.me/photo/uploads/big/e0c184b635d5991bfba5146e5aadd843.png"></p>
+<h3 id="UnifiedEmail-中的HtmlDocument"><a href="#UnifiedEmail-中的HtmlDocument" class="headerlink" title="UnifiedEmail 中的HtmlDocument"></a>UnifiedEmail 中的HtmlDocument</h3><p><img src="https://img-blog.csdn.net/20160623231447064" alt="https://img-blog.csdn.net/20160623231447064"></p>
 <p>上面就是整个HtmlDocument的观察者UML图，它是一个非常经典的观察者模式。HtmlDocument表示html文档，里面包含了Html的组成内容，它包含了Comment(注释)，Text(文本)，Tag(标签)，EndTag(结束标签)这些元素。</p>
 <h3 id="类介绍"><a href="#类介绍" class="headerlink" title="类介绍"></a>类介绍</h3><p>所有的类都在UnifiedEmail项目的com.google.android.mail.common.html.parser包中。</p>
 <h4 id="HtmlDocument"><a href="#HtmlDocument" class="headerlink" title="HtmlDocument"></a>HtmlDocument</h4><p>表示Html文档，它是Html节点的容器，包含了一个<code>List&lt;Node&gt; node</code>属性，这个属性就是包含了html的所有节点。另外它也包含了一些将html转换为String的接口:</p>
@@ -435,10 +435,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
+            Inhaltsverzeichnis
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
+            Übersicht
           </li>
         </ul>
       
@@ -459,7 +459,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -470,7 +470,7 @@
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">categories</span>
+                  <span class="site-state-item-name">Kategorien</span>
                 
               </div>
             
@@ -481,7 +481,7 @@
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">tags</span>
+                  <span class="site-state-item-name">Tags</span>
                 
               </div>
             
@@ -545,7 +545,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

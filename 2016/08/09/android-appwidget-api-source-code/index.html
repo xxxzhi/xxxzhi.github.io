@@ -84,14 +84,14 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="AppWidget源码分析---接口类">
 <meta property="og:url" content="http://houzhi.me/2016/08/09/android-appwidget-api-source-code/index.html">
-<meta property="og:site_name" content="Creative ,Challenging and Cogitative">
+<meta property="og:site_name" content="Creative, Challenging and Cogitative">
 <meta property="og:description" content="最近项目中接触到AppWidget，相对来说这部分比较简单，所以趁着空余时间详细阅读了AppWidget的源码。这篇文章主要是从源码上分析AppWidget中API类的相关原理，相关类的简单功能介绍和实现原理。关于使用，建议看指导文档。 简述AppWidget相关的API类（供我们应用开发者使用的类）主要有： AppWidgetProvider：继承这个类，来提供Appwidget。 AppWid">
-<meta property="og:image" content="http://img.blog.csdn.net/20160809231430250">
-<meta property="og:updated_time" content="2017-11-05T15:11:18.000Z">
+<meta property="og:image" content="http://img-blog.csdn.net/20160809231430250">
+<meta property="og:updated_time" content="2018-12-17T15:09:06.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="AppWidget源码分析---接口类">
 <meta name="twitter:description" content="最近项目中接触到AppWidget，相对来说这部分比较简单，所以趁着空余时间详细阅读了AppWidget的源码。这篇文章主要是从源码上分析AppWidget中API类的相关原理，相关类的简单功能介绍和实现原理。关于使用，建议看指导文档。 简述AppWidget相关的API类（供我们应用开发者使用的类）主要有： AppWidgetProvider：继承这个类，来提供Appwidget。 AppWid">
-<meta name="twitter:image" content="http://img.blog.csdn.net/20160809231430250">
+<meta name="twitter:image" content="http://img-blog.csdn.net/20160809231430250">
 
 
 
@@ -127,7 +127,7 @@
 
 
 
-  <title>AppWidget源码分析---接口类 | Creative ,Challenging and Cogitative</title>
+  <title>AppWidget源码分析---接口类 | Creative, Challenging and Cogitative</title>
   
 
 
@@ -157,7 +157,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Creative ,Challenging and Cogitative</span>
+        <span class="site-title">Creative, Challenging and Cogitative</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -187,7 +187,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            HOME
           </a>
         </li>
       
@@ -197,7 +197,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            ARCHIVE
           </a>
         </li>
       
@@ -243,7 +243,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Creative ,Challenging and Cogitative">
+      <meta itemprop="name" content="Creative, Challenging and Cogitative">
     </span>
 
     
@@ -261,7 +261,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-08-09T00:00:00+08:00">
                 2016-08-09
@@ -309,7 +309,7 @@
 <p>AppWidgetHost：与AppWidgt 服务交互的类，获取App widget，显示出来</p>
 <p>AppwidgetHostView：实际上显示出来的View</p>
 <p>他们之间的关系简略来讲如下：</p>
-<p><img src="http://img.blog.csdn.net/20160809231430250" alt="这里写图片描述"></p>
+<p><img src="http://img-blog.csdn.net/20160809231430250" alt="这里写图片描述"></p>
 <p>AppWidget Service 是一些类的集合，是AppWidget的核心服务，在之后的文章会介绍，这篇就不介绍了。下面详细介绍每个类的功能以及实现原理。</p>
 <h3 id="AppWidgetProvider"><a href="#AppWidgetProvider" class="headerlink" title="AppWidgetProvider"></a>AppWidgetProvider</h3><p>这是我们在建立AppWidget的时候，需要去实现的类，它有几个重要的方法：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public void onAppWidgetOptionsChanged(Context context, AppWidgetManager appWidgetManager,</div><div class="line">       int appWidgetId, Bundle newOptions) // 当Widget的布局到新的大小的时候会被调用</div><div class="line"></div><div class="line">public void onDeleted(Context context, int[] appWidgetIds) // 当某个Widget被移除的时候回调</div><div class="line"></div><div class="line">public void onDisabled(Context context) // 当最后一个Widget被移除的时候回调</div><div class="line"></div><div class="line">public void onEnabled(Context context) // 当第一个Widget被添加的时候回调</div><div class="line"></div><div class="line">public void onRestored(Context context, int[] oldWidgetIds, int[] newWidgetIds) // 当Widget从缓存的Widget恢复时</div><div class="line"></div><div class="line">public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) //当Widget需要被提供RemoteView的时候，每次添加Widget的时候会调用</div><div class="line"></div><div class="line">public void onReceive(Context context, Intent intent) // 后面介绍</div></pre></td></tr></table></figure>
@@ -435,10 +435,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
+            Inhaltsverzeichnis
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
+            Übersicht
           </li>
         </ul>
       
@@ -459,7 +459,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -470,7 +470,7 @@
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">categories</span>
+                  <span class="site-state-item-name">Kategorien</span>
                 
               </div>
             
@@ -481,7 +481,7 @@
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">tags</span>
+                  <span class="site-state-item-name">Tags</span>
                 
               </div>
             
@@ -545,7 +545,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

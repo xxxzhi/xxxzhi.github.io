@@ -84,7 +84,7 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android源码装饰模式---ContextWrapper">
 <meta property="og:url" content="http://houzhi.me/2016/04/14/android-source-code-decorator-contextwrapper/index.html">
-<meta property="og:site_name" content="Creative ,Challenging and Cogitative">
+<meta property="og:site_name" content="Creative, Challenging and Cogitative">
 <meta property="og:description" content="如果说Android源码中哪个地方装饰模式应用的最明显的话，那肯定是非ContextWrapper莫属了，ContextWrapper是一个透明的经典的装饰模式。本文将通过装饰器模式分析Context源码结构。本文基于的Android源码是(android 5.0.0)。首先先介绍一下装饰模式。 装饰模式意图装饰模式动态地给对象添加额外的职责，就添加功能来说，它比子类的方式更加灵活。 UML图 简">
 <meta property="og:image" content="http://xxxzhi.github.io/images/decorator.png">
 <meta property="og:image" content="http://xxxzhi.github.io/images/context-decorator.png">
@@ -128,7 +128,7 @@
 
 
 
-  <title>Android源码装饰模式---ContextWrapper | Creative ,Challenging and Cogitative</title>
+  <title>Android源码装饰模式---ContextWrapper | Creative, Challenging and Cogitative</title>
   
 
 
@@ -158,7 +158,7 @@
     <div class="custom-logo-site-title">
       <a href="/"  class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Creative ,Challenging and Cogitative</span>
+        <span class="site-title">Creative, Challenging and Cogitative</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -188,7 +188,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            HOME
           </a>
         </li>
       
@@ -198,7 +198,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            ARCHIVE
           </a>
         </li>
       
@@ -244,7 +244,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Creative ,Challenging and Cogitative">
+      <meta itemprop="name" content="Creative, Challenging and Cogitative">
     </span>
 
     
@@ -262,7 +262,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2016-04-14T00:00:00+08:00">
                 2016-04-14
@@ -466,10 +466,10 @@ r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfig
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
+            Inhaltsverzeichnis
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
+            Übersicht
           </li>
         </ul>
       
@@ -490,7 +490,7 @@ r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfig
                 <a href="/archives/">
               
                   <span class="site-state-item-count">74</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -501,7 +501,7 @@ r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfig
               <div class="site-state-item site-state-categories">
                 
                   <span class="site-state-item-count">8</span>
-                  <span class="site-state-item-name">categories</span>
+                  <span class="site-state-item-name">Kategorien</span>
                 
               </div>
             
@@ -512,7 +512,7 @@ r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfig
               <div class="site-state-item site-state-tags">
                 
                   <span class="site-state-item-count">45</span>
-                  <span class="site-state-item-name">tags</span>
+                  <span class="site-state-item-name">Tags</span>
                 
               </div>
             
@@ -576,7 +576,7 @@ r = new Resources(assets,getResources.getDisplayMetrics(),getResources.getConfig
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
